@@ -19,8 +19,8 @@
     "M13": "in_progress",
     "M14": "in_progress"
   },
-  "last_verified_commit": null,
-  "last_verified_at": "2026-10-03T22:56:08.938846+09:00",
+  "last_verified_commit": "6838db378d18ae1c6e616d9eb51297f2b545a4cc",
+  "last_verified_at": "2026-10-03T23:00:21.090217+09:00",
   "verification": {
     "backend_tests": "353 passed / 3 PG skipped in general suite; those 3 passed separately on real isolated PG16/pgvector",
     "backend_lint": "pass: final Ruff",
@@ -46,7 +46,8 @@
     "frontend_upgrade_tests": "7 passed; auth 4 + deploy 4 = 15 frontend tests",
     "document_export": "actual PDF/DOCX content and PDF pages verified; supported DOCX renderer attempted again: bundled soffice absent, pages unverified",
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
-    "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json"
+    "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json",
+    "source_control": "first local source commit 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 curated files; no private originals, keys or screenshots; remote/CI not run"
   },
   "notes": [
     "v2.2 FINAL: implementation plan reordered; M0 is repository bootstrap.",
@@ -61,7 +62,8 @@
     "2026-10-03: User scope override recorded: exclude improvement/comparison experiments, include resume/free service. HF/Groq official chat adapters, private owner settings/probe, 25 role contracts and durable Jev confidence added. 281 tests pass, 2 PostgreSQL tests skipped; frontend/auth/build and normal local runtime pass. Vercel FastAPI package/entrypoint, verified TLS CA supply and private upload guards prepared; 4 frontend deployment guard tests pass. HF MCP authenticated but OAuth read scopes do not provide backend inference credentials. Official Vercel CLI 62.2.0 installed locally; help options verified; user device approval pending, actual source dry check not completed. New-project first-deploy production target is documented with explicit staged --prod --skip-domain. No real generation, paid upgrade or public deployment performed.",
     "2026-10-03 follow-up audit: previous all-code-complete declaration narrowed. Read-only review found AI resume page option omission, PostgreSQL multi-output lexical recall gap, multi-call proxy deadline gap and unbounded free-provider input context. These fixes are not implemented in this audit. Existing 281-pass/2-skipped test evidence was not rerun. Local frontend/health/ready 200; provider none; Supabase projects 0; Vercel teams 0 and CLI logged out. See docs/REMAINING_WORK_AND_UPGRADES.md. Comparison/improvement experiments remain excluded.",
     "2026-10-03: Required follow-ups and six upgrades implemented. 339 Python passed/3 PG skipped; 15 frontend tests and latest lint/type/build pass. Actual UI/HTTP/E5/PDF/DOCX/SQLite recovery verified; normal owner restored with 6 references and QA access disabled. Live inference/PG/HTTPS/CI/Word visual rendering remain unverified. See docs/UPGRADE_PROGRESS.md.",
-    "2026-10-03 additional production audit: fixed actual psycopg %I protection execution and migration-owned FTS autogenerate false deletion. 353 general tests and 3 real PG checks pass; actual PG16 backup/restore 39 tables match. Personal historical fixture replaced with synthetic cases after byte-identical private preservation; original strategy/screenshots excluded; untracked source gate hardened. Live inference/Supabase/HTTPS/remote CI/Word pages remain pending."
+    "2026-10-03 additional production audit: fixed actual psycopg %I protection execution and migration-owned FTS autogenerate false deletion. 353 general tests and 3 real PG checks pass; actual PG16 backup/restore 39 tables match. Personal historical fixture replaced with synthetic cases after byte-identical private preservation; original strategy/screenshots excluded; untracked source gate hardened. Live inference/Supabase/HTTPS/remote CI/Word pages remain pending.",
+    "2026-10-03: Verified source baseline saved locally at 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 files, no external push. QA-only PostgreSQL container removed and port released. Subsequent commit only records acceptance metadata. Remote CI and production accounts remain pending."
   ],
   "coding_status": "upgrade_code_implemented_word_and_remote_acceptance_pending",
   "implementation_complete": {
@@ -319,13 +321,13 @@
       "Supabase project/Auth/TLS/operating data isolation",
       "Vercel authenticated source check/HTTPS/ingress",
       "operating Supabase recovery/retention/Auth restoration",
-      "source commit/remote and actual CI",
+      "source remote and actual CI",
       "Word visual page render"
     ],
     "user_scope_preserved": true,
     "full_service_complete": false,
     "current_runtime_snapshot": {
-      "checked_at": "2026-10-03T22:29:08.946242+09:00",
+      "checked_at": "2026-10-03T23:00:21.784643+09:00",
       "provider": "none",
       "configured": false,
       "live_verified": false,
@@ -363,12 +365,17 @@
       "protected_tables": 39,
       "anon_authenticated_table_grants": 0,
       "backup_restore_content_match": true,
-      "qa_container_cleanup": "agent_confirmation_pending"
+      "qa_container_cleanup": "own_container_removed_and_port_released; cleanup.json"
     },
     "source_control": {
-      "status": "privacy_reviewed_first_commit_pending",
+      "status": "privacy_reviewed_locally_committed",
+      "verified_code_commit": "6838db378d18ae1c6e616d9eb51297f2b545a4cc",
+      "tracked_source_files": 248,
+      "private_credentials_history_strategy_screenshots_excluded": true,
       "remote_configured": false,
-      "actual_remote_ci_run": false
+      "actual_remote_ci_run": false,
+      "publication_performed": false,
+      "follow_up_commit_scope": "verification_metadata_only"
     }
   }
 }
