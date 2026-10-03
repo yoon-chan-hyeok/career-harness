@@ -32,4 +32,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: npm ci
+      - name: Check production dependency advisories
+        run: npm audit --omit=dev --audit-level=high
       - run: npm run lint && npm run typecheck && npm run test:auth && npm run test:deploy && npm run test:upgrades && npm run build

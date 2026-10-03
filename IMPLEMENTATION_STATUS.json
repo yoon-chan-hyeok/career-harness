@@ -22,20 +22,20 @@
   "last_verified_commit": "b5d119ac10900ced38653f6a5030c6ea425fa817",
   "last_verified_at": "2026-10-03T23:45:41.608757+09:00",
   "verification": {
-    "backend_tests": "354 passed / 3 PG skipped in latest general suite; those 3 passed separately on real isolated PG16/pgvector",
+    "backend_tests": "363 passed / 3 PG skipped in latest expanded suite; prior 3 real PG16/pgvector checks passed separately",
     "backend_lint": "pass: final Ruff",
-    "backend_typecheck": "pass: final Pyright, zero errors/warnings",
-    "frontend_lint": "pass: latest PDF.js and unified page selector",
+    "backend_typecheck": "pass: final Pyright 0 errors/warnings",
+    "frontend_lint": "pass: latest expanded UI",
     "frontend_typecheck": "pass",
     "frontend_auth_tests": "4 passed",
-    "frontend_build": "pass: latest Next.js 15.5.26 production/standalone with PDF.js worker",
+    "frontend_build": "pass: latest actual multistage Docker and Windows standalone Next15 builds; runner UID1001 and dev packages removed in Docker",
     "migrations": "actual SQLite head 0011; actual PG16 check/downgrade base/upgrade head/check passed; FTS GIN exists",
     "e2e": "pass: actual isolated HTTP 19 runs through failure/recovery/freeze/handoff/submission confirmation/outcome/CLOSED; workflow/fixture/MCP regressions pass",
     "browser": "pass: actual latest PDF/provenance/draft/upload/usage/E5 flows and 390px; work/upgrade-browser-audit.json",
     "running_state": "pass: separate session observes actual RUNNING, concurrent guard and recovered execution fencing; no live long-running model UI claim",
     "recovery": "actual SQLite and isolated PG16 custom backup/empty restore passed; all 39 PG table counts/content hashes and 384-dimensional vectors match; operating Supabase restore pending",
-    "privacy": "tracked + untracked source candidates and forced-add negatives tested; personal original history/strategy/screenshots/credentials excluded; synthetic public fixture; known local credential matches 0",
-    "local_runtime": "pass: latest normal owner frontend/backend, health/ready; QA credentials rejected; owner retains 6 references",
+    "privacy": "pass: tracked/untracked candidate gate; private data/keys/DB/logs excluded; exact known local credential comparison recorded separately",
+    "local_runtime": "pass: latest Windows standalone and restarted backend, health/ready, current owner admin via frontend proxy; QA keys rejected, 6 active references preserved",
     "free_provider_protocol": "pass: official SDK mocked HTTP HF/Groq structured requests, failures, no retries/redirect/fallback; Workflow cover letter and resume artifacts/trace persist; no live inference token",
     "free_provider_ui": "pass: authenticated settings, HF permission link, masked key entry, truthful configured/live status, no console warnings/errors",
     "role_prompts": "pass: 25 role-specific stage contracts, independent reviewer boundaries and version metadata",
@@ -48,7 +48,10 @@
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
     "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json",
     "source_control": "latest verified source commit b5d119ac10900ced38653f6a5030c6ea425fa817; 248 curated files; personal originals/keys/screenshots excluded; no external push or remote CI",
-    "backend_container": "fresh current runtime source Docker build/start/migration 0011/health/auth/two-user isolation/Korean PDF-DOCX/private exclusions pass; QA container and port cleaned"
+    "backend_container": "fresh current runtime source Docker build/start/migration 0011/health/auth/two-user isolation/Korean PDF-DOCX/private exclusions pass; QA container and port cleaned",
+    "frontend_tests": "17 passed: auth4/deploy4/upgrades9",
+    "expanded_browser": "pass: actual 3 choices -> stored selection -> stale old writing -> new brief chosen context -> reapproval gate; pixel office/admin/#admin/403/mobile390; owner console/page/request errors0",
+    "production_fullstack_container": "pass: latest current runtime Python SHA256 match; migration0011; loopback/internal isolation; frontend built proxy; task-only QA containers/networks cleaned"
   },
   "notes": [
     "v2.2 FINAL: implementation plan reordered; M0 is repository bootstrap.",
@@ -66,9 +69,10 @@
     "2026-10-03 additional production audit: fixed actual psycopg %I protection execution and migration-owned FTS autogenerate false deletion. 353 general tests and 3 real PG checks pass; actual PG16 backup/restore 39 tables match. Personal historical fixture replaced with synthetic cases after byte-identical private preservation; original strategy/screenshots excluded; untracked source gate hardened. Live inference/Supabase/HTTPS/remote CI/Word pages remain pending.",
     "2026-10-03: Verified source baseline saved locally at 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 files, no external push. QA-only PostgreSQL container removed and port released. Subsequent commit only records acceptance metadata. Remote CI and production accounts remain pending.",
     "2026-10-03 container/DOCX audit: unmeasured Word overflow corrected to unknown; 354 general tests pass plus earlier separate real PG 3 pass. Fresh current runtime source backend Docker build/start/migration/auth/user isolation/Korean PDF-DOCX/private exclusions verified; QA container cleaned. Whole production HTTPS/Supabase/live HF/remote CI/Word pages remain pending.",
-    "2026-10-03: Current DOCX/container fix and truthful current records saved locally at b5d119ac10900ced38653f6a5030c6ea425fa817; subsequent commit records verified source hash only. Remote/CI/public deployment not performed."
+    "2026-10-03: Current DOCX/container fix and truthful current records saved locally at b5d119ac10900ced38653f6a5030c6ea425fa817; subsequent commit records verified source hash only. Remote/CI/public deployment not performed.",
+    "2026-10-04: Pixel office, admin and up to 3 verified experience alternatives implemented and actual isolated current-image browser/API flow accepted. 363 Python and17 frontend tests pass; old selection display/admin timezone/Supabase admin navigation fixed. Patched runtime dependencies and nonroot standalone frontend runner verified. Live HF/Supabase/HTTPS/GitHub/CI remain pending; no paid upgrade or remote publication."
   ],
-  "coding_status": "upgrade_code_implemented_word_and_remote_acceptance_pending",
+  "coding_status": "expanded_upgrade_code_verified_external_service_and_source_remote_pending",
   "implementation_complete": {
     "M0": true,
     "M1": true,
@@ -337,7 +341,7 @@
     "user_scope_preserved": true,
     "full_service_complete": false,
     "current_runtime_snapshot": {
-      "checked_at": "2026-10-03T23:46:41.873175+09:00",
+      "checked_at": "2026-10-04T01:15:30.676950+09:00",
       "provider": "none",
       "configured": false,
       "live_verified": false,
@@ -420,5 +424,24 @@
       "persistent_volumes_created": 0,
       "actual_user_data_or_credentials_used": false
     }
+  },
+  "expanded_upgrade_progress": {
+    "checked_at": "2026-10-04T03:27:22.650679+09:00",
+    "report": "docs/ADDITIONAL_UPGRADES_2026_10_04.md",
+    "pixel_workroom": "verified_actual_role_records_original_SVG_CSS",
+    "experience_options": "verified_max3_distinct_current_verified_facts_selected_writing_context",
+    "experience_inheritance": "strategy_fallback_visible_individual_override_possible",
+    "admin": "verified_current_account_server_permission_UUID_required_in_production",
+    "dependency_security": "sharp0.35.5_postcss8.5.28_production_audit0_dev_chain5_unpatched_removed_from_runner",
+    "actual_runtime_and_browser_evidence": "work/expanded-upgrades-qa/",
+    "local_owner_runtime": "verified_latest_main_frontend_backend_owner_only_auth_6references",
+    "github_source": "pending_destination_no_remote_upload_no_remote_CI",
+    "live_ai": "pending_HF_inference_token_free_ack_and_real_document_response",
+    "supabase": "pending_operating_project_auth_database_and_admin_UUID",
+    "vercel": "pending_project_link_deployment_HTTPS",
+    "jev": "optional_live_connection_pending",
+    "word_pagination": "unknown_not_rendered",
+    "improvement_comparison_experiments": "excluded_by_user_scope",
+    "autonomous_agent_swarm_added": false
   }
 }

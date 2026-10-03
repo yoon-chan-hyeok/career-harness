@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Artifact, Workspace } from "./page";
+import { PixelOffice } from "./pixel-office";
+import type { WorkroomRole } from "./workroom-state";
 
 type Request = (
   path: string,
@@ -43,6 +45,7 @@ type Activity = {
   runs: Run[];
   stages: Stage[];
   pending_review_count: number;
+  roles?: WorkroomRole[];
 };
 
 const statusLabels: Record<StageStatus, string> = {
@@ -169,6 +172,7 @@ export function AgentWorkspace({
   const [loading, setLoading] = useState(false);
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [motionPaused, setMotionPaused] = useState(false);
   const inFlight = useRef(false);
   const workspaceVersion = workspace.artifacts.map((a) => a.id).join(":");
 
@@ -245,7 +249,10 @@ export function AgentWorkspace({
     key === "strategy" ? 1 : key === "writing" ? 2 : key === "review" ? 4 : 0;
 
   return (
-    <div className="agent-workspace" aria-label="에이전트 작업 보기">
+    <div
+      className={`agent-workspace ${motionPaused ? "agent-animation-paused" : ""}`}
+      aria-label="에이전트 작업 보기"
+    >
       <div className="agent-workspace-heading">
         <div>
           <span className="eyebrow">WORK IN MOTION</span>
@@ -286,10 +293,18 @@ export function AgentWorkspace({
               AI {activity.provider.ai_available ? "설정됨" : "연결 대기"}
             </span>
             <span className={activity.provider.jev_enabled ? "connected" : ""}>
-              <i aria-hidden="true" />Jev 보조 판단{" "}
+              <i aria-hidden="true" />
+              Jev 보조 판단{" "}
               {activity.provider.jev_enabled ? "설정됨" : "연결 대기"}
             </span>
           </div>
+          <PixelOffice
+            roles={activity.roles || []}
+            artifacts={workspace.artifacts}
+            onArtifact={onArtifact}
+            motionAllowed={!error}
+            onMotionChange={setMotionPaused}
+          />
           {activity.active_run && !error ? (
             <ActiveRun key={activity.active_run.id} run={activity.active_run} />
           ) : (
@@ -327,70 +342,75 @@ export function AgentWorkspace({
               </button>
             </div>
           )}
-          <div className="agent-stage-grid">
-            {activity.stages.map((stage, index) => {
-              const role = roles[stage.key] || {
-                name: stage.label,
-                initial: String(index + 1),
-                task: "저장된 작업 상태를 확인합니다.",
-              };
-              const artifact = workspace.artifacts.find(
-                (item) => item.id === stage.artifact_id,
-              );
-              return (
-                <article
-                  className={`agent-stage-card agent-stage-${stage.status.toLowerCase()}`}
-                  key={stage.key}
-                >
-                  <div className="agent-stage-top">
-                    <span className="agent-role-icon" aria-hidden="true">
-                      {role.initial}
-                    </span>
-                    <span
-                      className={`agent-status agent-status-${stage.status.toLowerCase()}`}
-                    >
-                      {statusLabels[stage.status] || "상태 확인 필요"}
-                    </span>
-                  </div>
-                  <span className="agent-role-name">{role.name}</span>
-                  <h3>{stage.label}</h3>
-                  <p className="agent-role-task">{role.task}</p>
-                  <p className="agent-stage-detail">{stage.detail}</p>
-                  <div className="agent-stage-bottom">
-                    {artifact ? (
-                      <button
-                        className="agent-document-button"
-                        onClick={() => onArtifact(artifact)}
+          <details className="agent-role-details">
+            <summary>여섯 역할의 단계와 문서 자세히 보기</summary>
+            <div className="agent-stage-grid">
+              {activity.stages.map((stage, index) => {
+                const role = roles[stage.key] || {
+                  name: stage.label,
+                  initial: String(index + 1),
+                  task: "저장된 작업 상태를 확인합니다.",
+                };
+                const artifact = workspace.artifacts.find(
+                  (item) => item.id === stage.artifact_id,
+                );
+                return (
+                  <article
+                    className={`agent-stage-card agent-stage-${stage.status.toLowerCase()}`}
+                    key={stage.key}
+                  >
+                    <div className="agent-stage-top">
+                      <span className="agent-role-icon" aria-hidden="true">
+                        {role.initial}
+                      </span>
+                      <span
+                        className={`agent-status agent-status-${stage.status.toLowerCase()}`}
                       >
-                        ▤ 저장 문서 <small>v{artifact.version}</small>{" "}
-                        <span>↗</span>
-                      </button>
-                    ) : (
-                      <span className="agent-no-document">저장 문서 대기</span>
-                    )}
-                    {(stage.status === "READY" ||
-                      stage.status === "WAITING_USER" ||
-                      stage.status === "STALE" ||
-                      stage.status === "FAILED") && (
-                      <button
-                        className="agent-edit-button"
-                        onClick={() =>
-                          onEdit(phaseFor(stage.key), artifact?.slot)
-                        }
-                      >
-                        {stage.status === "WAITING_USER"
-                          ? "읽고 확인"
-                          : stage.status === "STALE"
-                            ? "다시 검토"
-                            : "작업 열기"}{" "}
-                        →
-                      </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                        {statusLabels[stage.status] || "상태 확인 필요"}
+                      </span>
+                    </div>
+                    <span className="agent-role-name">{role.name}</span>
+                    <h3>{stage.label}</h3>
+                    <p className="agent-role-task">{role.task}</p>
+                    <p className="agent-stage-detail">{stage.detail}</p>
+                    <div className="agent-stage-bottom">
+                      {artifact ? (
+                        <button
+                          className="agent-document-button"
+                          onClick={() => onArtifact(artifact)}
+                        >
+                          ▤ 저장 문서 <small>v{artifact.version}</small>{" "}
+                          <span>↗</span>
+                        </button>
+                      ) : (
+                        <span className="agent-no-document">
+                          저장 문서 대기
+                        </span>
+                      )}
+                      {(stage.status === "READY" ||
+                        stage.status === "WAITING_USER" ||
+                        stage.status === "STALE" ||
+                        stage.status === "FAILED") && (
+                        <button
+                          className="agent-edit-button"
+                          onClick={() =>
+                            onEdit(phaseFor(stage.key), artifact?.slot)
+                          }
+                        >
+                          {stage.status === "WAITING_USER"
+                            ? "읽고 확인"
+                            : stage.status === "STALE"
+                              ? "다시 검토"
+                              : "작업 열기"}{" "}
+                          →
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </details>
           {!!activity.pending_review_count && (
             <button className="agent-proposal-link" onClick={onConversation}>
               <span>

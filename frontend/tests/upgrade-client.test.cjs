@@ -25,6 +25,7 @@ function moduleApi(file, fetcher) {
     String,
     Object,
     Number,
+    URL,
     setTimeout,
     clearTimeout,
   };
@@ -177,4 +178,64 @@ test("an in-progress conflict does not discard the original retry key", async ()
   await assert.rejects(api.request("/actions/generate", { text: "same" }));
   await assert.rejects(api.request("/actions/generate", { text: "same" }));
   assert.equal(keys[0], keys[1]);
+});
+
+test("source links reject credentials, redirects, queries and unconfigured destinations", () => {
+  const { safeRepositoryUrl } = moduleApi("workroom-state.ts");
+  assert.equal(
+    safeRepositoryUrl("https://github.com/example/career-harness/"),
+    "https://github.com/example/career-harness",
+  );
+  for (const value of [
+    undefined,
+    "",
+    "javascript:alert(1)",
+    "https://github.com.evil.test/user/repo",
+    "https://secret@github.com/user/repo",
+    "https://github.com/user/repo?token=secret",
+    "https://github.com/user/repo#secret",
+    "http://github.com/user/repo",
+    "https://github.com:444/user/repo",
+    "https://github.com/user/repo/blob/main/private.md",
+  ]) {
+    assert.equal(safeRepositoryUrl(value), null);
+  }
+});
+
+test("agent messages require an actual artifact, execution or trace and preserve server wording", () => {
+  const { recordedMessages } = moduleApi("workroom-state.ts");
+  const role = (key, message, extra = {}) => ({
+    key,
+    label: key,
+    status: "DONE",
+    message,
+    basis: "saved",
+    artifact_id: null,
+    execution_run_id: null,
+    trace_id: null,
+    updated_at: "2026-10-04T10:00:00Z",
+    ...extra,
+  });
+  const records = [
+    role("research", "Invented dialogue without a record"),
+    role("writing", "", { artifact_id: "doc-1" }),
+    role("evidence", "Stored evidence result", { artifact_id: "doc-2" }),
+    role("review", "Failed actual execution", {
+      execution_run_id: "run-1",
+      status: "FAILED",
+      updated_at: "2026-10-04T11:00:00Z",
+    }),
+    role("strategy", "Verified model trace", {
+      trace_id: "trace-1",
+      updated_at: "2026-10-04T09:00:00Z",
+    }),
+  ];
+  const result = recordedMessages(records);
+  assert.deepEqual(
+    Array.from(result, (item) => item.key),
+    ["review", "evidence", "strategy"],
+  );
+  assert.equal(result[0].message, "Failed actual execution");
+  assert.equal(records[0].key, "research");
+  assert.equal(recordedMessages([]).length, 0);
 });

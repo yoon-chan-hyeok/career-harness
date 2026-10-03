@@ -1,6 +1,7 @@
 """Actual request activity and artifact-derived role status for the workbench."""
 
 import os
+import re
 from contextlib import ExitStack
 from contextvars import ContextVar
 from datetime import UTC, datetime, timedelta
@@ -54,6 +55,7 @@ ACTION_STAGE = {
     "correct-analysis": "opportunity",
     "question-portfolio": "strategy",
     "approve-portfolio": "strategy",
+    "select-experience": "evidence",
 }
 ACTION_LABELS = {
     "research": "기업·공고 자료 조사",
@@ -85,6 +87,7 @@ ACTION_LABELS = {
     "correct-analysis": "직무 해석 교정 반영",
     "question-portfolio": "문항별 역할 배분",
     "approve-portfolio": "문항 역할 승인",
+    "select-experience": "작성 경험 선택 반영",
 }
 AI_ACTIONS = frozenset({
     "conversation", "commands", "research", "analyze", "assess-opportunity", "evidence-map",
@@ -334,8 +337,58 @@ def snapshot(db, user, workspace):
         "active_run": serialize_run(active) if active else None,
         "runs": [serialize_run(r) for r in runs],
         "stages": stages,
+        "roles": role_snapshot(db, user, workspace, stages, runs, latest),
         "pending_review_count": pending,
     }
+
+
+TRACE_STAGE = {
+    "company_researcher": "research", "researcher": "research",
+    "opportunity_analyst": "opportunity", "opportunity_assessor": "opportunity",
+    "evidence_mapper": "evidence", "strategy": "strategy", "question_portfolio": "strategy",
+    "question_brief": "writing", "writer": "writing", "resume_writer": "writing",
+    "fact_reviewer": "review", "recruiter": "review", "reverse_interviewer": "review",
+    "portfolio_reviewer": "review",
+}
+
+
+def role_snapshot(db, user, workspace, stages, runs, artifacts):
+    """Narrate recorded state only: no model-generated dialogue or hidden prompt text."""
+    traces = list(db.scalars(select(PromptRun).where(
+        PromptRun.user_id == user, PromptRun.data["workspace_id"].as_string() == workspace,
+        PromptRun.stage.in_(list(TRACE_STAGE)),
+    ).order_by(PromptRun.created_at.desc()).limit(60)))
+    results = []
+    run_ids = {run.id for run in runs}
+    for stage in stages:
+        key = stage["key"]
+        run = next((item for item in runs if item.data.get("stage_key") == key), None)
+        trace = next((item for item in traces if TRACE_STAGE[item.stage] == key), None)
+        artifact = next((item for item in artifacts.values() if item.id == stage["artifact_id"]), None)
+        basis = "EXECUTION_RUN" if run else "ARTIFACT" if artifact else "PROMPT_TRACE" if trace else "NO_ACTIVITY"
+        message = {
+            "NOT_STARTED": "아직 이 역할의 작업 기록이 없습니다.",
+            "RUNNING": "요청을 처리 중입니다. 완료 후 실제 저장 결과를 표시합니다.",
+            "DONE": "현재 기준의 저장된 결과를 확인할 수 있습니다.",
+            "WAITING_USER": "저장된 제안의 사용자 확인·승인을 기다립니다.",
+            "STALE": "근거 또는 기준이 바뀌어 결과를 다시 검토해야 합니다.",
+            "FAILED": "완료되지 않은 작업 또는 해결할 검수 문제가 기록되어 있습니다.",
+        }.get(stage["status"], "현재 작업 기록을 확인해 주세요.")
+        if stage["status"] == "NOT_STARTED" and trace:
+            message = "AI 호출 기록이 있습니다. 저장된 결과와 성공 여부를 별도로 확인해 주세요."
+        provider = trace.provider.casefold() if trace and trace.provider.casefold() in {
+            "huggingface", "groq", "openai", "decision"} else None
+        raw_model = trace.data.get("model") if trace else None
+        model = raw_model if isinstance(raw_model, str) and re.fullmatch(r"[A-Za-z0-9_./:-]{1,200}", raw_model) else None
+        timestamp = max((_utc(row.created_at) for row in [run, trace, artifact] if row), default=None)
+        results.append({"key": key, "label": stage["label"], "status": stage["status"],
+                        "message": message, "basis": basis, "artifact_id": stage["artifact_id"],
+                        "artifact_version": stage["artifact_version"],
+                        "execution_run_id": run.id if run else trace.data.get("execution_run_id")
+                        if trace and trace.data.get("execution_run_id") in run_ids else None,
+                        "trace_id": trace.id if trace else None, "provider": provider, "model": model,
+                        "updated_at": timestamp.isoformat() if timestamp else None})
+    return results
 
 
 def bind_output(db, user, workspace, artifact):

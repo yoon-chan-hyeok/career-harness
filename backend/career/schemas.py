@@ -97,6 +97,8 @@ class EvidencePack(Schema):
 
 
 class ApplicationBrief(Schema):
+    selected_experience_id: str | None = None
+    experience_selection_artifact_id: str | None = None
     positioning: str
     base_profession_identity: str
     main_skill_message: str
@@ -110,6 +112,8 @@ class ApplicationBrief(Schema):
 
 
 class QuestionBrief(Schema):
+    selected_experience_id: str | None = None
+    experience_selection_artifact_id: str | None = None
     question_id: str
     question_type: Literal[
         "MOTIVATION", "JOB_COMPETENCY", "VALUES", "COLLABORATION", "CHALLENGE", "STRENGTH_WEAKNESS", "OTHER"
@@ -189,6 +193,8 @@ class ResumeEvidenceRank(Schema):
 
 
 class ResumeBrief(Schema):
+    selected_experience_id: str | None = None
+    experience_selection_artifact_id: str | None = None
     target_role: str
     top_capabilities: list[str]
     project_order: list[str]

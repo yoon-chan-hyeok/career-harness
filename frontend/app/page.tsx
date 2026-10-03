@@ -20,6 +20,8 @@ import { ProvenancePanel } from "./provenance-panel";
 import { KnowledgeSearch, SemanticMapping } from "./knowledge-search";
 import { CorrectionInbox, RuleControls } from "./correction-controls";
 import { ProviderSettings } from "./provider-settings";
+import { AdminConsole } from "./admin-console";
+import { ExperienceOptions } from "./experience-options";
 import {
   accessToken,
   clearSession,
@@ -104,6 +106,7 @@ const kindLabels: Record<string, string> = {
   ResumeContent: "이력서",
   Review: "문항 검수",
   ResumeReview: "이력서 검수",
+  ExperienceSelection: "선택한 경험",
   PortfolioReview: "전체 문서 검수",
   SubmissionBundle: "제출 보관본",
   InterviewHandoff: "면접 준비",
@@ -841,6 +844,12 @@ function Icon({ name }: { name: string }) {
         <circle cx="15" cy="17" r="3" />
       </>
     ),
+    관리자: (
+      <>
+        <path d="M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7z" />
+        <path d="M8 12h8M12 8v8" />
+      </>
+    ),
   };
   return (
     <svg
@@ -995,10 +1004,60 @@ export default function Home() {
     [token, authConfiguration?.provider],
   );
   const request = api.request;
+  const [adminAccess, setAdminAccess] = useState(false);
+  useEffect(() => {
+    let active = true;
+    setAdminAccess(false);
+    if (authenticated) {
+      request("/admin/access")
+        .then((result) => {
+          if (active) setAdminAccess(result.is_admin === true);
+        })
+        .catch(() => {
+          if (active) setAdminAccess(false);
+        });
+    }
+    return () => {
+      active = false;
+    };
+  }, [request, authenticated, authConfiguration?.provider]);
   const editorHandle = useRef<EditorHandle>(null);
   const [resumePages, setResumePages] = useState<"1" | "2" | "MASTER">("1");
   const navigate = (action: () => void) =>
     editorHandle.current ? editorHandle.current.beforeLeave(action) : action();
+  const navigateScreen = (destination: string) =>
+    navigate(() => {
+      if (destination === "관리자")
+        window.history.pushState(null, "", "#admin");
+      else if (window.location.hash === "#admin")
+        window.history.pushState(
+          null,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      setScreen(destination);
+      setShowEditor(false);
+    });
+  useEffect(() => {
+    const showAddressedPage = () => {
+      const action = () => {
+        if (window.location.hash === "#admin") {
+          setScreen("관리자");
+          setShowEditor(false);
+        } else
+          setScreen((previous) => (previous === "관리자" ? "설정" : previous));
+      };
+      if (editorHandle.current) editorHandle.current.beforeLeave(action);
+      else action();
+    };
+    showAddressedPage();
+    window.addEventListener("hashchange", showAddressedPage);
+    window.addEventListener("popstate", showAddressedPage);
+    return () => {
+      window.removeEventListener("hashchange", showAddressedPage);
+      window.removeEventListener("popstate", showAddressedPage);
+    };
+  }, []);
   const refresh = useCallback(
     async (id?: string) => {
       setList(await request("/applications"));
@@ -1075,6 +1134,12 @@ export default function Home() {
     draft = latest("Draft", qid),
     resume = latest("ResumeContent");
   const questions = ws?.data.questions || [];
+  const experienceReady = [
+    latest("OpportunityBrief"),
+    latest("EvidencePack"),
+  ].every(
+    (artifact) => artifact && ["ACTIVE", "LOCKED"].includes(artifact.status),
+  );
   const selected = Array.isArray(brief?.data.evidence_ids)
     ? (brief.data.evidence_ids as string[])
     : [];
@@ -1207,13 +1272,27 @@ export default function Home() {
             </div>
             <p className="nav-caption">WORKSPACE</p>
             <div className="aside-nav">
-              {["지원 기회", "경험 정리", "검증 기록", "설정"].map((s) => (
+              {[
+                "지원 기회",
+                "경험 정리",
+                "검증 기록",
+                "설정",
+                ...(adminAccess ? ["관리자"] : []),
+              ].map((s) => (
                 <button
                   className={screen === s ? "selected" : "nav-button"}
                   key={s}
                   onClick={() => {
                     navigate(() => {
                       setScreen(s);
+                      if (s === "관리자")
+                        window.history.pushState(null, "", "#admin");
+                      else if (window.location.hash === "#admin")
+                        window.history.pushState(
+                          null,
+                          "",
+                          window.location.pathname + window.location.search,
+                        );
                       if (s === "지원 기회") setWs(null);
                       setShowEditor(false);
                       setNotice("");
@@ -1280,7 +1359,9 @@ export default function Home() {
                         ? "내가 한 일을, 믿을 수 있는 문서의 재료로."
                         : screen === "설정"
                           ? "작업 공간 연결과 개인 자료를 관리하세요."
-                          : "작성과 검수 과정을 다시 살펴보세요."}
+                          : screen === "관리자"
+                            ? "사용량, 연결과 실행 상태를 살펴보세요."
+                            : "작성과 검수 과정을 다시 살펴보세요."}
                 </p>
               </div>
               {authenticated && screen === "지원 기회" && !ws && (
@@ -1416,6 +1497,20 @@ export default function Home() {
                   refresh={() => refresh(ws?.id)}
                 />
                 <RuleControls request={request} />
+                <div className="admin-settings-entry">
+                  <div>
+                    <h3>관리자 페이지</h3>
+                    <p className="muted">
+                      내 계정의 운영 현황과 소스 저장소 연결을 확인합니다.
+                    </p>
+                  </div>
+                  <button
+                    className="secondary"
+                    onClick={() => navigateScreen("관리자")}
+                  >
+                    관리자 페이지 열기 →
+                  </button>
+                </div>
                 <h3>내 데이터 관리</h3>
                 <button
                   disabled={busy}
@@ -1500,6 +1595,12 @@ export default function Home() {
                   </div>
                 ))}
               </section>
+            )}
+            {authenticated && screen === "관리자" && (
+              <AdminConsole
+                request={request}
+                onSettings={() => navigateScreen("설정")}
+              />
             )}
             {authenticated && screen === "지원 기회" && !ws && (
               <>
@@ -1830,6 +1931,12 @@ export default function Home() {
                     id: e.id,
                     title: e.title,
                   }))}
+                  sourceNames={Object.fromEntries(
+                    evidence.map((item) => [
+                      item.source_id,
+                      item.title + " 원자료",
+                    ]),
+                  )}
                   request={request}
                   refresh={refresh}
                   onBack={() => setWs(null)}
@@ -2248,6 +2355,30 @@ export default function Home() {
                     )}
                     {stage === stages[1] && (
                       <>
+                        <ExperienceOptions
+                          ready={experienceReady}
+                          workspaceId={ws.id}
+                          slot="strategy"
+                          version={ws.artifacts
+                            .map((artifact) => artifact.id + artifact.status)
+                            .join(":")}
+                          request={request}
+                          sourceNames={Object.fromEntries(
+                            evidence.map((item) => [
+                              item.source_id,
+                              item.title + " 원자료",
+                            ]),
+                          )}
+                          slotNames={Object.fromEntries(
+                            questions.map((question, index) => [
+                              question.id,
+                              `${index + 1}번 · ${question.text}`,
+                            ]),
+                          )}
+                          onSelected={async () => {
+                            await refresh(ws.id);
+                          }}
+                        />
                         <Card a={latest("ApplicationBrief")} />
                         <Panel title="지원 전략 설계" open>
                           {ai && button("AI 전략 제안", "strategy")}
@@ -2337,6 +2468,33 @@ export default function Home() {
                         </Panel>
                         {qid && (
                           <>
+                            <ExperienceOptions
+                              ready={experienceReady}
+                              key={qid}
+                              workspaceId={ws.id}
+                              slot={qid}
+                              version={ws.artifacts
+                                .map(
+                                  (artifact) => artifact.id + artifact.status,
+                                )
+                                .join(":")}
+                              request={request}
+                              sourceNames={Object.fromEntries(
+                                evidence.map((item) => [
+                                  item.source_id,
+                                  item.title + " 원자료",
+                                ]),
+                              )}
+                              slotNames={Object.fromEntries(
+                                questions.map((question, index) => [
+                                  question.id,
+                                  `${index + 1}번 · ${question.text}`,
+                                ]),
+                              )}
+                              onSelected={async () => {
+                                await refresh(ws.id);
+                              }}
+                            />
                             <Card a={brief} />
                             <Panel title="문항 메시지와 근거" open>
                               {ai &&
@@ -2388,7 +2546,17 @@ export default function Home() {
                                 />
                                 <label>
                                   선택 근거
-                                  <select name="evidence">
+                                  <select
+                                    name="evidence"
+                                    key={
+                                      latest("ExperienceSelection", qid)?.id ||
+                                      qid
+                                    }
+                                    defaultValue={String(
+                                      latest("ExperienceSelection", qid)?.data
+                                        .evidence_id || "",
+                                    )}
+                                  >
                                     {good
                                       .filter((e) =>
                                         (
@@ -2608,6 +2776,30 @@ export default function Home() {
                     )}
                     {stage === stages[3] && (
                       <>
+                        <ExperienceOptions
+                          ready={experienceReady}
+                          workspaceId={ws.id}
+                          slot="resume"
+                          version={ws.artifacts
+                            .map((artifact) => artifact.id + artifact.status)
+                            .join(":")}
+                          request={request}
+                          sourceNames={Object.fromEntries(
+                            evidence.map((item) => [
+                              item.source_id,
+                              item.title + " 원자료",
+                            ]),
+                          )}
+                          slotNames={Object.fromEntries(
+                            questions.map((question, index) => [
+                              question.id,
+                              `${index + 1}번 · ${question.text}`,
+                            ]),
+                          )}
+                          onSelected={async () => {
+                            await refresh(ws.id);
+                          }}
+                        />
                         <Card a={latest("ResumeBrief")} />
                         <Card a={resume} />
                         {resume && (

@@ -956,11 +956,13 @@ def personal_export(db: DB, ident: User):
     }
 
 
+from career.expanded_routes import build_expanded_router  # noqa: E402
 from career.rest_routes import router  # noqa: E402
 from career.upgrade_routes import build_router  # noqa: E402
 
 app.include_router(router)
 app.include_router(build_router(database, user))
+app.include_router(build_expanded_router(database, user))
 
 
 @app.post("/api/evals/run")

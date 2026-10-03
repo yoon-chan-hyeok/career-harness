@@ -12,6 +12,7 @@ import type { Artifact, Workspace } from "./page";
 import { AssessmentDecision, RevisionInbox } from "./review-controls";
 import { AgentWorkspace } from "./agent-workspace";
 import { CorrectionInbox } from "./correction-controls";
+import { ExperienceOptions } from "./experience-options";
 
 type Turn = {
   id: string;
@@ -59,6 +60,7 @@ export function ConversationWorkspace({
   questionId,
   qSelect,
   evidenceOptions,
+  sourceNames,
   request,
   refresh,
   onEdit,
@@ -70,6 +72,7 @@ export function ConversationWorkspace({
   questionId: string;
   qSelect: (qid: string) => void;
   evidenceOptions: { id: string; title: string }[];
+  sourceNames: Record<string, string>;
   request: Request;
   refresh: (id: string) => Promise<void>;
   onEdit: (stage: number, qid?: string) => void;
@@ -107,7 +110,12 @@ export function ConversationWorkspace({
     };
   }, [request, w.id]);
   useEffect(() => {
-    end.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+    end.current?.scrollIntoView({
+      block: "end",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
   }, [turns.length, sending]);
   const current = Object.values(
     w.artifacts.reduce<Record<string, Artifact>>((result, a) => {
@@ -474,6 +482,33 @@ export function ConversationWorkspace({
           작성한 문항과 문서가 여기에 쌓입니다.
         </p>
         <div className="storage-scroll">
+          <ExperienceOptions
+            ready={[latest("OpportunityBrief"), latest("EvidencePack")].every(
+              (artifact) =>
+                artifact && ["ACTIVE", "LOCKED"].includes(artifact.status),
+            )}
+            key={`${w.id}:${questionId || (selected?.kind.startsWith("Resume") ? "resume" : "strategy")}`}
+            workspaceId={w.id}
+            slot={
+              questionId ||
+              (selected?.kind.startsWith("Resume") ? "resume" : "strategy")
+            }
+            version={w.artifacts
+              .map((artifact) => artifact.id + artifact.status)
+              .join(":")}
+            request={request}
+            sourceNames={sourceNames}
+            slotNames={Object.fromEntries(
+              w.data.questions.map((question, index) => [
+                question.id,
+                `${index + 1}번 · ${question.text}`,
+              ]),
+            )}
+            onSelected={async (id) => {
+              setEvidenceId(id);
+              await refresh(w.id);
+            }}
+          />
           <div className="storage-group">
             <div className="storage-group-heading">
               <h3>

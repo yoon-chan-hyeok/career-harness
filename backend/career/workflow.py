@@ -327,6 +327,9 @@ class Workflow:
         opportunity = self.artifact(ident, "OpportunityBrief")
         pack = self.artifact(ident, "EvidencePack")
         assessment = latest(self.db, self.user, ident, "OpportunityAssessment", required=False)
+        from career.experience_options import active_selection, selection_context
+
+        selection = active_selection(self, ident, "strategy")
         if assessment and assessment.status not in {"ACTIVE", "LOCKED"}:
             raise ValueError("지원 가치·우선순위 평가를 현재 근거에 맞춰 다시 확인해 주세요.")
         decision = ws.data.get("opportunity_decision", {})
@@ -345,19 +348,23 @@ class Workflow:
                     "evidence_pack": pack.data,
                     "opportunity_assessment": assessment.data if assessment else {},
                     "human_decision": current_decision,
+                    "selected_experience": selection_context(selection),
                 },
                 ApplicationBrief,
             )
         )
         if not data["assignment_statement"].strip():
             raise ValueError("맡길 수 있는 일을 구체적으로 정해 주세요.")
+        data["selected_experience_id"] = selection.data["evidence_id"] if selection else None
+        data["experience_selection_artifact_id"] = selection.id if selection else None
         item, _ = save(
             self.db,
             self.user,
             ident,
             "ApplicationBrief",
             data,
-            deps=[opportunity.id, pack.id] + ([assessment.id] if assessment else []),
+            deps=[opportunity.id, pack.id] + ([assessment.id] if assessment else [])
+            + ([selection.id] if selection else []),
             sources=self.reference_sources("strategy"),
             model="manual" if manual else self.current_model,
         )
@@ -368,6 +375,7 @@ class Workflow:
         )
         if (
             ws.mode == "FAST"
+            and selection is None
             and not self.reference_sources("strategy")
             and conflicts is None
             and not pack.data["uncovered_outputs"]
@@ -424,6 +432,9 @@ class Workflow:
             raise ValueError("전략 승인이 먼저 필요합니다.")
         question = self.question(ident, qid)
         pack = self.artifact(ident, "EvidencePack")
+        from career.experience_options import active_selection, selection_context
+
+        selection = active_selection(self, ident, qid, fallback=True)
         portfolio = latest(self.db, self.user, ident, "QuestionPortfolio", required=False)
         allocation = None
         if portfolio:
@@ -433,6 +444,14 @@ class Workflow:
             allocation = next((item for item in portfolio.data["items"] if item["question_id"] == qid), None)
             if allocation is None:
                 raise ValueError("새로 추가한 문항의 역할을 다시 배분해 주세요.")
+        chosen_pack = pack.data
+        if selection:
+            chosen_id = selection.data["evidence_id"]
+            chosen_pack = {**pack.data, "items": [i for i in pack.data["items"] if i["evidence_id"] == chosen_id]}
+            if allocation:
+                allocation = {**allocation, "evidence_candidate_ids": [chosen_id],
+                              "primary_message_candidates": [],
+                              "selection_note": "사용자가 경험을 변경했으므로 현재 근거로 메시지를 다시 구성합니다."}
         data = (
             QuestionBrief.model_validate(manual).model_dump()
             if manual
@@ -442,14 +461,20 @@ class Workflow:
                     "question_id": qid,
                     "question": question,
                     "strategy": strategy.data,
-                    "evidence_pack": pack.data,
+                    "evidence_pack": chosen_pack,
                     "question_allocation": allocation,
+                    "selected_experience": selection_context(selection),
                 },
                 QuestionBrief,
             )
         )
         if data["question_id"] != qid:
             raise ValueError("문항 ID가 다릅니다.")
+        if selection:
+            if data["evidence_ids"] != [selection.data["evidence_id"]]:
+                raise ValueError("사용자가 선택한 경험으로 문항 메시지를 다시 구성해 주세요.")
+        data["selected_experience_id"] = selection.data["evidence_id"] if selection else None
+        data["experience_selection_artifact_id"] = selection.id if selection else None
         if manual is None and os.getenv("JEV_SHADOW_ENABLED") == "1" and os.getenv("JEV_API_KEY"):
             try:
                 decision = self.bounded_decision(
@@ -492,7 +517,8 @@ class Workflow:
             ident,
             "QuestionBrief",
             data,
-            deps=[strategy.id, pack.id] + ([portfolio.id] if portfolio else []),
+            deps=[strategy.id, pack.id] + ([portfolio.id] if portfolio else [])
+            + ([selection.id] if selection else []),
             sources=self.reference_sources("question_brief"),
             slot=qid,
             model="manual" if manual else self.current_model,
@@ -549,6 +575,11 @@ class Workflow:
         strategy = self.artifact(ident, "ApplicationBrief")
         if brief.status != "LOCKED" or strategy.status != "LOCKED":
             raise ValueError("전략과 문항 메시지를 승인한 후 작성할 수 있습니다.")
+        from career.experience_options import active_selection
+
+        selection = active_selection(self, ident, qid, fallback=True)
+        if selection and brief.data["evidence_ids"] != [selection.data["evidence_id"]]:
+            raise ValueError("선택 경험과 문항 근거가 달라졌습니다. 경험을 다시 선택하고 메시지를 승인해 주세요.")
         evidence = self.selected(brief.data["evidence_ids"])
         context = compile_context("writer", strategy=strategy.data, brief=brief.data, evidence=evidence)
         from career.rules import writing_rules
@@ -960,6 +991,12 @@ class Workflow:
             )
         )
         ranking = rank_evidence(opportunity.data, pack.data["items"], self.selected(candidates))
+        from career.experience_options import active_selection, selection_context
+
+        selection = active_selection(self, ident, "resume", fallback=True)
+        if selection:
+            ranking.sort(key=lambda row: row["evidence_id"] != selection.data["evidence_id"])
+            ranking = [{**row, "rank": index + 1} for index, row in enumerate(ranking)]
         selected = [item["evidence_id"] for item in ranking]
         evidence = self.selected(selected)
         from career.resume_master import master_context
@@ -981,6 +1018,8 @@ class Workflow:
                 "evidence_ranking": ranking,
                 "section_order": ORDER,
                 "section_budget": section_budgets(page_budget),
+                "selected_experience_id": selection.data["evidence_id"] if selection else None,
+                "experience_selection_artifact_id": selection.id if selection else None,
             }
         ).model_dump()
         if manual and "sections" not in manual:
@@ -1001,6 +1040,7 @@ class Workflow:
                             "canonical_profile": canonical(self.db, self.user),
                             "document_domain": "RESUME",
                             "canonical_master": master,
+                            "selected_experience": selection_context(selection),
                         },
                         ResumeContent,
                     )
@@ -1020,7 +1060,8 @@ class Workflow:
             ident,
             "ResumeBrief",
             brief_data,
-            deps=[strategy.id, pack.id] + ([master_id] if master_id else []),
+            deps=[strategy.id, pack.id] + ([master_id] if master_id else [])
+            + ([selection.id] if selection else []),
         )
         data.update({"selected_evidence_ids": selected, "protected_spans": [], "revision_count": 0})
         data["character_budget"] = {1: 3500, 2: 7000, "MASTER": 20000}[page_budget]
@@ -1513,7 +1554,7 @@ class Workflow:
             if resume:
                 document = latest(self.db, self.user, ident, "ResumeContent", required=False)
                 current_review = latest(self.db, self.user, ident, "ResumeReview", required=False)
-                if document is None:
+                if document is None or document.status not in {"ACTIVE", "LOCKED"}:
                     item = self.resume(ident)
                 elif current_review is None or current_review.status not in {"ACTIVE", "LOCKED"}:
                     item = self.review(ident, resume=True)
@@ -1553,7 +1594,7 @@ class Workflow:
                 item = plan(self, ident)
             elif qid:
                 brief = latest(self.db, self.user, ident, "QuestionBrief", qid, required=False)
-                if brief is None:
+                if brief is None or brief.status not in {"ACTIVE", "LOCKED"}:
                     item = self.question_brief(ident, qid)
                 elif brief.status == "ACTIVE":
                     raise ValueError("문항 메시지를 먼저 승인해 주세요.")
