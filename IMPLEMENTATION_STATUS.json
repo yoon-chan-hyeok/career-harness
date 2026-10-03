@@ -19,8 +19,8 @@
     "M13": "in_progress",
     "M14": "in_progress"
   },
-  "last_verified_commit": "b5d119ac10900ced38653f6a5030c6ea425fa817",
-  "last_verified_at": "2026-10-03T23:45:41.608757+09:00",
+  "last_verified_commit": "de094cc359aaa43b0c3a5ae141b3bbe9bfaf8f78",
+  "last_verified_at": "2026-10-04T03:30:47.700140+09:00",
   "verification": {
     "backend_tests": "363 passed / 3 PG skipped in latest expanded suite; prior 3 real PG16/pgvector checks passed separately",
     "backend_lint": "pass: final Ruff",
@@ -442,6 +442,8 @@
     "jev": "optional_live_connection_pending",
     "word_pagination": "unknown_not_rendered",
     "improvement_comparison_experiments": "excluded_by_user_scope",
-    "autonomous_agent_swarm_added": false
+    "autonomous_agent_swarm_added": false,
+    "verified_source_commit": "de094cc359aaa43b0c3a5ae141b3bbe9bfaf8f78",
+    "source_publication_performed": false
   }
 }
