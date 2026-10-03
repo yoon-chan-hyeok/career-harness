@@ -1,0 +1,12 @@
+{
+  "source": "https://github.com/google/fonts/tree/main/ofl/notosanskr",
+  "revision": "b38c5c93af322c45f633e17ac440ec1e6c94d489",
+  "license": "SIL Open Font License 1.1",
+  "derivation": "Noto Sans KR static wght 400/700, renamed CareerKR",
+  "sha256": {
+    "OFL.txt": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9",
+    "NotoSansKR%5Bwght%5D.ttf": "194018e6b2b293a7964f037b25c0249ce1418bc9ab3c971060a03aa57861e252",
+    "CareerKR-Regular.ttf": "18b4610e6e483d34de02af2ec2acd55aa1e6978ecd82cabb58ddf0179199de2e",
+    "CareerKR-Bold.ttf": "981071a309f37cca4efd9ae0858b40a31c58b00bbdaef515b627a2f1259b8446"
+  }
+}

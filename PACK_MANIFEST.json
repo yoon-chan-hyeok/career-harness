@@ -1,0 +1,47 @@
+{
+  "name": "Career Harness Codex One-Shot Implementation Pack",
+  "version": "2.2 FINAL",
+  "generated": "2026-09-29",
+  "primary_specs": [
+    "AGENTS.md",
+    "CODEX_MASTER_PROMPT.md",
+    "IMPLEMENTATION_STATUS.json",
+    "IMPLEMENTATION_PLAN.md",
+    "docs/00_PRODUCT_SCOPE.md",
+    "docs/05A_STATE_MACHINE_SPEC.md",
+    "docs/06A_WEB_RESEARCH_SPEC.md",
+    "docs/08_COVER_LETTER_IMPLEMENTATION_SPEC.md",
+    "docs/09_RESUME_IMPLEMENTATION_SPEC.md"
+  ],
+  "private_input_present": [
+    ".gitkeep",
+    "application_state_v2.json",
+    "eval_cases_v2.jsonl",
+    "career_agent_genesis_v2.jsonl",
+    "canonical_snapshot_v2.json"
+  ],
+  "notes": [
+    "Open entire folder in Codex.",
+    "Paste CODEX_MASTER_PROMPT.md once.",
+    "Codex should execute tasks autonomously in implementation-plan order.",
+    "private_input is gitignored and must remain private."
+  ],
+  "v2_1_changes": [
+    "Added canonical state machine spec",
+    "Added company/web research spec",
+    "Reorganized private_input contract and importer scope",
+    "Changed eval priority to smoke regression + production telemetry",
+    "Added implementation checkpoint/resume protocol"
+  ],
+  "status": "design-frozen",
+  "v2_2_final_changes": [
+    "Reordered bootstrap/eval milestones",
+    "Separated OpportunityBrief and ApplicationBrief responsibilities",
+    "Separated submission freeze from actual submission",
+    "Separated InterviewHandoff from SubmissionBundle",
+    "Specified OpenAIWebResearchProvider",
+    "Added production telemetry domain/tables",
+    "Moved core UI into vertical slices",
+    "Added ordinal CapabilityRecord and resume preview outputs"
+  ]
+}

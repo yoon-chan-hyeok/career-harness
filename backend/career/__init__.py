@@ -1,0 +1,1 @@
+"""Career Harness modular monolith."""

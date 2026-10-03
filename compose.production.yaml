@@ -1,0 +1,28 @@
+# The managed PostgreSQL/Auth project and Vercel frontend are configured separately.
+# This compose file runs the private API behind a HTTPS reverse proxy or container host ingress.
+services:
+  backend:
+    build: .
+    env_file: .env.production
+    environment:
+      CAREER_ENV: production
+      AUTH_MODE: supabase
+      AUTH_TOKENS: "{}"
+      RUN_MIGRATIONS: "0"
+      PORT: "8000"
+    ports: ["127.0.0.1:8000:8000"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - type: bind
+        source: ${DATABASE_SSL_ROOT_CERT:?Set DATABASE_SSL_ROOT_CERT to downloaded Supabase database CA}
+        target: /run/secrets/supabase-ca.crt
+        read_only: true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

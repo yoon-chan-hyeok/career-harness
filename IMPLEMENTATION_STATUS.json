@@ -1,0 +1,374 @@
+{
+  "pack_version": "2.2 FINAL",
+  "current_milestone": "M14",
+  "last_completed_milestone": "M12",
+  "milestones": {
+    "M0": "in_progress",
+    "M1": "complete",
+    "M2": "complete",
+    "M3": "complete",
+    "M4": "in_progress",
+    "M5": "complete",
+    "M6": "complete",
+    "M7": "complete",
+    "M8": "in_progress",
+    "M9": "complete",
+    "M10": "complete",
+    "M11": "complete",
+    "M12": "complete",
+    "M13": "in_progress",
+    "M14": "in_progress"
+  },
+  "last_verified_commit": null,
+  "last_verified_at": "2026-10-03T22:56:08.938846+09:00",
+  "verification": {
+    "backend_tests": "353 passed / 3 PG skipped in general suite; those 3 passed separately on real isolated PG16/pgvector",
+    "backend_lint": "pass: final Ruff",
+    "backend_typecheck": "pass: final Pyright, zero errors/warnings",
+    "frontend_lint": "pass: latest PDF.js and unified page selector",
+    "frontend_typecheck": "pass",
+    "frontend_auth_tests": "4 passed",
+    "frontend_build": "pass: latest Next.js 15.5.26 production/standalone with PDF.js worker",
+    "migrations": "actual SQLite head 0011; actual PG16 check/downgrade base/upgrade head/check passed; FTS GIN exists",
+    "e2e": "pass: actual isolated HTTP 19 runs through failure/recovery/freeze/handoff/submission confirmation/outcome/CLOSED; workflow/fixture/MCP regressions pass",
+    "browser": "pass: actual latest PDF/provenance/draft/upload/usage/E5 flows and 390px; work/upgrade-browser-audit.json",
+    "running_state": "pass: separate session observes actual RUNNING, concurrent guard and recovered execution fencing; no live long-running model UI claim",
+    "recovery": "actual SQLite and isolated PG16 custom backup/empty restore passed; all 39 PG table counts/content hashes and 384-dimensional vectors match; operating Supabase restore pending",
+    "privacy": "tracked + untracked source candidates and forced-add negatives tested; personal original history/strategy/screenshots/credentials excluded; synthetic public fixture; known local credential matches 0",
+    "local_runtime": "pass: latest normal owner frontend/backend, health/ready; QA credentials rejected; owner retains 6 references",
+    "free_provider_protocol": "pass: official SDK mocked HTTP HF/Groq structured requests, failures, no retries/redirect/fallback; Workflow cover letter and resume artifacts/trace persist; no live inference token",
+    "free_provider_ui": "pass: authenticated settings, HF permission link, masked key entry, truthful configured/live status, no console warnings/errors",
+    "role_prompts": "pass: 25 role-specific stage contracts, independent reviewer boundaries and version metadata",
+    "jev_confidence": "pass: numeric confidence from mock HTTP to durable PromptRun; invalid values fail isolated shadow",
+    "frontend_deployment_tests": "4 passed again after deployment exclusion hardening",
+    "serverless_backend": "pass: 24 added checks; minimal runtime package imports/health/auth/migration metadata without dotenv/network/migration; verified TLS, CA and upload exclusions",
+    "vercel_cli": "62.2.0 local install, version/login/deploy/link help pass; exact cwd and workspace-only global config; actual CLI --dry source inspection requires authentication and is not completed",
+    "frontend_upgrade_tests": "7 passed; auth 4 + deploy 4 = 15 frontend tests",
+    "document_export": "actual PDF/DOCX content and PDF pages verified; supported DOCX renderer attempted again: bundled soffice absent, pages unverified",
+    "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
+    "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json"
+  },
+  "notes": [
+    "v2.2 FINAL: implementation plan reordered; M0 is repository bootstrap.",
+    "M0 backend scaffold verified; frontend dependency installation running; Docker executable absent. No live OpenAI credential present.",
+    "Local scaffold checks pass. M1-M3 core behavior implemented with 13 tests; full acceptance audit pending. M4 started. M0 Docker acceptance remains unverified; no milestone completion claimed.",
+    "M0-M14 implementation exists in varying depth; acceptance audit is in progress. PostgreSQL/Docker and live providers remain unverified. No full-completion claim.",
+    "2026-09-29: Linear-referenced UI redesign implemented and browser verified; standalone launcher verified; RUN_LOCAL.md and IMPLEMENTATION_REPORT.md document actual behavior and unresolved acceptance gaps. Docker/PostgreSQL/live AI/Jev remain unverified; no overall-completion claim.",
+    "2026-09-30: Coding completed for the requested v0.1 flows and chat-centered UI with right document storage. Dedicated truth/application tables, extraction proposals, structured resume, conversational adapter, official Jev shadow tasks, rule scoping and product metrics added. 70 tests and all local checks pass. Milestone in_progress values now denote external acceptance checks only; implementation_complete records code completion. See IMPLEMENTATION_REPORT.md.",
+    "2026-10-02: Six confirmed supplemental references and human review integration complete. 93 local tests pass; 1 PostgreSQL test skipped. Browser review, source isolation, current assessment/decision dependencies and normal authenticated local startup verified. External acceptance limits remain unchanged. See docs/SUPPLEMENTAL_INTEGRATION_AUDIT.md.",
+    "2026-10-02: Full specification re-audit found implementation gaps beyond credentials. Supabase/Vercel preparation, real execution UI/telemetry, rule promotion, structured corrections and remaining requirements are being completed. Previous 93-test verification applies only to the supplemental baseline.",
+    "2026-10-02 final re-audit: local/manual/fixture implementation complete after closing prior coding gaps: graph, detailed handoff, structured corrections, Main Skill resume/section budgets, whole-prose ledger and company-source claims, question portfolio, parallel QA, actual Workflow ablation, evaluated learned rules, Supabase/Vercel/security/recovery, durable agent activity. 185 tests + 4 auth tests pass. External production and real-model quality remain unverified. Earlier 93-test and implementation-only declarations are superseded by this verification.",
+    "2026-10-03: User scope override recorded: exclude improvement/comparison experiments, include resume/free service. HF/Groq official chat adapters, private owner settings/probe, 25 role contracts and durable Jev confidence added. 281 tests pass, 2 PostgreSQL tests skipped; frontend/auth/build and normal local runtime pass. Vercel FastAPI package/entrypoint, verified TLS CA supply and private upload guards prepared; 4 frontend deployment guard tests pass. HF MCP authenticated but OAuth read scopes do not provide backend inference credentials. Official Vercel CLI 62.2.0 installed locally; help options verified; user device approval pending, actual source dry check not completed. New-project first-deploy production target is documented with explicit staged --prod --skip-domain. No real generation, paid upgrade or public deployment performed.",
+    "2026-10-03 follow-up audit: previous all-code-complete declaration narrowed. Read-only review found AI resume page option omission, PostgreSQL multi-output lexical recall gap, multi-call proxy deadline gap and unbounded free-provider input context. These fixes are not implemented in this audit. Existing 281-pass/2-skipped test evidence was not rerun. Local frontend/health/ready 200; provider none; Supabase projects 0; Vercel teams 0 and CLI logged out. See docs/REMAINING_WORK_AND_UPGRADES.md. Comparison/improvement experiments remain excluded.",
+    "2026-10-03: Required follow-ups and six upgrades implemented. 339 Python passed/3 PG skipped; 15 frontend tests and latest lint/type/build pass. Actual UI/HTTP/E5/PDF/DOCX/SQLite recovery verified; normal owner restored with 6 references and QA access disabled. Live inference/PG/HTTPS/CI/Word visual rendering remain unverified. See docs/UPGRADE_PROGRESS.md.",
+    "2026-10-03 additional production audit: fixed actual psycopg %I protection execution and migration-owned FTS autogenerate false deletion. 353 general tests and 3 real PG checks pass; actual PG16 backup/restore 39 tables match. Personal historical fixture replaced with synthetic cases after byte-identical private preservation; original strategy/screenshots excluded; untracked source gate hardened. Live inference/Supabase/HTTPS/remote CI/Word pages remain pending."
+  ],
+  "coding_status": "upgrade_code_implemented_word_and_remote_acceptance_pending",
+  "implementation_complete": {
+    "M0": true,
+    "M1": true,
+    "M2": true,
+    "M3": true,
+    "M4": false,
+    "M5": true,
+    "M6": true,
+    "M7": true,
+    "M8": false,
+    "M9": true,
+    "M10": true,
+    "M11": true,
+    "M12": true,
+    "M13": true,
+    "M14": false
+  },
+  "external_acceptance_pending": {
+    "M0": "Docker absent; actual containers not executed",
+    "M4": "3 actual PostgreSQL/pgvector/RLS checks skipped; local actual E5/SQLite flows pass",
+    "M13": "Optional official Jev live connection not verified; comparison/calibration experiments excluded by user. Confidence persistence, role contracts and failure isolation pass locally.",
+    "M14": "Supabase/Vercel/backend/HTTPS/PostgreSQL production not connected; local authenticated UI, MCP and SQLite recovery verified",
+    "M8": "Word visual page render and live free-provider writing/review acceptance remain unverified"
+  },
+  "supplemental_integration": {
+    "browser": "pass: desktop, 390px storage without horizontal overflow, revision preview/accept/reject, selective extraction, provenance/stale persistence, no console errors",
+    "source_documents": 6,
+    "scope": "additional rules and human review",
+    "backend_tests": "93 passed, 1 skipped",
+    "tio_korea": "not identifiable; optional exact URL/path pending; no unrelated references used",
+    "status": "complete",
+    "audit": "docs/SUPPLEMENTAL_INTEGRATION_AUDIT.md",
+    "privacy": "pass: six originals preserved and hashes match; no reference-backed candidate facts imported; QA user isolated; temporary QA token disabled; private data ignored",
+    "local_runtime": "pass: 3000 frontend, 8000 backend, existing owner has six active references",
+    "screenshots": [
+      "work/ui-supplemental-saved.png",
+      "work/ui-supplemental-review.png",
+      "work/ui-supplemental-mobile.png"
+    ]
+  },
+  "release_readiness": "local_upgrades_postgres_and_restore_verified_live_inference_supabase_https_word_pending",
+  "last_implemented_milestone": "M14",
+  "milestone_acceptance": {
+    "M0": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "pending"
+    },
+    "M1": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M2": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M3": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M4": {
+      "implementation": "upgrade_code_implemented",
+      "local_verification": "local_upgrade_flows_verified_word_and_remote_acceptance_pending",
+      "external_acceptance": "pending"
+    },
+    "M5": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M6": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M7": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M8": {
+      "implementation": "upgrade_code_implemented",
+      "local_verification": "local_upgrade_flows_verified_word_and_remote_acceptance_pending",
+      "external_acceptance": "word_visual_page_render_pending_live_generation_unverified"
+    },
+    "M9": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M10": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M11": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "manual_or_fixture_scope_verified"
+    },
+    "M12": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "comparison_experiments_excluded_by_user"
+    },
+    "M13": {
+      "implementation": "complete",
+      "local_verification": "pass",
+      "external_acceptance": "pending"
+    },
+    "M14": {
+      "implementation": "upgrade_code_implemented",
+      "local_verification": "local_upgrade_flows_verified_word_and_remote_acceptance_pending",
+      "external_acceptance": "pending"
+    }
+  },
+  "deployment_status": {
+    "supabase": "connector_lookup_success_1_org_0_accessible_projects_career_production_unconnected",
+    "vercel": "connector_team_lookup_success_0_accessible_teams_project_deployment_counts_unknown_career_connection_unverified",
+    "backend_https": "vercel_hobby_fastapi_entrypoint_and_deployment_prepared_not_deployed",
+    "openai": "manual_only_live_unverified",
+    "jev": "optional_shadow_adapter_confidence_verified_locally_live_unverified",
+    "postgresql": "integration_prepared_unverified",
+    "sqlite_local": "running_verified",
+    "huggingface": "adapter_prepared_live_unverified",
+    "groq": "adapter_prepared_live_unverified",
+    "vercel_cli": {
+      "version": "62.2.0",
+      "location": "work/deploy-cli/node_modules/vercel",
+      "configuration_location": "work/vercel-config",
+      "version_command": "passed",
+      "login_help": "passed",
+      "deploy_help": "passed",
+      "link_help": "passed",
+      "login_helper": "scripts/connect-vercel.ps1: PowerShell syntax, actual -Help, four environment variables restored: passed",
+      "dry_source_check": "not_completed_requires_cli_authentication",
+      "cli_authentication": "logged_out_last_device_flow_not_completed",
+      "deployment_created": false,
+      "project_created": false,
+      "payment_or_plan_change": false,
+      "verified_options": [
+        "--cwd",
+        "--global-config",
+        "--prod",
+        "--skip-domain",
+        "--target",
+        "--dry",
+        "--json"
+      ],
+      "privacy": "workspace-only ignored config; no debug; telemetry and update checks disabled"
+    }
+  },
+  "agent_activity_ui": {
+    "status": "implemented_and_browser_verified",
+    "basis": "actual_execution_runs_and_artifacts",
+    "roles": 6,
+    "screenshot": "work/ui-agent-final.png",
+    "failure_screenshot": "work/ui-agent-failure.png",
+    "mobile_screenshot": "work/ui-agent-mobile.png"
+  },
+  "audit": "docs/REQUIREMENT_COMPLETION_AUDIT.md",
+  "user_scope": {
+    "decisions": "docs/USER_DECISIONS.md",
+    "resume": "included_generation_review_storage",
+    "comparison_improvement_experiments": "excluded_not_a_release_gate",
+    "paid_subscription_credit_purchase_automatic_paid_fallback": "not_authorized_not_implemented",
+    "portfolio_design_rag_jev_explanation_pages": "later"
+  },
+  "free_inference": {
+    "huggingface_plugin": "authenticated_read_tools_available_not_an_app_inference_credential",
+    "providers_implemented": [
+      "huggingface",
+      "groq"
+    ],
+    "current_redacted_status": {
+      "provider": "none",
+      "model": "",
+      "configured": false,
+      "live_verified": false,
+      "verified_at": null,
+      "editable": true,
+      "credential_source": "missing",
+      "free_only_confirmed": false,
+      "token_configured": false
+    },
+    "live_service_workflow": "not_verified",
+    "user_next_step": "Enter own Inference Providers token in local Settings > AI connection; never send in chat",
+    "live_inference": "pending_inference_token_and_probe",
+    "setup": "docs/FREE_PROVIDER_SETUP.md",
+    "local_evidence": "work/free-service-local-audit.json",
+    "screenshot": "work/ui-free-provider-settings.jpg"
+  },
+  "last_reviewed_at": "2026-10-03T22:27:07.012175+09:00",
+  "remaining_work_audit": {
+    "reviewed_at": "2026-10-03T06:35:47.548049+09:00",
+    "document": "docs/REMAINING_WORK_AND_UPGRADES.md",
+    "mode": "read_only_code_and_current_service_review_no_full_test_rerun",
+    "implemented_during_review": false,
+    "required_code_follow_up": [
+      "Pass selected page_budget to AI resume generation",
+      "Collect PostgreSQL lexical candidates for multi-output query without requiring every token",
+      "Bound or split multi-model request within external proxy timeout and handle non-JSON errors",
+      "Select and bound long input context before free-provider invocation"
+    ],
+    "current_observations": {
+      "frontend_status": 200,
+      "backend_health_status": 200,
+      "backend_ready_status": 200,
+      "provider": "none",
+      "live_verified": false,
+      "retrieval": "lexical_only",
+      "jev": "disabled",
+      "supabase_project_count": 0,
+      "vercel_accessible_team_count": 0,
+      "vercel_cli": "logged_out"
+    },
+    "superseded_by": "upgrade_progress",
+    "follow_up_resolution": "4 required coding gaps implemented and locally verified; retain original read-only audit as history"
+  },
+  "upgrade_progress": {
+    "checked_at": "2026-10-03T22:56:08.938846+09:00",
+    "document": "docs/UPGRADE_PROGRESS.md",
+    "status": "code_and_local_upgrade_flows_verified_external_acceptance_pending",
+    "required_follow_up_code": "4 implemented",
+    "upgrades": {
+      "provenance": "implemented_browser_verified",
+      "editor_recovery": "implemented_browser_verified",
+      "usage_caps": "implemented_tested_browser_verified",
+      "uploads_pdf_docx": "implemented_real_files_and_pdf_verified_word_pages_pending",
+      "local_korean_semantics": "actual_next_wasm_and_real_pgvector_verified_personal_operating_acceptance_pending",
+      "operational_provider_status": "implemented_browser_verified_live_success_absent"
+    },
+    "evidence": [
+      "work/upgrade-browser-audit.json",
+      "work/upgrade-http-audit.json",
+      "work/upgrade-download-audit.json",
+      "work/upgrade-recovery-audit.json",
+      "work/normal-runtime-audit.json",
+      "work/upgrade-final-tests.xml",
+      "work/upgrade-external-audit.json",
+      "work/release-source-tests.xml",
+      "work/source-privacy-tests.xml",
+      "work/source-privacy-audit.json",
+      "work/postgres-upgrades-verification/result.json",
+      "work/postgres-upgrades-verification/junit.xml",
+      "work/postgres-upgrades-verification/backup-restore-result.json"
+    ],
+    "pending": [
+      "HF inference token and actual writing/review",
+      "Supabase project/Auth/TLS/operating data isolation",
+      "Vercel authenticated source check/HTTPS/ingress",
+      "operating Supabase recovery/retention/Auth restoration",
+      "source commit/remote and actual CI",
+      "Word visual page render"
+    ],
+    "user_scope_preserved": true,
+    "full_service_complete": false,
+    "current_runtime_snapshot": {
+      "checked_at": "2026-10-03T22:29:08.946242+09:00",
+      "provider": "none",
+      "configured": false,
+      "live_verified": false,
+      "actual_support_workflow_success_present": false,
+      "backend_ready": true
+    },
+    "external_snapshot": {
+      "checked_at": "2026-10-03T22:29:31+09:00",
+      "read_only": true,
+      "supabase": {
+        "lookup_success": true,
+        "accessible_organizations": 1,
+        "accessible_projects": 0,
+        "career_production_connected": false
+      },
+      "vercel": {
+        "team_lookup_success": true,
+        "accessible_teams": 0,
+        "project_count": null,
+        "deployment_count": null,
+        "counts_unavailable_reason": "teamId required and no local project link",
+        "career_production_connection_verified": false
+      },
+      "created_project_or_deployment": false,
+      "payment_or_plan_change": false
+    },
+    "postgres_acceptance": {
+      "scope": "isolated_local_synthetic_not_operating_Supabase",
+      "version": "16.15",
+      "pgvector": "0.8.7",
+      "tests_passed": 3,
+      "migration_head": "0011",
+      "roundtrip_and_autogenerate_check": "passed",
+      "protection_cli": "passed",
+      "protected_tables": 39,
+      "anon_authenticated_table_grants": 0,
+      "backup_restore_content_match": true,
+      "qa_container_cleanup": "agent_confirmation_pending"
+    },
+    "source_control": {
+      "status": "privacy_reviewed_first_commit_pending",
+      "remote_configured": false,
+      "actual_remote_ci_run": false
+    }
+  }
+}
