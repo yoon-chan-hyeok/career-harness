@@ -19,7 +19,7 @@
     "M13": "in_progress",
     "M14": "in_progress"
   },
-  "last_verified_commit": "6838db378d18ae1c6e616d9eb51297f2b545a4cc",
+  "last_verified_commit": "b5d119ac10900ced38653f6a5030c6ea425fa817",
   "last_verified_at": "2026-10-03T23:45:41.608757+09:00",
   "verification": {
     "backend_tests": "354 passed / 3 PG skipped in latest general suite; those 3 passed separately on real isolated PG16/pgvector",
@@ -47,7 +47,7 @@
     "document_export": "actual PDF pages/body verified; DOCX body preserved and unmeasured overflow truthfully unknown, no page count; bundled Word renderer absent",
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
     "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json",
-    "source_control": "first local source commit 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 curated files; no private originals, keys or screenshots; remote/CI not run",
+    "source_control": "latest verified source commit b5d119ac10900ced38653f6a5030c6ea425fa817; 248 curated files; personal originals/keys/screenshots excluded; no external push or remote CI",
     "backend_container": "fresh current runtime source Docker build/start/migration 0011/health/auth/two-user isolation/Korean PDF-DOCX/private exclusions pass; QA container and port cleaned"
   },
   "notes": [
@@ -65,7 +65,8 @@
     "2026-10-03: Required follow-ups and six upgrades implemented. 339 Python passed/3 PG skipped; 15 frontend tests and latest lint/type/build pass. Actual UI/HTTP/E5/PDF/DOCX/SQLite recovery verified; normal owner restored with 6 references and QA access disabled. Live inference/PG/HTTPS/CI/Word visual rendering remain unverified. See docs/UPGRADE_PROGRESS.md.",
     "2026-10-03 additional production audit: fixed actual psycopg %I protection execution and migration-owned FTS autogenerate false deletion. 353 general tests and 3 real PG checks pass; actual PG16 backup/restore 39 tables match. Personal historical fixture replaced with synthetic cases after byte-identical private preservation; original strategy/screenshots excluded; untracked source gate hardened. Live inference/Supabase/HTTPS/remote CI/Word pages remain pending.",
     "2026-10-03: Verified source baseline saved locally at 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 files, no external push. QA-only PostgreSQL container removed and port released. Subsequent commit only records acceptance metadata. Remote CI and production accounts remain pending.",
-    "2026-10-03 container/DOCX audit: unmeasured Word overflow corrected to unknown; 354 general tests pass plus earlier separate real PG 3 pass. Fresh current runtime source backend Docker build/start/migration/auth/user isolation/Korean PDF-DOCX/private exclusions verified; QA container cleaned. Whole production HTTPS/Supabase/live HF/remote CI/Word pages remain pending."
+    "2026-10-03 container/DOCX audit: unmeasured Word overflow corrected to unknown; 354 general tests pass plus earlier separate real PG 3 pass. Fresh current runtime source backend Docker build/start/migration/auth/user isolation/Korean PDF-DOCX/private exclusions verified; QA container cleaned. Whole production HTTPS/Supabase/live HF/remote CI/Word pages remain pending.",
+    "2026-10-03: Current DOCX/container fix and truthful current records saved locally at b5d119ac10900ced38653f6a5030c6ea425fa817; subsequent commit records verified source hash only. Remote/CI/public deployment not performed."
   ],
   "coding_status": "upgrade_code_implemented_word_and_remote_acceptance_pending",
   "implementation_complete": {
@@ -392,7 +393,7 @@
     },
     "source_control": {
       "status": "privacy_reviewed_locally_committed",
-      "verified_code_commit": "6838db378d18ae1c6e616d9eb51297f2b545a4cc",
+      "verified_code_commit": "b5d119ac10900ced38653f6a5030c6ea425fa817",
       "tracked_source_files": 248,
       "private_credentials_history_strategy_screenshots_excluded": true,
       "remote_configured": false,
