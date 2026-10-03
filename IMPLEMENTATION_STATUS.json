@@ -20,9 +20,9 @@
     "M14": "in_progress"
   },
   "last_verified_commit": "6838db378d18ae1c6e616d9eb51297f2b545a4cc",
-  "last_verified_at": "2026-10-03T23:00:21.090217+09:00",
+  "last_verified_at": "2026-10-03T23:45:41.608757+09:00",
   "verification": {
-    "backend_tests": "353 passed / 3 PG skipped in general suite; those 3 passed separately on real isolated PG16/pgvector",
+    "backend_tests": "354 passed / 3 PG skipped in latest general suite; those 3 passed separately on real isolated PG16/pgvector",
     "backend_lint": "pass: final Ruff",
     "backend_typecheck": "pass: final Pyright, zero errors/warnings",
     "frontend_lint": "pass: latest PDF.js and unified page selector",
@@ -44,10 +44,11 @@
     "serverless_backend": "pass: 24 added checks; minimal runtime package imports/health/auth/migration metadata without dotenv/network/migration; verified TLS, CA and upload exclusions",
     "vercel_cli": "62.2.0 local install, version/login/deploy/link help pass; exact cwd and workspace-only global config; actual CLI --dry source inspection requires authentication and is not completed",
     "frontend_upgrade_tests": "7 passed; auth 4 + deploy 4 = 15 frontend tests",
-    "document_export": "actual PDF/DOCX content and PDF pages verified; supported DOCX renderer attempted again: bundled soffice absent, pages unverified",
+    "document_export": "actual PDF pages/body verified; DOCX body preserved and unmeasured overflow truthfully unknown, no page count; bundled Word renderer absent",
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
     "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json",
-    "source_control": "first local source commit 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 curated files; no private originals, keys or screenshots; remote/CI not run"
+    "source_control": "first local source commit 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 curated files; no private originals, keys or screenshots; remote/CI not run",
+    "backend_container": "fresh current runtime source Docker build/start/migration 0011/health/auth/two-user isolation/Korean PDF-DOCX/private exclusions pass; QA container and port cleaned"
   },
   "notes": [
     "v2.2 FINAL: implementation plan reordered; M0 is repository bootstrap.",
@@ -63,7 +64,8 @@
     "2026-10-03 follow-up audit: previous all-code-complete declaration narrowed. Read-only review found AI resume page option omission, PostgreSQL multi-output lexical recall gap, multi-call proxy deadline gap and unbounded free-provider input context. These fixes are not implemented in this audit. Existing 281-pass/2-skipped test evidence was not rerun. Local frontend/health/ready 200; provider none; Supabase projects 0; Vercel teams 0 and CLI logged out. See docs/REMAINING_WORK_AND_UPGRADES.md. Comparison/improvement experiments remain excluded.",
     "2026-10-03: Required follow-ups and six upgrades implemented. 339 Python passed/3 PG skipped; 15 frontend tests and latest lint/type/build pass. Actual UI/HTTP/E5/PDF/DOCX/SQLite recovery verified; normal owner restored with 6 references and QA access disabled. Live inference/PG/HTTPS/CI/Word visual rendering remain unverified. See docs/UPGRADE_PROGRESS.md.",
     "2026-10-03 additional production audit: fixed actual psycopg %I protection execution and migration-owned FTS autogenerate false deletion. 353 general tests and 3 real PG checks pass; actual PG16 backup/restore 39 tables match. Personal historical fixture replaced with synthetic cases after byte-identical private preservation; original strategy/screenshots excluded; untracked source gate hardened. Live inference/Supabase/HTTPS/remote CI/Word pages remain pending.",
-    "2026-10-03: Verified source baseline saved locally at 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 files, no external push. QA-only PostgreSQL container removed and port released. Subsequent commit only records acceptance metadata. Remote CI and production accounts remain pending."
+    "2026-10-03: Verified source baseline saved locally at 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 files, no external push. QA-only PostgreSQL container removed and port released. Subsequent commit only records acceptance metadata. Remote CI and production accounts remain pending.",
+    "2026-10-03 container/DOCX audit: unmeasured Word overflow corrected to unknown; 354 general tests pass plus earlier separate real PG 3 pass. Fresh current runtime source backend Docker build/start/migration/auth/user isolation/Korean PDF-DOCX/private exclusions verified; QA container cleaned. Whole production HTTPS/Supabase/live HF/remote CI/Word pages remain pending."
   ],
   "coding_status": "upgrade_code_implemented_word_and_remote_acceptance_pending",
   "implementation_complete": {
@@ -84,8 +86,8 @@
     "M14": false
   },
   "external_acceptance_pending": {
-    "M0": "Docker absent; actual containers not executed",
-    "M4": "3 actual PostgreSQL/pgvector/RLS checks skipped; local actual E5/SQLite flows pass",
+    "M0": "WSL Docker and fresh backend image/runtime verified; whole frontend/backend production deployment and HTTPS pending",
+    "M4": "3 real isolated PostgreSQL/pgvector/RLS tests passed; operating Supabase Auth/TLS and personal data acceptance pending",
     "M13": "Optional official Jev live connection not verified; comparison/calibration experiments excluded by user. Confidence persistence, role contracts and failure isolation pass locally.",
     "M14": "Supabase/Vercel/backend/HTTPS/PostgreSQL production not connected; local authenticated UI, MCP and SQLite recovery verified",
     "M8": "Word visual page render and live free-provider writing/review acceptance remain unverified"
@@ -106,12 +108,12 @@
       "work/ui-supplemental-mobile.png"
     ]
   },
-  "release_readiness": "local_upgrades_postgres_and_restore_verified_live_inference_supabase_https_word_pending",
+  "release_readiness": "local_upgrades_postgres_restore_backend_container_verified_live_inference_supabase_https_remote_CI_word_pending",
   "last_implemented_milestone": "M14",
   "milestone_acceptance": {
     "M0": {
       "implementation": "complete",
-      "local_verification": "pass",
+      "local_verification": "fresh_backend_Docker_and_existing_frontend_production_build_pass",
       "external_acceptance": "pending"
     },
     "M1": {
@@ -131,7 +133,7 @@
     },
     "M4": {
       "implementation": "upgrade_code_implemented",
-      "local_verification": "local_upgrade_flows_verified_word_and_remote_acceptance_pending",
+      "local_verification": "local_E5_and_real_isolated_PG16_pgvector_protection_migrations_restore_pass",
       "external_acceptance": "pending"
     },
     "M5": {
@@ -191,7 +193,7 @@
     "backend_https": "vercel_hobby_fastapi_entrypoint_and_deployment_prepared_not_deployed",
     "openai": "manual_only_live_unverified",
     "jev": "optional_shadow_adapter_confidence_verified_locally_live_unverified",
-    "postgresql": "integration_prepared_unverified",
+    "postgresql": "actual_isolated_PG16_pgvector_migrations_protection_and_restore_verified_operating_Supabase_pending",
     "sqlite_local": "running_verified",
     "huggingface": "adapter_prepared_live_unverified",
     "groq": "adapter_prepared_live_unverified",
@@ -219,7 +221,8 @@
         "--json"
       ],
       "privacy": "workspace-only ignored config; no debug; telemetry and update checks disabled"
-    }
+    },
+    "backend_docker": "fresh_runtime_source_built_and_actual_synthetic_runtime_verified_not_publicly_deployed"
   },
   "agent_activity_ui": {
     "status": "implemented_and_browser_verified",
@@ -261,7 +264,7 @@
     "local_evidence": "work/free-service-local-audit.json",
     "screenshot": "work/ui-free-provider-settings.jpg"
   },
-  "last_reviewed_at": "2026-10-03T22:27:07.012175+09:00",
+  "last_reviewed_at": "2026-10-03T23:45:41.608757+09:00",
   "remaining_work_audit": {
     "reviewed_at": "2026-10-03T06:35:47.548049+09:00",
     "document": "docs/REMAINING_WORK_AND_UPGRADES.md",
@@ -285,19 +288,19 @@
       "vercel_accessible_team_count": 0,
       "vercel_cli": "logged_out"
     },
-    "superseded_by": "upgrade_progress",
+    "superseded_by": "upgrade_progress; historical pre-implementation findings remain for audit only",
     "follow_up_resolution": "4 required coding gaps implemented and locally verified; retain original read-only audit as history"
   },
   "upgrade_progress": {
-    "checked_at": "2026-10-03T22:56:08.938846+09:00",
+    "checked_at": "2026-10-03T23:45:41.608757+09:00",
     "document": "docs/UPGRADE_PROGRESS.md",
-    "status": "code_and_local_upgrade_flows_verified_external_acceptance_pending",
+    "status": "code_local_upgrades_real_postgres_restore_and_backend_container_verified_external_acceptance_pending",
     "required_follow_up_code": "4 implemented",
     "upgrades": {
       "provenance": "implemented_browser_verified",
       "editor_recovery": "implemented_browser_verified",
       "usage_caps": "implemented_tested_browser_verified",
-      "uploads_pdf_docx": "implemented_real_files_and_pdf_verified_word_pages_pending",
+      "uploads_pdf_docx": "implemented_real_API_and_container_downloads_verified_DOCX_overflow_unknown_word_pages_pending",
       "local_korean_semantics": "actual_next_wasm_and_real_pgvector_verified_personal_operating_acceptance_pending",
       "operational_provider_status": "implemented_browser_verified_live_success_absent"
     },
@@ -314,7 +317,13 @@
       "work/source-privacy-audit.json",
       "work/postgres-upgrades-verification/result.json",
       "work/postgres-upgrades-verification/junit.xml",
-      "work/postgres-upgrades-verification/backup-restore-result.json"
+      "work/postgres-upgrades-verification/backup-restore-result.json",
+      "work/docx-final-tests.xml",
+      "work/docx-unknown-tests.xml",
+      "work/container-upgrades-verification/runtime-result.json",
+      "work/container-upgrades-verification/source-context-manifest.json",
+      "work/container-upgrades-verification/image-and-isolation.json",
+      "work/container-upgrades-verification/cleanup.json"
     ],
     "pending": [
       "HF inference token and actual writing/review",
@@ -327,7 +336,7 @@
     "user_scope_preserved": true,
     "full_service_complete": false,
     "current_runtime_snapshot": {
-      "checked_at": "2026-10-03T23:00:21.784643+09:00",
+      "checked_at": "2026-10-03T23:46:41.873175+09:00",
       "provider": "none",
       "configured": false,
       "live_verified": false,
@@ -352,7 +361,21 @@
         "career_production_connection_verified": false
       },
       "created_project_or_deployment": false,
-      "payment_or_plan_change": false
+      "payment_or_plan_change": false,
+      "huggingface": {
+        "connector_authenticated": true,
+        "connector_inference_provider_scope_available": false,
+        "token_settings_page": "login_required_human_handoff",
+        "app_inference_token_configured": false,
+        "app_live_inference_verified": false
+      },
+      "github": {
+        "connector_authenticated": true,
+        "matching_career_harness_or_codex_master_prompt_repo_found": false,
+        "designated_project_remote": false,
+        "remote_ci_executed": false,
+        "source_push_performed": false
+      }
     },
     "postgres_acceptance": {
       "scope": "isolated_local_synthetic_not_operating_Supabase",
@@ -376,6 +399,25 @@
       "actual_remote_ci_run": false,
       "publication_performed": false,
       "follow_up_commit_scope": "verification_metadata_only"
+    },
+    "container_acceptance": {
+      "scope": "fresh_backend_runtime_current_code_synthetic_empty_SQLite_not_full_production_deployment",
+      "image_id": "sha256:2217eaae6049c7e92c52bba4934151f6c2344ff6de6aee4e85702081e78a5683",
+      "build": "passed",
+      "context_transport": "git_candidate_current_bytes_tar_stdin_with_normal_Dockerfile_and_dockerignore",
+      "direct_directory_context": "WSL_DrvFS_cache_ACL_stat_failed_original_ACL_unchanged",
+      "required_current_source_hashes_match": true,
+      "migration_head": "0011",
+      "health": "healthy",
+      "non_root_user": "career",
+      "authentication_and_two_user_isolation": "passed",
+      "korean_PDF_actual_visual_check": "passed",
+      "docx_overflow": "unknown",
+      "docx_visual_pagination_verified": false,
+      "private_data_settings_keys_screenshots_excluded": true,
+      "qa_container_removed_and_port_released": true,
+      "persistent_volumes_created": 0,
+      "actual_user_data_or_credentials_used": false
     }
   }
 }

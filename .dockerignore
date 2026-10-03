@@ -1,5 +1,13 @@
 private_input
 .git
+.pytest_cache
+**/.pytest_cache/**
+.mypy_cache
+**/.mypy_cache/**
+.ruff_cache
+**/.ruff_cache/**
+.venv
+node_modules
 .env*
 *.db
 frontend

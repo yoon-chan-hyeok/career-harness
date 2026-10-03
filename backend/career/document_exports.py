@@ -35,7 +35,7 @@ class RenderedDocument:
     media_type: str
     pages: int | None
     page_budget: int | str
-    overflow: bool
+    overflow: bool | None
 
 
 def page_budget(data):
@@ -145,4 +145,4 @@ def render_docx(data) -> RenderedDocument:
     output = io.BytesIO()
     document.save(output)
     # Word pagination depends on its renderer/fonts. Do not invent a DOCX page count.
-    return RenderedDocument(output.getvalue(), DOCX_MIME, None, page_budget(data), False)
+    return RenderedDocument(output.getvalue(), DOCX_MIME, None, page_budget(data), None)

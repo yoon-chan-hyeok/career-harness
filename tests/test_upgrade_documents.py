@@ -53,7 +53,7 @@ def test_pdf_docx_roundtrip_keeps_korean_and_reports_real_overflow(db):
     docx = render_docx(value)
     document = Document(io.BytesIO(docx.content))
     assert text in "\n".join(p.text for p in document.paragraphs)
-    assert docx.pages is None
+    assert docx.pages is None and docx.overflow is None
     preview = upload_preview(db, "alice", upload_body("resume.docx", docx.content))
     assert text in preview["text"] and preview["pages"] == []
     overflow = render_pdf({"text": ("실제 수행한 분석 결과와 근거를 정리했습니다.\n" * 200) + "END-UNCHANGED", "page_budget": 1})

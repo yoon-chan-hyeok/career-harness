@@ -1,6 +1,6 @@
 # Career Harness — Codex One-Shot Implementation Pack v2.2 FINAL
 
-로컬 구현을 실행하려면 [실행 안내](RUN_LOCAL.md)를, 구현 범위와 남은 검증은 [구현 현황](IMPLEMENTATION_REPORT.md)을 확인하세요. 아래는 제공된 원본 구현 팩 안내입니다.
+최신 검증과 남은 작업은 [업그레이드 현황](docs/UPGRADE_PROGRESS.md)을 확인하세요. 로컬 실행은 [실행 안내](RUN_LOCAL.md), 이전 단계의 기록은 [구현 현황](IMPLEMENTATION_REPORT.md)에 있습니다. 아래는 제공된 원본 구현 팩 안내입니다.
 
 이 패키지는 사용자가 GPT와 수동으로 수행하는 취업 준비 절차를
 프로덕션 수준의 반복 가능한 AI workflow로 자동화하기 위한 최종 구현 명세다.

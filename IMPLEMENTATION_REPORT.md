@@ -1,6 +1,6 @@
 # 구현·검증 현황
 
-> 2026-10-03 후속 코드 감사 정정: 기존 핵심 기능과 아래 검사 기록은 유지하지만, AI 이력서 분량 옵션·PostgreSQL 근거 검색·전체 요청 시간·긴 입력 사전 제한에 추가 보완을 발견했다. 계정 연결만 남은 상태가 아니다. 이번 감사는 수정/전체 검사 재실행을 하지 않았다. [추가 작업·업그레이드 감사](docs/REMAINING_WORK_AND_UPGRADES.md)가 현재 남은 작업의 기준이다.
+> 현재 기준: [업그레이드 현황](docs/UPGRADE_PROGRESS.md)과 `IMPLEMENTATION_STATUS.json`의 `upgrade_progress`. 필수 보완 4건과 업그레이드 6종을 구현했고 Python 354개·별도 실제 PostgreSQL 3개·새 backend Docker 실행을 검증했다. 실제 HF 작성, 운영 Supabase/Auth, HTTPS, 원격 CI, Word 페이지는 미검증이다. 아래는 이전 단계의 구현·검사 기록이며 당시 검사 수와 미완료 항목을 현재 상태로 해석하지 않는다.
 
 2026-10-03. **Hugging Face/Groq 생성 연결 코드, 레쥬메 작성·검토·보관, 역할별 지시문과 개인 설정 화면의 로컬 검증을 마쳤다. 앱은 실행 중이다. 실제 추론 토큰과 공개 서비스 배포는 아직 연결하지 않았다.**
 
@@ -24,7 +24,7 @@ Next.js 대화·오른쪽 문서 보관함·경험 정리 → 인증 REST/읽기
 
 Supabase 인증·세션 갱신·RLS, Vercel/backend 설정, 운영 guards/readiness, 백업 복구와 읽기 전용 MCP가 준비돼 있다. 역할은 중앙 Workflow 안에서 제어하며 자료·승인·상태의 기준은 버전 Artifact다.
 
-## 현재 검증
+## 이전 제공자 연결 단계의 검증 기록
 
 - Python **281 통과 / 2 미실행**: 실제 PostgreSQL/pgvector·RLS 환경이 없다. 결과는 `work/free-service-tests.xml`이다.
 - Ruff·Pyright 0 오류. 프런트엔드 lint·TypeScript, 로그인 검사 **4개**·배포 설정 검사 **4개**, 새 Next.js **15.5.26 production/standalone build** 통과.
@@ -34,7 +34,7 @@ Supabase 인증·세션 갱신·RLS, Vercel/backend 설정, 운영 guards/readin
 - 서버리스 검사 24개를 추가했다. 실제 필요한 파일만 모은 임시 배포 패키지가 dotenv·네트워크·migration 실행 없이 import·health·인증 차단·migration metadata를 처리하는지 확인했다. 이 검사는 실제 Vercel 배포·PostgreSQL 연결을 대신하지 않는다.
 - 2026-10-02에 별도 QA 계정 HTTP 19개, 모바일 390px 저장/승인/실패 화면, SQLite 백업·별도 빈 대상 복구, 추가 기준 6종 원본·격리를 확인했다. 이번에는 새 제공자 코드와 설정을 추가 검증했다.
 
-## 실제로 사용하기 위한 다음 단계
+## 이전 제공자 연결 단계에서 기록한 다음 작업
 
 Hugging Face 플러그인 계정 연결은 확인됐지만 도구의 OAuth 조회 권한은 앱의 추론 토큰과 다르다. 사용자 본인이 [HF 토큰 설정](https://huggingface.co/settings/tokens)에서 **Make calls to Inference Providers** 권한의 토큰을 발급해 **앱 설정 → AI 연결**에 입력·저장한다. 키를 채팅에 보내지 않는다. 연결 검사 후 실제 작성 흐름을 확인할 수 있다. [연결 절차와 현재 한도](docs/FREE_PROVIDER_SETUP.md).
 
@@ -59,3 +59,5 @@ Supabase·Vercel 도구는 사용 가능하다. Supabase 조회 결과 개인 �
 
 
 2026-10-03 추가 실DB/소스 감사: Python 353 통과와 별도 실제 PG 3 통과, PG16 migration 왕복·보호 적용·39개 테이블 복구/내용 일치 확인. 공개 회귀 사례 비식별 합성 교체와 미추적 소스 개인정보 검사 보강. 운영 계정 연결과 Word 페이지 검증은 미완료. 최신 상세 상태는 docs/UPGRADE_PROGRESS.md.
+
+2026-10-03 최종 컨테이너 감사: DOCX 미측정 페이지 초과를 false로 표시하던 결함을 unknown으로 수정했다. Python 354 통과/일반 실행의 PG 3개 건너뜀, 별도 실제 PG 검사 3개 통과. 현재 소스로 만든 새 backend Docker 이미지의 시작·migration·인증·사용자 격리·한글 PDF/DOCX 다운로드와 개인자료 제외를 확인하고 임시 컨테이너를 정리했다. Word 실제 페이지·외부 계정·HTTPS·원격 CI는 남아 있다.

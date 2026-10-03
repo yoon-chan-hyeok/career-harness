@@ -9,6 +9,38 @@ from career.models import PromptRun
 from test_api import client  # noqa: F401
 
 
+def test_resume_files_report_pdf_pagination_but_never_claim_word_fits(client):
+    import io
+
+    from career.models import Artifact, Workspace
+    from docx import Document
+
+    generator = app.dependency_overrides[database]()
+    db = next(generator)
+    workspace = Workspace(user_id="alice", company="합성 회사", role="분석", jd_raw="가상 공고")
+    db.add(workspace)
+    db.flush()
+    resume = Artifact(user_id="alice", workspace_id=workspace.id, kind="ResumeContent",
+                      data={"text": "본인의 합성 수행 범위를 확인했습니다.", "page_budget": 1})
+    db.add(resume)
+    db.commit()
+    workspace_id, artifact_id = workspace.id, resume.id
+    generator.close()
+    path = f"/api/applications/{workspace_id}/resume/download?artifact_id={artifact_id}"
+    client.headers["Authorization"] = "Bearer alice-key"
+    pdf = client.get(path + "&format=pdf")
+    assert pdf.status_code == 200
+    assert pdf.headers["X-Page-Count"] == "1" and pdf.headers["X-Page-Overflow"] == "false"
+    word = client.get(path + "&format=docx")
+    assert word.status_code == 200
+    assert "X-Page-Count" not in word.headers
+    assert word.headers["X-Page-Overflow"] == "unknown" and word.headers["X-Page-Budget"] == "1"
+    assert word.headers["X-Artifact-Id"] == artifact_id
+    assert "수행 범위" in "\n".join(p.text for p in Document(io.BytesIO(word.content)).paragraphs)
+    client.headers["Authorization"] = "Bearer bob-key"
+    assert client.get(path + "&format=docx").status_code == 404
+
+
 def test_document_upload_original_download_and_delete_are_private(client):
     value = "합성 자료입니다. 직접 확인 전에는 사실 근거로 사용하지 않습니다.".encode()
     body = {"filename": "synthetic.txt", "content_base64": base64.b64encode(value).decode()}

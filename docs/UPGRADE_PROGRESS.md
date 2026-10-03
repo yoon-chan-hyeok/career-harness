@@ -1,6 +1,6 @@
 # 추가 작업과 업그레이드 현황 — 2026-10-03
 
-필수 보완 4건과 제안한 업그레이드 6종을 구현하고 로컬 기능을 검증했다. **실제 AI 작성, Supabase 운영 로그인·DB, HTTPS 배포, Word 페이지 렌더링은 아직 미검증이다.** 수정 전 감사와 과거 검사 수는 현재 기록과 구별한다.
+필수 보완 4건과 제안한 업그레이드 6종을 구현하고 로컬 기능·실제 PostgreSQL·현재 소스의 backend Docker 실행을 검증했다. **실제 AI 작성, Supabase 운영 로그인·DB, HTTPS 배포, Word 페이지 렌더링은 아직 미검증이다.** 수정 전 감사와 과거 검사 수는 현재 기록과 구별한다.
 
 ## 필수 보완
 
@@ -18,7 +18,7 @@
 | 문장→근거 | Claim의 경험·원자료·수치·수행 범위·프로필·기업 출처 조회. 해당 문서의 연구 버전을 사용하며 누락 링크/수행 범위를 명시한다. 실제 패널을 열어 확인했다. | 실제 생성 문서의 주장 연결 품질 |
 | 편집 보호·복구 | ESC/닫기/이동 확인, 계정별 서버 초안, 기준 버전 충돌 보호. 본문 보관→다시 열기→복구와 새로고침 후 초안 존재를 확인했다. 승인 체크·키·비밀번호를 복구하지 않는다. | 운영 로그인/세션 갱신과 함께 인수 |
 | 일·월 사용량 | UTC 호출·토큰·선택적인 예상비용을 사전 예약/정산한다. 동시 요청·단일 DB 연결·중단 예약을 검증했다. 웹 검색 비용/미확인 횟수를 반영하고 정산 실패가 원래 오류를 덮지 않도록 수정했다. 화면은 예약을 사용량 합계와 구별한다. | 실제 무료 계정 호출·운영 장애 확인 |
-| 업로드·PDF/DOCX | 인증된 2,000,000바이트 이하 문서→추출 미리보기→명시적 등록. 새 경험은 UNVERIFIED/UNKNOWN이다. 비공개 원본 보관/삭제와 정확한 이력서 버전 출력. 실제 다운로드 파일의 본문 보존, PDF.js 한글 페이지/확대를 확인했다. | Word 실제 페이지·잘림 렌더 |
+| 업로드·PDF/DOCX | 인증된 2,000,000바이트 이하 문서→추출 미리보기→명시적 등록. 새 경험은 UNVERIFIED/UNKNOWN이다. 비공개 원본 보관/삭제와 정확한 이력서 버전 출력. 실제 다운로드 파일의 본문 보존, PDF.js 한글 페이지/확대를 확인했다. DOCX는 페이지 수를 제공하지 않고 분량 초과 여부를 unknown으로 반환한다. | Word 실제 페이지·잘림 렌더 |
 | 무료 한국어 의미 검색 | 고정 E5 q8를 기기 WASM에서 실행하고 384차원 색인을 본인 계정에 저장한다. 최신 앱에서 공개 모델 준비→경험 2개 색인→한국어 결과를 확인했다. 미검증 업로드는 결과에 섞이지 않았다. | 운영 계정의 개인 경험 인수 |
 | 실제 AI 응답 상태 | 지원 작업의 완료 trace에서 제공자·모델·시간을 표시한다. probe/실패/타 계정을 제외하고 현재 제공자·모델과의 일치만 비교한다. 실제 지원 호출이 없다고 정확히 표시했다. | HF 키 연결 후 작성·검수 성공 |
 
@@ -28,7 +28,7 @@
 
 ## 검증 증거
 
-- Python **353 통과** (`work/release-source-tests.xml`), 일반 검사에서 건너뛴 PostgreSQL 3개도 **별도 실DB에서 모두 통과** (`work/postgres-upgrades-verification/junit.xml`). Ruff/Pyright 오류 없음.
+- Python **354 통과** (`work/docx-final-tests.xml`), 일반 검사에서 건너뛴 PostgreSQL 3개도 **별도 실DB에서 모두 통과** (`work/postgres-upgrades-verification/junit.xml`). Ruff/Pyright 오류 없음.
 - 프론트엔드 15개 검사와 최신 lint/typecheck/production 빌드 통과. PDF 미리보기 빈 화면·보관함 넘침을 수정한 뒤 실제 화면을 재검증했다.
 - 실제 HTTP: 분량·주장 조회·업로드 승인 전 격리·미검증 등록·원본 접근·타 계정 차단 (`work/upgrade-http-audit.json`).
 - 최신 UI: 한글 PDF·목표 2/실제 1페이지·초안 복구·업로드 확인 게이트·중복 등록 거절·사용량/실호출 상태·한국어 검색. 1280px와 390px 모두 페이지/보관함 가로 넘침 없음. 관측한 콘솔 경고/오류 없음 (`work/upgrade-browser-audit.json`).
@@ -37,6 +37,7 @@
 - 새 사용량 3종·초안·벡터를 포함한 실제 SQLite 백업의 해시/무결성, 별도 빈 대상 복구, 모든 테이블 행 수 일치 (`work/upgrade-recovery-audit.json`). 앱을 가져오지 않은 별도 프로세스에서도 PG 백업 허용 목록에 새 테이블을 확인했다. 이후 별도 실제 PG16 합성 복구도 검증했다. 운영 Supabase/Auth 복구를 입증한 것은 아니다.
 - 실제 SQLite 및 PostgreSQL Alembic head 0011/변경 검사 통과. PostgreSQL base 다운그레이드→head 복원→변경 검사도 통과했다. 새 테이블 소유자 필터·PG RLS/Data API 차단·계정 내보내기, OFL 한글 글꼴/wheel/배포 허용 목록 검사 통과.
 - 기존 개인 계정으로 최신 서버 복원, 새/과거 QA 토큰 거절, 개인 계정에서 QA 지원 제외, 추가 자료 6종 유지, 화면/health/ready 정상 (`work/normal-runtime-audit.json`).
+- 현재 작업 파일로 만든 새 backend Docker 이미지에서 migration 0011·health/ready·인증·두 합성 사용자 격리·실제 한글 PDF/DOCX 응답 통과. 비관리자 실행, 글꼴/wheel/필수 스크립트 포함과 개인자료/키 제외를 확인했다. 실제 컨테이너 PDF도 이미지로 확인했다 (`work/container-upgrades-verification/README.md`). frontend 전체 Compose나 운영 Supabase/HTTPS 검증으로 확대하지 않는다.
 
 DOCX 본문·표 순서·재추출·구조를 확인했지만 **Word 실제 페이지 렌더링은 미검증**이다. Windows 번들에 LibreOffice가 없다. documents 스킬의 “use the absolute path to bundled LibreOffice … never use the user's installed desktop LibreOffice” 조건 때문에 사용자 데스크톱 프로그램으로 대체하지 않았다. 지침: `C:/Users/ych13/.codex/plugins/cache/openai-primary-runtime/documents/26.905.11957/skills/documents/SKILL.md`.
 
@@ -68,3 +69,11 @@ DOCX 본문·표 순서·재추출·구조를 확인했지만 **Word 실제 페�
 Word 번들 렌더러를 다시 실행했으나 `soffice.exe was not found on PATH`로 페이지를 만들지 못했다. 사용자 데스크톱 Office/LibreOffice를 실행하거나 문서를 외부에 전송하지 않았다.
 
 로컬 소스 보관: `6838db378d18ae1c6e616d9eb51297f2b545a4cc`, 검토한 소스 248개. 외부 push/공개는 수행하지 않았다. 이후 상태 기록 commit은 검증 메타데이터만 담는다. 임시 PostgreSQL 컨테이너를 제거하고 포트 해제도 확인했다 (`work/postgres-upgrades-verification/cleanup.json`).
+
+## DOCX 분량 정정과 실제 컨테이너 감사
+
+DOCX는 Word 렌더러를 거치지 않는데도 분량 초과 여부를 false로 반환하던 결함을 수정했다. 이제 `X-Page-Overflow: unknown`이고 `X-Page-Count`는 없다. PDF는 실제 페이지 수와 초과 여부를 계속 제공한다. 정확한 버전·한글 본문 보존·타 사용자 다운로드 차단을 실제 API와 새 컨테이너에서 확인했다.
+
+WSL DrvFS의 캐시 ACL/stat 제약 때문에 일반 디렉터리 Docker context 전송은 실패했다. 원본 캐시·ACL을 바꾸지 않고 Git 후보의 현재 바이트를 정상 Dockerfile/.dockerignore와 함께 검토한 tar로 전달해 새 이미지를 빌드했다. 이미지 코드·공개 글꼴·합성 사례 해시가 현재 파일과 일치했다. QA 컨테이너 제거·localhost 포트 해제·영속 볼륨 없음도 확인했다. 이 QA 전송 방식은 실제 Vercel 원격 업로드나 전체 운영 배포를 대신하지 않는다.
+
+최신 읽기 전용 계정 확인에서 HF 커넥터는 인증됐으나 추론 권한은 없고 토큰 설정 페이지는 로그인을 요구했다. 앱의 추론 토큰·실제 작성 성공은 여전히 없다. GitHub 커넥터 인증은 정상이지만 이 프로젝트에 지정한 원격 저장소가 없으며 실제 CI는 실행하지 않았다. 개인자료·키의 외부 전송이나 프로젝트 생성·요금 변경은 수행하지 않았다.

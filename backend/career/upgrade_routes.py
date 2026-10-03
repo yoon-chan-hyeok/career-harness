@@ -116,7 +116,8 @@ def build_router(database_dep: Callable, user_dep: Callable):
         filename = f"이력서-v{item.version}.{format}"
         headers = {"Cache-Control": "private, no-store", "X-Artifact-Id": item.id,
                    "Content-Disposition": "inline; filename*=UTF-8''" + quote(filename),
-                   "X-Page-Budget": str(result.page_budget), "X-Page-Overflow": str(result.overflow).lower()}
+                   "X-Page-Budget": str(result.page_budget),
+                   "X-Page-Overflow": "unknown" if result.overflow is None else str(result.overflow).lower()}
         if result.pages is not None:
             headers["X-Page-Count"] = str(result.pages)
         return Response(result.content, media_type=result.media_type, headers=headers)

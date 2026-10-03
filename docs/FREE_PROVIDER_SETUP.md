@@ -81,7 +81,7 @@ python scripts/deployment_preflight.py --live-ai
 
 제공자 공통 설정은 `CAREER_LLM_TIMEOUT_SECONDS`, `CAREER_LLM_MAX_OUTPUT_TOKENS`, `CAREER_LLM_SMALL_MODEL`, `CAREER_LLM_STAGE_POLICIES`, `CAREER_LLM_PRICING_JSON`이다. 생략한 값은 기존 `OPENAI_*` 설정과 호환된다. 작은 모델은 명시적으로 설정한 경우에만 제한된 단계에 사용한다. 현재 실제 모델 요금을 모르면 `CAREER_LLM_PRICING_JSON={}`를 유지하며 비용은 `null`로 기록한다. 무료 할당량 사용과 모델의 명목상 비용 추정은 별개다.
 
-HF/Groq 생성 연결만으로 OpenAI 전용 웹 조사나 임베딩이 활성화되지 않는다. 조사에는 수동으로 확인한 출처를 사용할 수 있다. 현재 PostgreSQL 벡터 색인은 1,536차원을 사용하며 로컬 공개 임베딩 모델로 바꾸려면 차원·모델 버전 관리와 재색인이 별도로 필요하다. SQLite의 현재 키워드 검색을 실제 벡터 검색이라고 표시하지 않는다.
+HF/Groq 생성 연결만으로 OpenAI 전용 웹 조사나 1,536차원 임베딩이 활성화되지 않는다. 조사에는 수동으로 확인한 출처를 사용할 수 있다. 현재 추가한 [무료 한국어 의미 검색](LOCAL_SEMANTIC_SEARCH.md)은 브라우저에서 고정 E5 모델로 만든 384차원 벡터를 별도로 저장한다. SQLite에서는 이 로컬 벡터의 코사인 검색, PostgreSQL에서는 pgvector 검색을 사용하며 기존 OpenAI 1,536차원 색인과 섞지 않는다. 브라우저 벡터가 없는 자연어 대화·서버 호출은 무료 제공자에서 어휘 검색을 사용한다. 어휘 검색을 벡터 검색이라고 표시하지 않는다.
 
 ## 5. Jev와 출시 조건
 
