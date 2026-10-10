@@ -1136,9 +1136,20 @@
   "github_publication_2026_10_10": {
     "repository": "yoon-chan-hyeok/career-harness",
     "visibility": "private",
-    "status": "prepared_for_push",
+    "status": "uploaded",
     "private_paths_excluded": true,
     "working_tree_and_history_credential_scan": "passed",
-    "deployment_completed": false
+    "deployment_completed": false,
+    "url": "https://github.com/yoon-chan-hyeok/career-harness",
+    "branch": "main",
+    "first_pushed_commit": "bb47f4b9fbf0f87611986da6f3dd8b6b7cb2dfb1",
+    "report": "docs/GITHUB_PUBLICATION_2026_10_10.md",
+    "first_ci": "failed_missing_test_build_tool_and_dependency_advisory",
+    "ci_fixes": [
+      "explicit_setuptools_dev_dependency",
+      "next_15_5_27",
+      "source_map_js_1_2_2"
+    ],
+    "ci_recheck": "pending_after_fix_push"
   }
 }

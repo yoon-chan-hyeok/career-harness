@@ -321,6 +321,10 @@ def test_backend_wheel_contains_korean_fonts_and_license_without_private_files(t
             relative = "career/assets/fonts/" + name
             assert relative in names
             assert bundle.read(relative) == (PROJECT / "backend/career/assets/fonts" / name).read_bytes()
+        for name in ("o200k_base.tiktoken", "LICENSE.txt"):
+            relative = "career/assets/tokenizer/" + name
+            assert relative in names
+            assert bundle.read(relative) == (PROJECT / "backend/career/assets/tokenizer" / name).read_bytes()
         assert not any(
             name.endswith((".db", ".key", ".pem"))
             or ".provider-settings" in name
