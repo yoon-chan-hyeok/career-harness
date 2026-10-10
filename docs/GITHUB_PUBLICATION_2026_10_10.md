@@ -12,3 +12,9 @@
 실행 의존성의 `npm audit --omit=dev --audit-level=high`는 수정 후 통과했다. 모든 의존성 경고가 없다는 뜻은 아니다. Transformers.js 3 계열의 Node 전용 간접 의존성에 moderate 경고가 남아 있고, 개발용 ESLint의 braces 계열에도 high 경고가 남아 있다. 자동 권고가 제안하는 메이저 업그레이드/다운그레이드는 적용하지 않았다. 별도 호환성 확인이 필요하다.
 
 코드 업로드는 실제 AI 연결·Vercel/Supabase 운영 배포와 다르다. 기능별 완료 범위는 [최신 구현 기록](FINAL_REVIEW_PROGRESS_2026_10_10.md)을 참고한다. CI의 최종 결과는 GitHub Actions에서 해당 커밋 기준으로 확인한다.
+
+## 최종 확인
+
+수정 코드 커밋 `ab47b1de54178946f8668a8c7af144b3ddd8ccea`의 [GitHub Actions 실행](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38059236404)이 성공했다. 백엔드와 프런트엔드 두 작업 모두 성공했으며 전체 Python, 별도 PostgreSQL, 마이그레이션 왕복·차이 검사, 개인정보 제외, 프런트엔드 검사·빌드를 포함한다. 실행 의존성의 high 이상 보안 검사는 통과했으며 위에 기록한 남은 경고를 제거했다는 뜻은 아니다.
+
+동일 보안 패치 빌드로 격리 브라우저의 마지막 세 질문 → 미제출 최종본 보관 → 면접 답변 연결도 재확인했다. 로컬 화면은 3000번 주소에 복구돼 있다. 실제 AI는 none 상태이며 새 외부 배포는 수행하지 않았다.

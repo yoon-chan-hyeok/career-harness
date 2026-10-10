@@ -1150,6 +1150,16 @@
       "next_15_5_27",
       "source_map_js_1_2_2"
     ],
-    "ci_recheck": "pending_after_fix_push"
+    "ci_recheck": "success",
+    "verified_code_commit": "ab47b1de54178946f8668a8c7af144b3ddd8ccea",
+    "ci_url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38059236404",
+    "postgres_and_migrations_ci": "passed",
+    "next_patch_browser": "passed",
+    "remaining": [
+      "project_specific_boundaries",
+      "repetition_rules",
+      "full_pack_and_reference_acceptance",
+      "real_AI_and_production"
+    ]
   }
 }
