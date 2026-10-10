@@ -70,6 +70,9 @@ def test_reference_change_stales_related_work_and_preserves_snapshot(flow):
     refs = install_refs(f.db)
     # Regenerate only the document under the activated cover pack.
     q = finish(f, w, e)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     frozen = deepcopy(bundle.data)
@@ -320,12 +323,11 @@ def test_resume_file_qa_is_bound_to_version_and_master_is_derived(flow):
     f.final_lock(w.id, resume=True)
     save_master(f, resume.id)
     master, ident = master_context(f, [e.id])
-    assert ident == resume.id and master["mode"] == "TAILOR_APPROVED_MASTER"
+    assert ident is None and master["mode"] == "TAILOR_APPROVED_MASTER"
     empty, _ = master_context(f, [])
     assert empty["sections"] == []
     f.patch_document(w.id, "", "정확도", "테스트 정확도", resume=True)
-    with pytest.raises(ValueError):
-        master_context(f, [e.id])
+    assert master_context(f, [e.id])[0]["mode"] == "BUILD_FROM_CURRENT_CONFIRMED_FACTS"
 
 
 def test_latest_explicit_metric_correction_blocks_old_raw_result(db):

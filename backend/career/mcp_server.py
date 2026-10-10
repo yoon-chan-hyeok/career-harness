@@ -14,7 +14,8 @@ mcp = FastMCP("Career Harness")
 
 
 def identity():
-    return user("Bearer " + os.getenv("CAREER_MCP_TOKEN", ""))
+    with SessionLocal() as db:
+        return user("Bearer " + os.getenv("CAREER_MCP_TOKEN", ""), db)
 
 
 @mcp.tool()

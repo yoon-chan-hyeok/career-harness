@@ -117,6 +117,7 @@ GUIDANCE = {
 }
 
 PACKS = {
+    "research": ("registry", "integrity", "cover"),
     "opportunity": ("registry", "integrity", "opportunity"),
     "strategy": ("registry", "integrity", "opportunity", "cover"),
     "cover": ("registry", "integrity", "cover", "expression"),
@@ -126,11 +127,19 @@ PACKS = {
     "postmortem": ("registry", "integrity"),
 }
 STAGES = {
+    "research": "research",
+    "research_plan": "research",
+    "web_search": "research",
+    "research_extract": "research",
+    "research_source_extract": "research",
     "opportunity": "opportunity",
     "opportunity_assessment": "opportunity",
     "evidence_mapper": "opportunity",
     "strategy": "strategy",
+    "question_portfolio": "strategy",
     "question_brief": "cover",
+    "claim_evidence_test": "cover",
+    "submission_readiness": "cover",
     "writer": "cover",
     "issue_patch_compression": "cover",
     "resume_writer": "resume",
@@ -138,6 +147,8 @@ STAGES = {
     "truth_extraction": "fact",
     "recruiter": "cover",
     "reverse_interview": "interview",
+    "review_answers": "interview",
+    "review_answer_extract": "interview",
     "interview_handoff": "interview",
     "postmortem": "postmortem",
 }
@@ -192,7 +203,13 @@ def import_directory(db, user, root: Path):
 
 
 def listing(db, user):
-    return [{"id": r.id, **{k: v for k, v in r.data.items() if k != "content"}} for r in references(db, user)]
+    from career.rulebook import overview
+
+    return [
+        {"id": r.id, **{k: v for k, v in r.data.items() if k != "content"},
+         "compilation": overview(r.data["key"], r.data["content"])}
+        for r in references(db, user)
+    ]
 
 
 def activate(db, user, reference_id: str, active: bool):
@@ -212,9 +229,12 @@ def activate(db, user, reference_id: str, active: bool):
 
 
 def compile_pack(db, user, stage: str, domain=""):
+    from career.rulebook import COMPILER_VERSION, compile_sections
+
     pack = (
         "resume"
-        if domain == "RESUME" and stage in {"recruiter", "issue_patch_compression"}
+        if domain == "RESUME" and stage in {"recruiter", "issue_patch_compression", "reverse_interview",
+                                           "review_answers", "review_answer_extract", "interview_handoff"}
         else STAGES.get(stage)
     )
     if pack is None:
@@ -226,6 +246,7 @@ def compile_pack(db, user, stage: str, domain=""):
         if record is None or owned(db, Source, user, record.data["source_id"]).status not in GOOD:
             continue
         section, rules = GUIDANCE[key]
+        source_sections = compile_sections(key, record.data["content"], stage)
         if pack == "interview" and key == "cover":
             section = "Phase 7 §8-2 Reverse Test / §8-3 Red Team (면접용 일부)"
             rules = [
@@ -240,7 +261,11 @@ def compile_pack(db, user, stage: str, domain=""):
                 "source_id": record.data["source_id"],
                 "content_hash": record.data["content_hash"],
                 "section": section,
-                "guidance": rules,
+                "guidance": [item["text"] for item in source_sections] if source_sections else rules,
+                "requirements": [{k: v for k, v in item.items() if k != "text"} for item in source_sections],
+                "compiler_version": COMPILER_VERSION,
+                "compilation_status": "SOURCE_SECTIONS" if source_sections else "DEFAULT_GUIDANCE_ONLY",
+                "fact_authority": False,
             }
         )
     if pack == "interview":

@@ -10,6 +10,7 @@ from career.artifacts import fresh, latest, lock, save, stale
 from career.db import Record, now, uid
 from career.document_qa import cross_document_qa, portfolio_qa, skimmability_qa
 from career.models import Artifact, Evidence, Fact, PromptRun, Workspace
+from career.prompt_cache import identity_scope
 from career.provider_config import provider_available, provider_settings
 from career.providers import (
     ManualResearchProvider,
@@ -105,7 +106,8 @@ class Workflow:
         provider = self.provider
         try:
             provider = self.provider or configured_provider()
-            result = provider.structured(stage, context, schema)
+            with identity_scope(self.user):
+                result = provider.structured(stage, context, schema)
             if not getattr(provider, "trace_emitting", False):
                 emit_trace(
                     stage,
@@ -168,6 +170,10 @@ class Workflow:
     def research(self, ident: str, live=False, manual=None):
         ws = self.ws(ident)
         self.editable(ws)
+        existing = latest(self.db, self.user, ident, "CompanyResearchResult", required=False)
+        if manual is None and existing and existing.data.get("source_documents"):
+            fresh(self.db, self.user, existing)
+            return existing
         status = "MANUAL_JD_ONLY"
         result = ManualResearchProvider().research(ws.company, ws.role, ws.jd_raw)
         if manual:
@@ -187,6 +193,8 @@ class Workflow:
             except Exception:
                 # No provider exception text (which can include private input) enters logs or the UI.
                 status = "LIVE_UNAVAILABLE_MANUAL_FALLBACK"
+        from career.research_context import scope
+
         item, _ = save(
             self.db,
             self.user,
@@ -203,15 +211,34 @@ class Workflow:
                     "raw_text_hash": sha256(ws.jd_raw.encode()).hexdigest(),
                 },
                 "mode": status,
+                "scope": scope(result, status),
                 "retrieved_at": now().isoformat(),
             },
         )
+        if live and status == "LIVE_UNAVAILABLE_MANUAL_FALLBACK":
+            from career.research_workspace import collect, jd_links
+
+            for url in jd_links(ws.jd_raw):
+                try:
+                    item = collect(self, ident, {"research_id": item.id, "method": "URL", "url": url,
+                                                 "category": "CURRENT_JD"})
+                except ValueError:
+                    # A blocked/inaccessible page never blocks JD-only work.
+                    continue
         return item
 
     def analyze(self, ident: str, manual=None):
         ws = self.ws(ident)
         self.editable(ws)
         research = latest(self.db, self.user, ident, "CompanyResearchResult", required=False)
+        if research is None:
+            # Direct/manual analysis remains available, with a recorded JD-only
+            # basis instead of silently suggesting that research was performed.
+            research = self.research(ident)
+        fresh(self.db, self.user, research)
+        from career.research_workspace import analyzer_context, reviewed
+
+        research_review = reviewed(self, ident, research, required=bool(research.data.get("sources")))
         if manual and research and "company_facts" not in manual:
             manual = {
                 **manual,
@@ -228,14 +255,28 @@ class Workflow:
                     "company": ws.company,
                     "role": ws.role,
                     "jd_untrusted": ws.jd_raw,
-                    "research": research.data if research else {},
+                    "research": analyzer_context(research),
+                    "hiring_context_review": research_review.data if research_review else {},
                 },
                 OpportunityBrief,
             )
         )
+        if research_review:
+            data["hiring_context"] = (
+                "공개 근거에 따른 가설: " + research_review.data["hypothesis"]
+                if research_review.data["mode"] == "HYPOTHESIS"
+                else "채용 배경 미확인: " + research_review.data["limitation"]
+            )
         valid_source_ids = {s["id"] for s in research.data.get("sources", [])} if research else set()
         if any(f["source_id"] not in valid_source_ids for f in data["company_facts"]):
             raise ValueError("회사 사실은 등록된 조사 출처와 연결해야 합니다.")
+        if research.data.get("source_documents"):
+            backed = {(fact["source_id"], fact["statement"]): fact for fact in
+                      research.data["official_facts"] + research.data["external_evidence"]}
+            if any((fact["source_id"], fact["statement"]) not in backed for fact in data["company_facts"]):
+                raise ValueError("회사 사실은 원문 인용으로 정리한 조사 내용에서 선택해 주세요.")
+            data["company_facts"] = [deepcopy(backed[(fact["source_id"], fact["statement"])])
+                                     for fact in data["company_facts"]]
         from career.assessment import validate_opportunity
 
         validate_opportunity(data, valid_source_ids)
@@ -245,7 +286,7 @@ class Workflow:
             ident,
             "OpportunityBrief",
             data,
-            deps=[research.id] if research else [],
+            deps=[research.id] + ([research_review.id] if research_review else []),
             sources=self.reference_sources("opportunity"),
             model="manual" if manual else self.current_model,
         )
@@ -265,6 +306,9 @@ class Workflow:
         except ProviderUnavailable:
             candidates = search(self.db, self.user, query, task_context=brief.data,
                                 local_vector=local_vector, local_profile_id=local_profile_id)
+        from career.preparation import preparation_context
+
+        preparation = preparation_context(self, ws, candidates)
         data = (
             EvidencePack.model_validate(manual).model_dump()
             if manual
@@ -276,6 +320,7 @@ class Workflow:
                     "differentiators": brief.data.get("differentiators", []),
                     "output_importance": brief.data.get("output_importance", []),
                     "evidence_candidates": candidates,
+                    "preparation": preparation["context"],
                     "task": "Classify output fit based on actual work. Link skill_focus/skill_name only to given JD skills. concrete_output/understandable_hook must be exact evidence quotes or empty. Retrieval priority alone is not Direct evidence.",
                 },
                 EvidencePack,
@@ -314,8 +359,8 @@ class Workflow:
             ident,
             "EvidencePack",
             data,
-            deps=[brief.id],
-            sources=list(set(sources) | set(self.reference_sources("evidence_mapper"))),
+            deps=[brief.id, *preparation["depends_on"]],
+            sources=sorted(set(sources + preparation["source_ids"] + self.reference_sources("evidence_mapper"))),
             model="manual" if manual else self.current_model,
         )
         ws.state = "EVIDENCE_READY"
@@ -330,6 +375,11 @@ class Workflow:
         from career.experience_options import active_selection, selection_context
 
         selection = active_selection(self, ident, "strategy")
+        from career.preparation import preparation_context
+
+        preparation = preparation_context(self, ws, self.selected(list(dict.fromkeys(
+            i["evidence_id"] for i in pack.data["items"] if i["classification"] != "NO_EVIDENCE"
+        ))))
         if assessment and assessment.status not in {"ACTIVE", "LOCKED"}:
             raise ValueError("지원 가치·우선순위 평가를 현재 근거에 맞춰 다시 확인해 주세요.")
         decision = ws.data.get("opportunity_decision", {})
@@ -349,6 +399,7 @@ class Workflow:
                     "opportunity_assessment": assessment.data if assessment else {},
                     "human_decision": current_decision,
                     "selected_experience": selection_context(selection),
+                    "preparation": preparation["context"],
                 },
                 ApplicationBrief,
             )
@@ -364,8 +415,9 @@ class Workflow:
             "ApplicationBrief",
             data,
             deps=[opportunity.id, pack.id] + ([assessment.id] if assessment else [])
-            + ([selection.id] if selection else []),
-            sources=self.reference_sources("strategy"),
+            + ([selection.id] if selection else []) + preparation["depends_on"],
+            sources=sorted(set(self.reference_sources("strategy") + preparation["source_ids"]
+                               + preparation["guidance_source_ids"])),
             model="manual" if manual else self.current_model,
         )
         ws.state = "WAITING_STRATEGY_APPROVAL"
@@ -384,7 +436,8 @@ class Workflow:
             and all(
                 i["classification"] == "DIRECT"
                 and i["ownership_strength"] == "STRONG"
-                and i.get("ownership", {}).get("implementation", "UNKNOWN") != "UNKNOWN"
+                and isinstance(i.get("ownership"), dict)
+                and i["ownership"].get("implementation", "UNKNOWN") != "UNKNOWN"
                 for i in pack.data["items"]
             )
         ):
@@ -413,6 +466,13 @@ class Workflow:
         if portfolio:
             stale(self.db, self.user, [portfolio.id])
             portfolio.status = "STALE"
+        elif len(ws.data["questions"]) > 1:
+            for brief in self.db.scalars(select(Artifact).where(
+                Artifact.user_id == self.user, Artifact.workspace_id == ident,
+                Artifact.kind == "QuestionBrief", Artifact.status.in_(["ACTIVE", "LOCKED"]),
+            )):
+                stale(self.db, self.user, [brief.id])
+                brief.status = "STALE"
         self.question_state(ident, question["id"], "NEW")
         if ws.state == "READY_TO_FREEZE":
             ws.state = "COMPOSING"
@@ -437,6 +497,8 @@ class Workflow:
         selection = active_selection(self, ident, qid, fallback=True)
         portfolio = latest(self.db, self.user, ident, "QuestionPortfolio", required=False)
         allocation = None
+        if len(ws.data.get("questions", [])) > 1 and portfolio is None:
+            raise ValueError("여러 문항은 역할과 메시지 후보를 배분하고 승인한 뒤 설계해 주세요.")
         if portfolio:
             fresh(self.db, self.user, portfolio)
             if portfolio.status != "LOCKED":
@@ -447,11 +509,24 @@ class Workflow:
         chosen_pack = pack.data
         if selection:
             chosen_id = selection.data["evidence_id"]
-            chosen_pack = {**pack.data, "items": [i for i in pack.data["items"] if i["evidence_id"] == chosen_id]}
+            chosen_pack = {**pack.data, "items": sorted(pack.data["items"], key=lambda i: i["evidence_id"] != chosen_id)}
             if allocation:
-                allocation = {**allocation, "evidence_candidate_ids": [chosen_id],
+                allocation = {**allocation, "evidence_candidate_ids": list(dict.fromkeys(
+                    [chosen_id, *allocation["evidence_candidate_ids"]])),
                               "primary_message_candidates": [],
                               "selection_note": "사용자가 경험을 변경했으므로 현재 근거로 메시지를 다시 구성합니다."}
+        evidence = self.selected(list(dict.fromkeys(
+            i["evidence_id"] for i in chosen_pack["items"] if i["classification"] != "NO_EVIDENCE"
+        )))
+        from career.preparation import preparation_context
+        from career.retrieval import style_projection
+
+        preparation = preparation_context(self, ws, evidence)
+        styles = [style_projection(item) for item in search(
+            self.db, self.user, question["text"], "EXPRESSION", limit=3
+        )]
+        from career.expressions import context as expression_context
+        preferred = expression_context(self, "COVER", "", evidence, question=question["text"])
         data = (
             QuestionBrief.model_validate(manual).model_dump()
             if manual
@@ -464,6 +539,9 @@ class Workflow:
                     "evidence_pack": chosen_pack,
                     "question_allocation": allocation,
                     "selected_experience": selection_context(selection),
+                    "evidence": evidence,
+                    "preparation": preparation["context"],
+                    "style_projections": preferred + styles,
                 },
                 QuestionBrief,
             )
@@ -471,8 +549,9 @@ class Workflow:
         if data["question_id"] != qid:
             raise ValueError("문항 ID가 다릅니다.")
         if selection:
-            if data["evidence_ids"] != [selection.data["evidence_id"]]:
+            if selection.data["evidence_id"] not in data["evidence_ids"]:
                 raise ValueError("사용자가 선택한 경험으로 문항 메시지를 다시 구성해 주세요.")
+            data["evidence_ids"] = list(dict.fromkeys([selection.data["evidence_id"], *data["evidence_ids"]]))
         data["selected_experience_id"] = selection.data["evidence_id"] if selection else None
         data["experience_selection_artifact_id"] = selection.id if selection else None
         if manual is None and os.getenv("JEV_SHADOW_ENABLED") == "1" and os.getenv("JEV_API_KEY"):
@@ -518,8 +597,10 @@ class Workflow:
             "QuestionBrief",
             data,
             deps=[strategy.id, pack.id] + ([portfolio.id] if portfolio else [])
-            + ([selection.id] if selection else []),
-            sources=self.reference_sources("question_brief"),
+            + ([selection.id] if selection else []) + preparation["depends_on"],
+            sources=sorted(set(self.reference_sources("question_brief") + preparation["source_ids"]
+                               + preparation["guidance_source_ids"]
+                               + [source for item in evidence for source in item["context_source_ids"]])),
             slot=qid,
             model="manual" if manual else self.current_model,
         )
@@ -530,10 +611,21 @@ class Workflow:
     def approve_question(self, ident: str, qid: str):
         self.editable(self.ws(ident))
         item = self.artifact(ident, "QuestionBrief", qid)
+        from career.claim_test import require_pass
+        from career.portfolio import require_current
+
+        require_current(self, ident, item)
+        proof = require_pass(self, ident, qid, item)
+        lock(self.db, self.user, proof)
         lock(self.db, self.user, item)
         feedback(self.db, self.user, item, "ACCEPT")
         self.question_state(ident, qid, "BRIEF_LOCKED")
         return item
+
+    def test_claim(self, ident: str, qid: str, manual=None, confirmed=False):
+        from career.claim_test import run
+
+        return run(self, ident, qid, manual, confirmed=confirmed)
 
     def selected(self, identifiers: list[str]):
         result = []
@@ -565,6 +657,23 @@ class Workflow:
                     and owned(self.db, Source, self.user, metric["source_id"]).status not in GOOD
                 ):
                     raise ValueError("선택 근거의 지표 출처가 무효화되었습니다.")
+            from career.entities import ClaimBoundaryRecord, DecisionEpisodeRecord, OwnershipRecord
+
+            context_sources = {e.source_id}
+            context_sources.update(m["source_id"] for m in item["data"]["metric_ledger"] if m["status"] in GOOD)
+            for key, model in [("confirmed_decision_episodes", DecisionEpisodeRecord),
+                               ("confirmed_ownership", OwnershipRecord),
+                               ("confirmed_claim_boundaries", ClaimBoundaryRecord)]:
+                records = []
+                for record in self.db.scalars(select(model).where(
+                    model.user_id == self.user, model.evidence_id == e.id, model.status.in_(GOOD)
+                )):
+                    if record.source_id and owned(self.db, Source, self.user, record.source_id).status in GOOD:
+                        records.append({"id": record.id, "version": record.version,
+                                        "status": record.status, "data": record.data})
+                        context_sources.add(record.source_id)
+                item["data"][key] = records
+            item["context_source_ids"] = sorted(context_sources)
             result.append(item)
         return result
 
@@ -575,10 +684,15 @@ class Workflow:
         strategy = self.artifact(ident, "ApplicationBrief")
         if brief.status != "LOCKED" or strategy.status != "LOCKED":
             raise ValueError("전략과 문항 메시지를 승인한 후 작성할 수 있습니다.")
+        from career.claim_test import require_pass
+        from career.portfolio import require_current
+
+        require_current(self, ident, brief)
+        proof = require_pass(self, ident, qid, brief)
         from career.experience_options import active_selection
 
         selection = active_selection(self, ident, qid, fallback=True)
-        if selection and brief.data["evidence_ids"] != [selection.data["evidence_id"]]:
+        if selection and brief.data["evidence_ids"][0] != selection.data["evidence_id"]:
             raise ValueError("선택 경험과 문항 근거가 달라졌습니다. 경험을 다시 선택하고 메시지를 승인해 주세요.")
         evidence = self.selected(brief.data["evidence_ids"])
         context = compile_context("writer", strategy=strategy.data, brief=brief.data, evidence=evidence)
@@ -594,6 +708,11 @@ class Workflow:
             style_projection(item)
             for item in search(self.db, self.user, self.question(ident, qid)["text"], "EXPRESSION", limit=3)
         ]
+        from career.expressions import context as expression_context
+        from career.expressions import usage as expression_usage
+
+        preferred = expression_context(self, "COVER", brief.data["question_type"], evidence)
+        context["style_projections"] = preferred + context["style_projections"]
         profile = canonical(self.db, self.user)
         context["canonical_profile"] = profile
         opportunity = self.artifact(ident, "OpportunityBrief")
@@ -619,6 +738,7 @@ class Workflow:
         data["selected_evidence_ids"] = brief.data["evidence_ids"]
         data["protected_spans"] = old.data.get("protected_spans", []) if old else []
         data["revision_count"] = 0
+        data["expression_usage"] = expression_usage(preferred) if manual is None else []
         self.validate_ledger(data, evidence)
         item, _ = save(
             self.db,
@@ -626,7 +746,7 @@ class Workflow:
             ident,
             "Draft",
             data,
-            deps=[brief.id],
+            deps=[brief.id, proof.id],
             sources=list(
                 {e["source_id"] for e in evidence}
                 | {f["source_id"] for f in profile.values()}
@@ -704,8 +824,19 @@ class Workflow:
             if claim["support"] != "SUPPORTED" or not claim["ownership_ok"]:
                 issues.append({"code": "CLAIM_SUPPORT", "priority": "P0", "message": claim["text"]})
         followups = []
+        from career.review_resolution import compile_tasks, tasks_for
+
+        response_tasks = []
         if manual_verified:
             review_mode = "USER_VERIFIED"
+            previous_review = latest(self.db, self.user, ident, "ResumeReview" if resume else "Review", qid, required=False)
+            if previous_review and document.id in previous_review.depends_on:
+                # Quick manual review cannot erase recorded unresolved AI concerns.
+                response_tasks = tasks_for(previous_review)
+                followups = previous_review.data.get("followups", [])
+                for issue in previous_review.data["issues"]:
+                    if issue not in issues:
+                        issues.append(issue)
         else:
             from career.parallel_qa import run as parallel_review
 
@@ -744,16 +875,22 @@ class Workflow:
             assert fact is not None and recruiter is not None
             issues.extend(fact["issues"] + recruiter["issues"])
             followups.extend(fact["followups"] + recruiter["followups"])
+            response_tasks = compile_tasks([("fact_reviewer", fact), ("recruiter", recruiter)])
             if (
                 any(c["type"] in {"METRIC", "OWNERSHIP"} for c in document.data["claims"])
                 or issues
                 or self.reference_sources("writer")
             ):
-                reverse = self.ai(
-                    "reverse_interview", {"document": document.data, "evidence": evidence}, Review
-                )
+                reverse = self.ai("reverse_interview", {
+                    "document": document.data, "evidence": evidence, "jd": ws.jd_raw,
+                    "question": "이력서" if resume else self.question(ident, qid)["text"],
+                    "opportunity": self.artifact(ident, "OpportunityBrief").data,
+                    "strategy": self.artifact(ident, "ApplicationBrief").data,
+                    "document_domain": "RESUME" if resume else "COVER",
+                }, Review)
                 issues.extend(reverse["issues"])
                 followups.extend(reverse["followups"])
+                response_tasks.extend(compile_tasks([("reverse_interview", reverse)]))
             review_mode = "AI_REVIEWED"
             if os.getenv("JEV_SHADOW_ENABLED") == "1" and os.getenv("JEV_API_KEY"):
                 checks = [
@@ -824,23 +961,32 @@ class Workflow:
                 "followups": followups,
                 "mode": review_mode,
                 "document_version": document.version,
+                "response_tasks": response_tasks,
             },
             deps=[document.id],
+            sources=sorted(set(self.reference_sources("fact_reviewer")
+                               + self.reference_sources("recruiter", "RESUME" if resume else "COVER")
+                               + self.reference_sources("reverse_interview", "RESUME" if resume else "COVER"))),
             slot=qid,
             model="manual" if manual_verified else self.current_model,
         )
         if resume:
             self.resume_state(
-                ident, "REVIEWED" if any(i["priority"] in {"P0", "P1"} for i in issues) else "FINAL_READY"
+                ident, "REVIEWED" if response_tasks or any(i["priority"] in {"P0", "P1"} for i in issues) else "FINAL_READY"
             )
         else:
             self.question_state(
                 ident,
                 qid,
-                "QA_FAILED" if any(i["priority"] in {"P0", "P1"} for i in issues) else "FINAL_READY",
+                "QA_FAILED" if response_tasks or any(i["priority"] in {"P0", "P1"} for i in issues) else "FINAL_READY",
             )
         ws.state = "REVIEWING"
         return review
+
+    def answer_review(self, ident: str, qid: str, payload: dict, resume=False, manual=False):
+        from career.review_resolution import respond
+
+        return respond(self, ident, qid, payload, resume, manual=manual)
 
     def patch_document(
         self,
@@ -960,6 +1106,9 @@ class Workflow:
             i["priority"] in {"P0", "P1"} for i in review.data["issues"]
         ):
             raise ValueError("현재 버전의 중대한 검수 문제를 먼저 해결해 주세요.")
+        from career.review_resolution import require_resolved
+
+        require_resolved(self, ident, review, document, locking=True)
         if resume and self.reference_sources("resume_writer"):
             from career.resume_master import require_file_qa
 
@@ -1005,6 +1154,10 @@ class Workflow:
         from career.rules import writing_rules
 
         rules = writing_rules(self.db, self.user, ws, "RESUME", [e["title"] for e in evidence])
+        from career.expressions import context as expression_context
+        from career.expressions import usage as expression_usage
+
+        preferred = expression_context(self, "RESUME", "RESUME", evidence)
         brief_data = ResumeBrief.model_validate(
             {
                 "target_role": ws.role,
@@ -1041,6 +1194,7 @@ class Workflow:
                             "document_domain": "RESUME",
                             "canonical_master": master,
                             "selected_experience": selection_context(selection),
+                            "style_projections": preferred,
                         },
                         ResumeContent,
                     )
@@ -1054,6 +1208,10 @@ class Workflow:
             content = arrange(content, brief_data, preserve_order=bool(manual))
             data = structured_document(content, set(selected), profile=canonical(self.db, self.user))
         self.validate_ledger(data, evidence)
+        old = latest(self.db, self.user, ident, "ResumeContent", required=False)
+        protected = old.data.get("protected_spans", []) if old else []
+        if old and any(data["text"].count(span) < old.data["text"].count(span) for span in protected):
+            raise ValueError("재작성 결과가 보호된 문장을 바꿉니다. 부분 수정으로 진행해 주세요.")
         brief, _ = save(
             self.db,
             self.user,
@@ -1063,7 +1221,8 @@ class Workflow:
             deps=[strategy.id, pack.id] + ([master_id] if master_id else [])
             + ([selection.id] if selection else []),
         )
-        data.update({"selected_evidence_ids": selected, "protected_spans": [], "revision_count": 0})
+        data.update({"selected_evidence_ids": selected, "protected_spans": protected, "revision_count": 0})
+        data["expression_usage"] = expression_usage(preferred) if manual is None else []
         data["character_budget"] = {1: 3500, 2: 7000, "MASTER": 20000}[page_budget]
         data["page_budget"] = page_budget
         item, _ = save(
@@ -1095,12 +1254,20 @@ class Workflow:
         documents = []
         for q in ws.data.get("questions", []):
             brief = self.artifact(ident, "QuestionBrief", q["id"])
+            from career.claim_test import require_pass
+            from career.portfolio import require_current
+
+            require_current(self, ident, brief)
+            require_pass(self, ident, q["id"], brief)
             messages.append(brief.data["primary_message"].strip())
             briefs.append(brief.data)
             document = self.artifact(ident, "Draft", q["id"])
             review = self.artifact(ident, "Review", q["id"])
             if document.status != "LOCKED" or review.status != "LOCKED":
                 raise ValueError("모든 문항의 현재 본문과 검수 결과를 최종 잠금해 주세요.")
+            from career.review_resolution import require_resolved
+
+            require_resolved(self, ident, review, document)
             documents.append(document)
         if len(messages) != len(set(messages)):
             raise ValueError("문항 간 핵심 메시지가 중복됩니다. 서로 다른 역할을 정해 주세요.")
@@ -1109,9 +1276,17 @@ class Workflow:
             review = self.artifact(ident, "ResumeReview")
             if resume.status != "LOCKED" or review.status != "LOCKED":
                 raise ValueError("이력서 본문과 검수 결과를 최종 잠금해 주세요.")
+            from career.review_resolution import require_resolved
+
+            require_resolved(self, ident, review, resume)
             documents.append(resume)
         if not documents:
             raise ValueError("최종 잠금된 문서가 필요합니다.")
+        for document in documents:
+            self.validate_ledger(document.data, self.selected(document.data["selected_evidence_ids"]))
+        from career.final_decision import require_pass as require_final_review
+
+        require_final_review(self, ident)
         portfolio = portfolio_qa(briefs, [d.data for d in documents if d.kind == "Draft"])
         portfolio.extend(cross_document_qa([d.data for d in documents]))
         if self.provider is not None or provider_available():
@@ -1564,8 +1739,18 @@ class Workflow:
                     return self.ready(ident)
                 else:
                     item = self.final_lock(ident, resume=True)
-            elif ws.state == "CREATED":
-                item = self.analyze(ident)
+            elif ws.state == "CREATED" or (ws.state == "NEED_USER_ACTION" and (
+                (previous_analysis := latest(self.db, self.user, ident, "OpportunityBrief", required=False)) is None
+                or previous_analysis.status not in {"ACTIVE", "LOCKED"}
+            )):
+                research = latest(self.db, self.user, ident, "CompanyResearchResult", required=False)
+                if research is None:
+                    item = self.research(ident, live=True)
+                else:
+                    from career.research_workspace import reviewed
+
+                    reviewed(self, ident, research, required=True)
+                    item = self.analyze(ident)
             elif ws.state == "OPPORTUNITY_READY":
                 item = self.map_evidence(ident)
             elif ws.state == "EVIDENCE_READY":
@@ -1582,7 +1767,14 @@ class Workflow:
                 (current_brief := latest(self.db, self.user, ident, "QuestionBrief", qid, required=False)) is not None
                 and current_brief.status == "ACTIVE"
             ):
-                raise ValueError("문항 메시지를 먼저 승인해 주세요.")
+                from career.claim_test import require_pass
+
+                proof = latest(self.db, self.user, ident, "ClaimEvidenceTest", qid, required=False)
+                if proof is None or proof.status not in {"ACTIVE", "LOCKED"} or proof.data.get("brief_id") != current_brief.id:
+                    item = self.test_claim(ident, qid)
+                else:
+                    require_pass(self, ident, qid, current_brief)
+                    raise ValueError("근거 검증을 통과했습니다. 문항 메시지를 읽고 승인해 주세요.")
             elif len(ws.data.get("questions", [])) > 1 and (
                 (portfolio := latest(self.db, self.user, ident, "QuestionPortfolio", required=False)) is None
                 or portfolio.status != "LOCKED"
@@ -1703,7 +1895,10 @@ class Workflow:
             old = view(e)
             e.status = "CONFLICTED"
             if action == "이건 내가 한 거 아님":
-                e.data = {**e.data, "ownership": {**e.data.get("ownership", {}), "implementation": "UNKNOWN"}}
+                previous_ownership = e.data.get("ownership")
+                e.data = {**e.data, "ownership": {
+                    **(previous_ownership if isinstance(previous_ownership, dict) else {}),
+                    "implementation": "UNKNOWN"}}
             changed = stale(self.db, self.user, [e.source_id])
             from career.projections import CorrectionRecord
 

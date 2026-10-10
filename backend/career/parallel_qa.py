@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextvars import copy_context
 
 from career.models import PromptRun
+from career.prompt_cache import identity_scope
 from career.providers import configured_provider
 from career.runtime_trace import emit_trace, input_hash, trace_context, trace_sink
 
@@ -41,7 +42,8 @@ def run(service, calls):
         sink = trace_sink.set(lambda key, name, data: traces.append((key, name, data)))
         token = trace_context.set(metadata)
         try:
-            value = provider.structured(stage, context, schema).model_dump()
+            with identity_scope(service.user):
+                value = provider.structured(stage, context, schema).model_dump()
             if not getattr(provider, "trace_emitting", False):
                 emit_trace(
                     stage,

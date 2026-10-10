@@ -15,6 +15,148 @@ from sqlalchemy.orm import Session
 
 
 @pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
+def test_shared_budget_is_serialized_across_postgres_connections(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    from career.provider_policy import BudgetExceeded, StagePolicy
+    from career.service_access import configure_member
+    from career.usage_limits import configure_usage, request_budget_scope, usage_status
+
+    url = os.environ["TEST_POSTGRES_URL"]
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.delenv("DATABASE_MIGRATION_URL", raising=False)
+    command.upgrade(Config("alembic.ini"), "head")
+    engine = create_engine(url, pool_size=8, max_overflow=0)
+    shared = "__career_test_" + str(uuid4())
+    monkeypatch.setattr("career.usage_limits.SHARED_BUDGET_USER", shared)
+    monkeypatch.setattr("career.service_access.SHARED_BUDGET_USER", shared)
+    monkeypatch.setenv("CAREER_SHARED_SERVICE", "1")
+    operator = str(uuid4())
+    users = [operator, *[str(uuid4()) for _ in range(5)]]
+    monkeypatch.setenv("CAREER_ADMIN_USER_IDS", operator)
+    with Session(engine) as db:
+        for user in users:
+            configure_member(db, operator, user, "ACTIVE", {})
+        configure_usage(db, shared, {"daily_calls": 1})
+        db.commit()
+    barrier = Barrier(len(users))
+
+    def invoke(user):
+        barrier.wait(timeout=10)
+        with Session(engine) as db:
+            try:
+                with request_budget_scope(db, user) as quota:
+                    ticket = quota.draw(StagePolicy("unknown", max_output_tokens=20), 20)
+                    quota.settle_call(ticket, "unknown", {"input_tokens": 10, "output_tokens": 5})
+                return True
+            except BudgetExceeded:
+                return False
+
+    with ThreadPoolExecutor(max_workers=len(users)) as executor:
+        assert sum(executor.map(invoke, users)) == 1
+    with Session(engine) as db:
+        total = usage_status(db, shared)["daily"]
+        assert total["calls"] == 1 and total["tokens"] == 15 and total["reserved_calls"] == 0
+        assert sum(usage_status(db, user)["daily"]["calls"] for user in users) == 1
+    engine.dispose()
+
+
+@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
+def test_public_request_cap_is_atomic_in_postgres(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    from career.public_guard import limit_request
+    from fastapi import HTTPException
+
+    url = os.environ["TEST_POSTGRES_URL"]
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.delenv("DATABASE_MIGRATION_URL", raising=False)
+    command.upgrade(Config("alembic.ini"), "head")
+    monkeypatch.setenv("CAREER_ACCESS_MODE", "public")
+    monkeypatch.setenv("CAREER_PUBLIC_MUTATIONS_PER_MINUTE", "2")
+    monkeypatch.setattr("career.public_guard.time.time", lambda: 6000)
+    engine = create_engine(url, pool_size=8, max_overflow=0)
+    owner = str(uuid4())
+    barrier = Barrier(8)
+
+    def call(_):
+        barrier.wait(timeout=10)
+        try:
+            limit_request(engine, owner, "POST")
+            return True
+        except HTTPException as error:
+            assert error.status_code == 429
+            return False
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        assert sum(pool.map(call, range(8))) == 2
+    limit_request(engine, str(uuid4()), "POST")
+    engine.dispose()
+
+
+@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
+def test_public_account_deletion_purges_vectors_and_rejects_late_writer_in_postgres(monkeypatch):
+    import httpx
+    from career.account_lifecycle import delete_account
+    from career.db import Record
+    from career.models import AIUsageBucket, ServiceMember, Source
+    from career.public_guard import bind_request
+    from fastapi import HTTPException
+    from sqlalchemy import select
+
+    url = os.environ["TEST_POSTGRES_URL"]
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.delenv("DATABASE_MIGRATION_URL", raising=False)
+    command.upgrade(Config("alembic.ini"), "head")
+    for name, value in {
+        "CAREER_ACCESS_MODE": "public", "AUTH_MODE": "supabase",
+        "SUPABASE_URL": "https://synthetic.supabase.co",
+        "SUPABASE_SECRET_KEY": "sb_secret_synthetic-only", "CAREER_ADMIN_USER_IDS": "",
+    }.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setattr("career.account_lifecycle.require_recent_otp", lambda *args: None)
+    engine = create_engine(url)
+    own, other = str(uuid4()), str(uuid4())
+
+    class Embedder:
+        def embed(self, texts):
+            return [[1.0] + [0.0] * 1535 for _ in texts]
+
+    with Session(engine) as db:
+        for user in (own, other):
+            db.add(ServiceMember(user_id=user, status="ACTIVE", limits={}))
+            source, _ = register_source(db, user, "synthetic", "synthetic private text", "MASTER")
+            add_evidence(db, user, source.id, "합성", "실제 개인자료 없음", status="VERIFIED")
+            assert index_embeddings(db, user, Embedder()) == 1
+            db.add(AIUsageBucket(user_id=user, period="D:2026-10-05", data={"calls": 1}))
+        db.commit()
+    with Session(engine, expire_on_commit=False) as writer:
+        cached = writer.get(ServiceMember, own)
+        assert cached is not None
+        writer.commit()
+        with Session(engine) as closer:
+            assert delete_account(closer, own, "DELETE", "fresh", transport=httpx.MockTransport(
+                lambda _: httpx.Response(200, json={})))['auth_account_deleted']
+        assert cached.status == "ACTIVE"
+        bind_request(writer, own)
+        writer.add(Record(user_id=own, kind="Conversation", data={"text": "late response"}))
+        writer.flush()
+        with pytest.raises(HTTPException):
+            writer.commit()
+        writer.rollback()
+    with Session(engine) as db:
+        assert not list(db.scalars(select(Source).where(Source.user_id == own)))
+        assert len(list(db.scalars(select(Source).where(Source.user_id == other)))) == 1
+        for user, count in ((own, 0), (other, 1)):
+            assert db.scalar(text("SELECT count(*) FROM evidence_embeddings WHERE user_id=:user"), {"user": user}) == count
+        assert db.scalar(select(AIUsageBucket).where(AIUsageBucket.user_id == own)) is not None
+        assert {r.kind for r in db.scalars(select(Record).where(Record.user_id == own))} == {"AccountDeletionReceipt"}
+    engine.dispose()
+
+
+@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
 def test_postgres_fts_semantic_episode_expression_and_user_filter(monkeypatch):
     url = os.environ["TEST_POSTGRES_URL"]
     monkeypatch.setenv("DATABASE_URL", url)
@@ -142,13 +284,22 @@ def test_supabase_data_api_roles_cannot_read_private_career_tables(monkeypatch):
                 END $$""")
             )
             connection.execute(text("GRANT USAGE ON SCHEMA public TO anon, authenticated"))
-            connection.execute(text("GRANT ALL ON public.sources TO anon, authenticated"))
+            connection.execute(text("GRANT ALL ON public.sources, public.service_members TO anon, authenticated"))
             connection.execute(text("ALTER TABLE public.sources DISABLE ROW LEVEL SECURITY"))
+            connection.execute(text("ALTER TABLE public.service_members DISABLE ROW LEVEL SECURITY"))
             assert connection.execute(
                 text("SELECT has_table_privilege('anon','public.sources','SELECT')")
             ).scalar()
             connection.exec_driver_sql(script, execution_options={"no_parameters": True})
             for role in ["anon", "authenticated"]:
+                assert not connection.execute(
+                    text("SELECT has_table_privilege(:role,'public.request_rate_buckets','SELECT,INSERT,UPDATE,DELETE,TRUNCATE')"),
+                    {"role": role},
+                ).scalar()
+                assert not connection.execute(
+                    text("SELECT has_table_privilege(:role,'public.service_members','SELECT,INSERT,UPDATE,DELETE,TRUNCATE')"),
+                    {"role": role},
+                ).scalar()
                 assert not connection.execute(
                     text(
                         "SELECT has_table_privilege(:role,'public.sources','SELECT,INSERT,UPDATE,DELETE,TRUNCATE')"
@@ -164,6 +315,12 @@ def test_supabase_data_api_roles_cannot_read_private_career_tables(monkeypatch):
                     nested.rollback()
             assert connection.execute(
                 text("SELECT relrowsecurity FROM pg_class WHERE oid='public.sources'::regclass")
+            ).scalar()
+            assert connection.execute(
+                text("SELECT relrowsecurity FROM pg_class WHERE oid='public.service_members'::regclass")
+            ).scalar()
+            assert connection.execute(
+                text("SELECT relrowsecurity FROM pg_class WHERE oid='public.request_rate_buckets'::regclass")
             ).scalar()
         finally:
             transaction.rollback()

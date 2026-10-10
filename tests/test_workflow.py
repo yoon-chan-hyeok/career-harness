@@ -51,7 +51,27 @@ def flow(db):
     return f, w, e
 
 
-def question(f, w, e, message="평가 실험을 검증했습니다."):
+def proof_payload(brief, evidence):
+    """Explicit human test result for the supported synthetic claim in fixtures."""
+    from career.claim_test import CHECKS, claim_texts
+
+    return {"claims": [{"claim": text, "support": "SUPPORTED", "rationale": "직접 수행한 평가 기록으로 범위를 확인함",
+                        "citations": [{"evidence_id": evidence.id, "quote": evidence.body}]}
+                       for text in claim_texts(brief)],
+            "checks": [{"key": key, "verdict": "PASS", "rationale": "원문 수행 범위와 해당 주장을 직접 대조함"}
+                       for key in CHECKS], "followups": []}
+
+
+def verify_claim(f, w, qid):
+    from career.models import Evidence
+    from career.truth import owned
+
+    brief = f.artifact(w.id, "QuestionBrief", qid)
+    evidence = owned(f.db, Evidence, f.user, brief.data["evidence_ids"][0])
+    return f.test_claim(w.id, qid, proof_payload(brief.data, evidence), confirmed=True)
+
+
+def question(f, w, e, message="평가 실험을 검증했습니다.", *, tested=True):
     q = f.add_question(w.id, "직무 역량을 설명하세요.", 1000)
     f.question_brief(
         w.id,
@@ -64,6 +84,8 @@ def question(f, w, e, message="평가 실험을 검증했습니다."):
             "evidence_ids": [e.id],
         },
     )
+    if tested:
+        verify_claim(f, w, q["id"])
     return q
 
 
@@ -98,6 +120,9 @@ def test_personal_e2e_freeze_is_not_submission_and_handoff_immutable(flow, db):
     f.resume(w.id, doc(e))
     f.review(w.id, resume=True, manual_verified=True)
     f.final_lock(w.id, resume=True)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     snapshot = deepcopy(bundle.data)
@@ -122,7 +147,7 @@ def test_guided_commands_cannot_skip_approvals(flow):
     with pytest.raises(ValueError, match="전략"):
         f.command(w.id, "ㄱㄱ")
     with pytest.raises(ValueError):
-        question(f, w, e)
+        f.question_brief(w.id, "not-yet", {})
     f.approve_strategy(w.id)
     q = question(f, w, e)
     with pytest.raises(ValueError):
@@ -150,6 +175,9 @@ def test_metric_correction_stales_resume_and_cover_letter_but_preserves_frozen(f
     f.resume(w.id, doc(e))
     f.review(w.id, resume=True, manual_verified=True)
     f.final_lock(w.id, resume=True)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     original = deepcopy(bundle.data)

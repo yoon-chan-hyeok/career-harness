@@ -59,7 +59,9 @@ def hard_qa(
         for boundary in data.get("forbidden_claims", []) + data.get("claim_boundaries", []):
             if boundary and boundary in text:
                 issue("CLAIM_BOUNDARY", f"사용 금지 주장: {boundary}")
-        if data.get("ownership", {}).get("implementation", "UNKNOWN") != "USER":
+        ownership = data.get("ownership")
+        implementation = ownership.get("implementation", "UNKNOWN") if isinstance(ownership, dict) else "UNKNOWN"
+        if implementation != "USER":
             if any(
                 phrase in text
                 for phrase in ["혼자 개발", "전부 직접 구현", "단독 개발", "built entirely myself"]

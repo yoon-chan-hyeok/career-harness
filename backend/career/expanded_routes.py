@@ -16,12 +16,12 @@ def build_expanded_router(database_dep: Callable, user_dep: Callable):
 
     @router.get("/applications/{workspace}/experience-options")
     def experience_options(workspace: str, slot: str = Query("strategy", min_length=1, max_length=100),
-                           db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+                           db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return options(Workflow(db, ident), workspace, slot)
 
     @router.post("/applications/{workspace}/experience-options/select")
     def experience_choice(workspace: str, body: ExperienceChoiceRequest,
-                          db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+                          db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return run_operation(db, ident, workspace, "select-experience",
                              lambda: choose(Workflow(db, ident), workspace, body), uses_ai=False)
 
@@ -30,7 +30,7 @@ def build_expanded_router(database_dep: Callable, user_dep: Callable):
         return {"is_admin": admin.is_admin(ident)}
 
     @router.get("/admin/status")
-    def admin_status(db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def admin_status(db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return admin.status(db, ident)
 
     return router

@@ -3,7 +3,7 @@ from copy import deepcopy
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from career.models import Artifact, Source, Workspace
+from career.models import Artifact, Fact, Source, Workspace
 from career.telemetry import feedback, revision
 from career.truth import owned
 from career.validation import GOOD
@@ -35,6 +35,11 @@ def fresh(db: Session, user: str, artifact: Artifact, seen=None):
     for source_id in artifact.source_ids:
         if owned(db, Source, user, source_id).status not in GOOD:
             raise ValueError("출처가 무효화되었습니다.")
+    for claim in artifact.data.get("claims", []):
+        for fact_id in claim.get("profile_fact_ids", []):
+            fact = owned(db, Fact, user, fact_id)
+            if fact.status not in GOOD or owned(db, Source, user, fact.source_id).status not in GOOD:
+                raise ValueError("문서가 참조한 프로필 사실이 변경되거나 충돌했습니다. 다시 검토해 주세요.")
     for ident in artifact.depends_on:
         fresh(db, user, owned(db, Artifact, user, ident), seen)
 

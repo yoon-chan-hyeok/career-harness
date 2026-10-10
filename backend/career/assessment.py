@@ -1,6 +1,6 @@
 """Job-side metadata and candidate-side assessments stay separate."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import select
@@ -142,6 +142,24 @@ def decide(service, ident, artifact_id, decision):
     return {"id": record.id, **record.data}
 
 
+def current_deadline_status(opportunity, instant=None):
+    if opportunity is None:
+        return "UNKNOWN"
+    if opportunity.data.get("posting_status") == "CLOSED":
+        return "CLOSED"
+    deadline = opportunity.data.get("deadline_at")
+    if deadline:
+        try:
+            parsed = datetime.fromisoformat(deadline)
+            if parsed.tzinfo is None:
+                return "UNKNOWN"
+            if parsed <= (instant or datetime.now(UTC)):
+                return "EXPIRED"
+        except (ValueError, TypeError):
+            return "UNKNOWN"
+    return "OPEN" if opportunity.data.get("posting_status") == "OPEN" else "UNKNOWN"
+
+
 def rankings(db, user):
     assessments = {}
     for a in db.scalars(
@@ -160,6 +178,14 @@ def rankings(db, user):
         ):
             continue
         opportunity = latest(db, user, ws.id, "OpportunityBrief", required=False)
+        deadline_status = current_deadline_status(opportunity)
+        next_action = {
+            "NEED_USER_ACTION": "변경된 근거와 문서 다시 검토",
+            "WAITING_STRATEGY_APPROVAL": "지원 전략 승인",
+            "WAITING_QUESTION_APPROVAL": "문항 메시지 승인",
+            "REVIEWING": "작성 문서 검수·잠금",
+            "READY_TO_FREEZE": "제출 전 문서 확인",
+        }.get(ws.state, "지원 작업 이어가기")
         rows.append(
             {
                 "workspace_id": ws.id,
@@ -169,6 +195,8 @@ def rankings(db, user):
                 "career_value": a.data["career_value"]["level"],
                 "action_priority": a.data["action_priority"]["level"],
                 "recommendation": a.data["recommendation"],
+                "current_deadline_status": deadline_status,
+                "next_action": "마감 경과 · 공고 다시 확인" if deadline_status in {"EXPIRED", "CLOSED"} else next_action,
                 "deadline_at": opportunity.data.get("deadline_at", "") if opportunity else "",
                 "decision": (
                     ws.data.get("opportunity_decision", {}).get("decision", "PENDING")
@@ -180,13 +208,17 @@ def rankings(db, user):
     order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2, "UNKNOWN": 3}
 
     def deadline_order(row):
-        return datetime.fromisoformat(row["deadline_at"]).timestamp() if row["deadline_at"] else float("inf")
+        try:
+            return datetime.fromisoformat(row["deadline_at"]).timestamp() if row["deadline_at"] else float("inf")
+        except (ValueError, TypeError):
+            return float("inf")
 
     return {
         "fit_order": sorted(rows, key=lambda r: (order[r["fit"]], order[r["career_value"]], r["company"])),
         "action_order": sorted(
             rows,
             key=lambda r: (
+                r["current_deadline_status"] in {"EXPIRED", "CLOSED"},
                 r["recommendation"] == "SKIP" or r["decision"] == "SKIP",
                 order[r["action_priority"]],
                 deadline_order(r),

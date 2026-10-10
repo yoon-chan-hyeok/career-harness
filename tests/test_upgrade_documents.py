@@ -26,7 +26,7 @@ def test_upload_preview_never_confirms_facts_and_registration_is_account_scoped(
     decision = UploadDecision(title="분석", confirmed=True)
     saved = confirm_upload(db, "alice", preview["id"], decision)
     assert saved["evidence"]["status"] == "UNVERIFIED"
-    assert saved["evidence"]["data"]["ownership"] == "UNKNOWN"
+    assert saved["evidence"]["data"]["ownership"] == {"implementation": "UNKNOWN"}
     repeated = confirm_upload(db, "alice", preview["id"], decision)
     assert repeated["evidence"]["id"] == saved["evidence"]["id"]
     assert repeated["evidence"]["body"] == saved["evidence"]["body"]

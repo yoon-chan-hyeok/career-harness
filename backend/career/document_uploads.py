@@ -4,6 +4,7 @@ import base64
 import binascii
 import hashlib
 import io
+import json
 import re
 import zipfile
 import zlib
@@ -181,11 +182,16 @@ def upload_preview(db: Session, user: str, body: UploadRequest):
         # Parser errors may contain source text and local paths.
         raise ValueError("문서를 읽지 못했습니다. 파일이 손상되었는지 확인해 주세요.") from None
     binary_hash = hashlib.sha256(raw).hexdigest()
-    source, added = register_source(db, user, "uploads/" + binary_hash + suffix, text, "UPLOAD_PREVIEW", {
+    payload = {
         "upload": {"filename": filename, "bytes": len(raw), "binary_hash": binary_hash,
                    "text": text, "pages": pages, "warnings": warnings, "confirmed": False,
                    "original_base64": body.content_base64},
-    })
+    }
+    path = "uploads/" + binary_hash + suffix
+    from career.storage_limits import check_upload_capacity
+
+    check_upload_capacity(db, user, path, len(json.dumps(payload)) * 4)
+    source, added = register_source(db, user, path, text, "UPLOAD_PREVIEW", payload)
     if added:
         source.status = "UNVERIFIED"
     elif source.status in {"DO_NOT_USE", "SUPERSEDED"}:
@@ -214,7 +220,7 @@ def confirm_upload(db: Session, user: str, source_id: str, decision: UploadDecis
         source.authority = "APPLICATION" if decision.kind == "EXPRESSION" else "MEMORY"
         source.status = "SOURCE_BACKED"
         evidence = add_evidence(db, user, source.id, signature["title"], upload["text"],
-                                {"upload_source_id": source.id, "ownership": "UNKNOWN"},
+                                {"upload_source_id": source.id, "ownership": {"implementation": "UNKNOWN"}},
                                 kind=decision.kind, status="UNVERIFIED")
         source.data = {**source.data, "upload": {**upload, "confirmed": True, "decision": signature,
                                                  "evidence_id": evidence.id}}

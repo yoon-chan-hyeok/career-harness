@@ -5,18 +5,44 @@ if (process.env.VERCEL === "1") {
     if (
       origin.protocol !== "https:" ||
       !origin.hostname ||
-      origin.username || origin.password || origin.search || origin.hash ||
+      origin.username ||
+      origin.password ||
+      origin.search ||
+      origin.hash ||
       origin.pathname !== "/"
-    ) throw new Error();
+    )
+      throw new Error();
     backend = origin.origin;
   } catch {
     // Configuration errors must not echo a URL that could contain a credential.
-    throw new Error("Vercel BACKEND_URL must be an explicit HTTPS origin without credentials, path, query or fragment.");
+    throw new Error(
+      "Vercel BACKEND_URL must be an explicit HTTPS origin without credentials, path, query or fragment.",
+    );
   }
 }
 
 const config = {
   output: "standalone",
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

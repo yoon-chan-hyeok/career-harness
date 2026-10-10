@@ -1,5 +1,23 @@
 # Implementation Status Protocol
 
+2026-10-10 최신 제출 전 확인 구현은 `docs/FINAL_REVIEW_PROGRESS_2026_10_10.md`와 JSON `final_review_2026_10_10` 참조. Role Noun·마지막 세 질문 직접 확인, 버전/근거 변경 시 재확인, API·대화 우회 차단, 제출본·면접 답변 연결과 모바일 브라우저 검증 완료. 전체 Python 642/PG 6 skipped, frontend 26, Ruff/Pyright/lint/typecheck/build 통과. 프로젝트별 경계·반복 규칙·전체 통합 인수·실제 AI/외부 운영은 남는다. GitHub 비공개 업로드 요청을 우선 처리한다.
+
+2026-10-10 F2/F7 로컬 구현·검증은 `docs/RESEARCH_AND_EXPRESSION_PROGRESS_2026_10_10.md`와 JSON `research_expression_2026_10_10` 참조. 공개 자료·인용·Why Now 확인, 승인 표현 보관/범위별 재사용, 자소서·레쥬메·모바일 브라우저 검증 완료. Python 합계 627/PG 6 skipped(소유권 환경 보정 후 privacy 14 포함), frontend 26, Ruff/Pyright/build 통과. 실제 AI none, 최종 세 질문·프로젝트별 경계·전체 인수·외부 운영은 미완이다.
+
+2026-10-07 F8 후속 구현: `docs/REVIEW_RESPONSE_PROGRESS_2026_10_07.md` 및 JSON `review_resolution_2026_10_07` 참조. 검수 답변 화면·대화·이력서 규칙·면접 자료 연결, 저장 후 편집창 이동 오류 수정과 자소서/이력서 합성 브라우저 검증을 완료했다. 로컬 화면 복구 및 새 API 경로 확인. 전체 Python 571/6 PG skipped, 후속 F8 23, frontend 26, Ruff/Pyright/build 통과. 실제 AI 및 전체 문서 요구 충족은 미완이다.
+
+2026-10-07 최신 작성전략 재점검: `docs/RULEBOOK_V5_1_RECHECK_2026_10_07.md`와 JSON `rulebook_v5_1_recheck_2026_10_07` 참조. 26단계·세부 규칙 대조 결과 전체 충족 false. F8 백엔드의 버전별 답변·잠금 차단은 합성 검사에서 확인됐지만 UI/대화/면접 자료/Resume 규칙 연결 및 실행 앱 반영은 남아 있다. 조사·표현 재사용·최종 제출 판단도 미완. 최종 Python 550 passed/6 PG skipped, frontend 25, Ruff/Pyright/typecheck/lint 통과. 별도 진단 20개 중 9개는 누락을 재현한 것. 실제 AI provider=none이며 이번 production build/브라우저/외부 인수는 수행하지 않았다.
+
+2026-10-06 작성 규칙 구현 진행: `docs/RULEBOOK_IMPLEMENTATION_PROGRESS_2026_10_06.md` 및 JSON `rulebook_implementation_2026_10_06` 참조. 원문 절 선택, 작성 전 교정·원자료 입력, Evidence Test 승인 게이트, 여러 문항 역할 배분 및 보조 경험 연결을 구현했다. 전체 Python 550/별도 PG 6 skipped, frontend 25, lint/type/build, 격리 브라우저 직접 검증→승인 흐름 통과. 조사·표현 재사용·역질문 답변 처리·전체 제출 검수·전체 명세 인수는 남아 있으며 목표는 진행 중이다.
+
+2026-10-06 작성전략 요구사항 감사: `docs/RULEBOOK_V5_1_COVERAGE_AUDIT_2026_10_06.md` 참조. 원문 등록·요약 반영과 전체 기능 구현을 구별한다. 기존 관련 회귀 59개와 누락 동작 진단 11개를 확인했으며 전체 요구사항 충족은 false, 이번 제품 코드 수정은 없다.
+
+2026-10-06 19:44 KST 전체 현황 보고: `docs/OVERALL_STATUS_AND_UPGRADES_2026_10_06.md`와 JSON `overall_review_2026_10_06` 참조. 현재 로컬 실행만 재확인했으며, 전체 테스트·Astra 감사·외부 배포를 새로 수행한 기록은 아니다. 실제 AI 미연결과 공개 운영 준비 미완료 상태를 유지한다.
+
+2026-10-06 최신 공개 가입형 추가: `docs/PUBLIC_RELEASE_2026_10_06.md` 및 JSON `public_release_2026_10_06` 참조. 초대형을 보존하고 공개형 가입·동의·계정 관리·제한·운영 회원 검색을 구현했다. Astra P2 두 건은 수정 후 재검증했다. 실제 외부 운영 인수와 비교 실험은 구별한다.
+
+2026-10-05 최신 점검: `docs/PRODUCTION_UPGRADE_2026_10_05.md`와 JSON의 `production_upgrade_2026_10_05`를 확인한다. 초대·공용 예산·문서 묶음·마감 재판정 및 Astra 오류 수정은 완료했다. Python 488, 별도 실제 PG 4, frontend 22 통과, 최종 관련 34개 재검사 통과, migration 0012와 기존 로컬 재시작을 확인했다. 실제 AI·운영 계정·HTTPS·Word 레이아웃은 미완료다. 이전 cache·readiness 항목은 당시의 기록으로 보존한다.
+
 `IMPLEMENTATION_STATUS.json` is the machine-readable checkpoint for Codex implementation sessions.
 
 ## Start/resume rule

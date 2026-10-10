@@ -42,6 +42,29 @@ def issued(private, **changes):
     return jwt.encode(claims, private, algorithm="ES256", headers={"kid": "verified-key"}), claims
 
 
+def test_signed_db_invite_overrides_bootstrap_allowlist_and_revocation_is_immediate(signing, db, monkeypatch):
+    from career.service_access import configure_member, require_member
+
+    private, key = signing
+    subject, bootstrap = str(uuid4()), str(uuid4())
+    monkeypatch.setenv("AUTH_MODE", "supabase")
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("CAREER_SHARED_SERVICE", "1")
+    monkeypatch.setenv("CAREER_ADMIN_USER_IDS", bootstrap)
+    monkeypatch.setenv("CAREER_ALLOWED_USER_IDS", bootstrap)
+    transport = httpx.MockTransport(lambda _: httpx.Response(200, json={"keys": [key]}))
+    monkeypatch.setattr("career.authentication.configured_verifier", lambda config: SupabaseVerifier(config, transport))
+    token, _ = issued(private, sub=subject)
+    identity = authenticate("Bearer " + token)
+    with pytest.raises(HTTPException):
+        require_member(db, identity)
+    configure_member(db, bootstrap, subject, "ACTIVE", {})
+    require_member(db, authenticate("Bearer " + token))
+    configure_member(db, bootstrap, subject, "SUSPENDED", {})
+    with pytest.raises(HTTPException):
+        require_member(db, authenticate("Bearer " + token))
+
+
 def verifier(key, calls):
     def respond(request):
         calls.append(request)
@@ -69,8 +92,8 @@ def test_supabase_verifies_signed_subject_and_caches_only_public_keys(signing):
     [
         {"iss": "https://attacker.example/auth/v1"},
         {"aud": "service_role"},
-        {"exp": int(time.time()) - 60},
-        {"iat": int(time.time()) + 60},
+        {"exp": lambda: int(time.time()) - 60},
+        {"iat": lambda: int(time.time()) + 60},
         {"role": "service_role"},
         {"role": "anon"},
         {"sub": "forged-owner"},
@@ -79,7 +102,10 @@ def test_supabase_verifies_signed_subject_and_caches_only_public_keys(signing):
 )
 def test_supabase_rejects_wrong_claims(signing, changes):
     private, key = signing
-    token, _ = issued(private, **changes)
+    # Measure relative times when this case runs, not during collection of a
+    # suite that may take longer than the invalid token's 60-second offset.
+    current_changes = {key: value() if callable(value) else value for key, value in changes.items()}
+    token, _ = issued(private, **current_changes)
     with pytest.raises(HTTPException) as result:
         verifier(key, []).verify(token)
     assert result.value.status_code == 401

@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -21,31 +22,38 @@ from career.truth import owned
 from career.usage_limits import configure_usage, usage_status
 
 
+class MemberRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    user_id: str = Field(min_length=1, max_length=64)
+    status: Literal["ACTIVE", "SUSPENDED"] = "ACTIVE"
+    limits: dict = Field(default_factory=dict)
+
+
 def build_router(database_dep: Callable, user_dep: Callable):
     router = APIRouter(prefix="/api")
 
     @router.get("/artifacts/{artifact_id}/provenance")
-    def provenance(artifact_id: str, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def provenance(artifact_id: str, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return artifact_provenance(db, ident, artifact_id)
 
     @router.get("/editor-drafts/{key:path}")
-    def draft_read(key: str, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def draft_read(key: str, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return read_draft(db, ident, key)
 
     @router.put("/editor-drafts/{key:path}")
-    def draft_write(key: str, body: DraftRequest, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def draft_write(key: str, body: DraftRequest, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return save_draft(db, ident, key, body)
 
     @router.delete("/editor-drafts/{key:path}")
-    def draft_delete(key: str, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def draft_delete(key: str, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return delete_draft(db, ident, key)
 
     @router.get("/usage")
-    def usage(db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def usage(db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return usage_status(db, ident)
 
     @router.get("/providers/activity")
-    def provider_activity(db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def provider_activity(db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         snapshot = provider_settings()
         success = db.scalar(select(PromptRun).where(PromptRun.user_id == ident,
                             PromptRun.data["status"].as_string() == "COMPLETED",
@@ -61,13 +69,37 @@ def build_router(database_dep: Callable, user_dep: Callable):
                 "notice": "지원 작업의 실제 AI 응답 기록입니다. 연결 확인용 인사 요청과 현재 계정의 원격 잔액은 포함하지 않습니다."}
 
     @router.get("/usage/limits")
-    def usage_limits(db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def usage_limits(db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         value = usage_status(db, ident)
-        return {key: value[key] for key in ("limits", "defaults", "notice")}
+        return {key: value[key] for key in ("limits", "defaults", "notice", "managed", "operator_ceiling")}
 
     @router.put("/usage/limits")
-    def limits_write(body: dict, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def limits_write(body: dict, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return configure_usage(db, ident, body)
+
+    @router.get("/admin/service")
+    def service(after: str = Query("", max_length=64), prefix: str = Query("", max_length=64),
+                limit: int = Query(50, ge=1, le=100),
+                db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
+        from career.service_access import service_status
+
+        return service_status(db, ident, after, prefix, limit)
+
+    @router.put("/admin/service/members")
+    def member_write(body: MemberRequest, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
+        from career.service_access import configure_member
+
+        return configure_member(db, ident, body.user_id, body.status, body.limits)
+
+    @router.put("/admin/service/limits")
+    def shared_limits(body: dict, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
+        from career.db import Record
+        from career.service_access import SHARED_BUDGET_USER, require_operator
+
+        require_operator(ident)
+        result = configure_usage(db, SHARED_BUDGET_USER, body)
+        db.add(Record(user_id=ident, kind="SharedLimitChanged", data={"limits": result["limits"]}))
+        return result
 
     @router.get("/semantic/profile")
     def semantic_profile(ident: str = Depends(user_dep)):
@@ -75,27 +107,27 @@ def build_router(database_dep: Callable, user_dep: Callable):
 
     @router.get("/semantic/documents")
     def semantic_documents(kind: Literal["FACT", "EXPRESSION"] = "FACT", cursor: str | None = Query(None, max_length=64),
-                           db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+                           db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return documents(db, ident, kind, cursor)
 
     @router.post("/semantic/index")
-    def semantic_index(body: IndexRequest, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def semantic_index(body: IndexRequest, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return index(db, ident, body)
 
     @router.post("/semantic/search")
-    def semantic_find(body: SearchRequest, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def semantic_find(body: SearchRequest, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return semantic_search(db, ident, body)
 
     @router.post("/sources/upload")
-    def upload(body: UploadRequest, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def upload(body: UploadRequest, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return upload_preview(db, ident, body)
 
     @router.post("/sources/uploads/{source_id}/confirm")
-    def upload_confirm(source_id: str, body: UploadDecision, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def upload_confirm(source_id: str, body: UploadDecision, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         return confirm_upload(db, ident, source_id, body)
 
     @router.get("/sources/uploads/{source_id}/original")
-    def original(source_id: str, db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+    def original(source_id: str, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         source = owned(db, Source, ident, source_id)
         upload = source.data.get("upload", {})
         if source.status in {"DO_NOT_USE", "SUPERSEDED"} or not upload.get("original_base64"):
@@ -106,7 +138,7 @@ def build_router(database_dep: Callable, user_dep: Callable):
 
     @router.get("/applications/{workspace}/resume/download")
     def download(workspace: str, format: Literal["pdf", "docx"] = "pdf", artifact_id: str | None = None,
-                 db: Session = Depends(database_dep), ident: str = Depends(user_dep)):
+                 db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
         owned(db, Workspace, ident, workspace)
         item = (owned(db, Artifact, ident, artifact_id) if artifact_id
                 else latest(db, ident, workspace, "ResumeContent"))
@@ -121,5 +153,19 @@ def build_router(database_dep: Callable, user_dep: Callable):
         if result.pages is not None:
             headers["X-Page-Count"] = str(result.pages)
         return Response(result.content, media_type=result.media_type, headers=headers)
+
+    @router.get("/applications/{workspace}/packet")
+    def packet(workspace: str, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
+        from career.application_packet import packet_status
+
+        return packet_status(db, ident, workspace)
+
+    @router.get("/applications/{workspace}/packet/download")
+    def packet_download(workspace: str, db: Session = Depends(database_dep, scope="function"), ident: str = Depends(user_dep)):
+        from career.application_packet import download_packet
+
+        content = download_packet(db, ident, workspace)
+        return Response(content, media_type="application/zip", headers={"Cache-Control": "private, no-store",
+                        "Content-Disposition": 'attachment; filename="application-packet.zip"'})
 
     return router

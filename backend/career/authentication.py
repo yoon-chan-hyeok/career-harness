@@ -30,6 +30,7 @@ class AuthConfiguration:
     audience: str = "authenticated"
     algorithms: tuple[str, ...] = ("ES256", "RS256")
     allowed_subjects: tuple[str, ...] = ()
+    require_nonanonymous: bool = False
 
     @property
     def jwks_url(self) -> str:
@@ -37,11 +38,16 @@ class AuthConfiguration:
 
 
 def authentication_configuration() -> AuthConfiguration:
+    from career.access_config import access_mode
+
+    public = access_mode() == "public"
     mode = os.getenv("AUTH_MODE", "local").strip().lower()
     if mode not in {"local", "supabase"}:
         raise ValueError("AUTH_MODE must be local or supabase")
     if is_production() and (mode != "supabase" or os.getenv("AUTH_TOKENS", "").strip() not in {"", "{}"}):
         raise ValueError("Production requires Supabase Auth and forbids local AUTH_TOKENS")
+    if public and mode != "supabase":
+        raise ValueError("Public access requires Supabase Auth")
     if mode == "local":
         return AuthConfiguration(mode=mode)
     origin = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
@@ -68,7 +74,7 @@ def authentication_configuration() -> AuthConfiguration:
     subjects = tuple(x.strip() for x in os.getenv("CAREER_ALLOWED_USER_IDS", "").split(",") if x.strip())
     for subject in subjects:
         UUID(subject)
-    return AuthConfiguration(mode, issuer, audience, algorithms, subjects)
+    return AuthConfiguration(mode, issuer, audience, algorithms, subjects, public)
 
 
 class SupabaseVerifier:
@@ -114,6 +120,9 @@ class SupabaseVerifier:
         self._expires = time.monotonic() + 600
 
     def verify(self, token: str) -> str:
+        return str(self.verify_claims(token)["sub"])
+
+    def verify_claims(self, token: str) -> dict[str, Any]:
         try:
             header = jwt.get_unverified_header(token)
             kid, algorithm = header.get("kid"), header.get("alg")
@@ -150,9 +159,11 @@ class SupabaseVerifier:
             subject = str(UUID(claims["sub"]))
             if claims["role"] != "authenticated" or claims.get("is_anonymous") is True:
                 raise jwt.InvalidTokenError()
+            if self.config.require_nonanonymous and claims.get("is_anonymous") is not False:
+                raise jwt.InvalidTokenError()
             if self.config.allowed_subjects and subject not in self.config.allowed_subjects:
                 raise HTTPException(403, "이 서비스 이용 권한이 없습니다.")
-            return subject
+            return {**claims, "sub": subject}
         except (jwt.PyJWTError, ValueError, TypeError, KeyError):
             raise HTTPException(401, AUTH_ERROR, headers={"WWW-Authenticate": "Bearer"}) from None
 
@@ -192,6 +203,13 @@ def authenticate(authorization: str | None) -> str:
     if not token or len(token) > 16384 or any(c.isspace() for c in token):
         raise HTTPException(401, AUTH_ERROR)
     if config.mode == "supabase":
+        from dataclasses import replace
+
+        from career.service_access import shared_service
+
+        if shared_service():
+            # Identity validation stays here; dynamic invite/revocation checks run in API dependency.
+            config = replace(config, allowed_subjects=())
         return configured_verifier(config).verify(token)
     try:
         tokens = json.loads(os.getenv("AUTH_TOKENS", "{}"))
@@ -205,3 +223,33 @@ def authenticate(authorization: str | None) -> str:
     except (ValueError, TypeError):
         raise HTTPException(503, "로그인 설정을 확인해 주세요.") from None
     raise HTTPException(401, AUTH_ERROR, headers={"WWW-Authenticate": "Bearer"})
+
+
+def require_recent_otp(authorization: str | None, user: str, max_age_seconds: int = 300) -> None:
+    """Destructive account actions require a signed fresh OTP AMR, never a fresh token iat."""
+    from dataclasses import replace
+
+    try:
+        config = authentication_configuration()
+    except ValueError:
+        raise HTTPException(503, "로그인 설정을 확인해 주세요.") from None
+    if config.mode != "supabase" or not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "이메일 인증 코드를 다시 확인한 뒤 진행해 주세요.")
+    token = authorization[7:]
+    if not token or len(token) > 16384 or any(c.isspace() for c in token):
+        raise HTTPException(401, AUTH_ERROR)
+    claims = configured_verifier(replace(config, allowed_subjects=())).verify_claims(token)
+    if claims["sub"] != user:
+        raise HTTPException(401, AUTH_ERROR)
+    instant = time.time()
+    amr = claims.get("amr", [])
+    if not isinstance(amr, list) or not any(
+        isinstance(item, dict) and item.get("method") == "otp"
+        and isinstance(item.get("timestamp"), (int, float)) and not isinstance(item["timestamp"], bool)
+        and instant - max_age_seconds <= item["timestamp"] <= instant + 10
+        for item in amr
+    ):
+        raise HTTPException(401, "이메일 인증 코드를 다시 확인한 뒤 5분 안에 진행해 주세요.")
+    from career.public_service import verify_confirmed_email
+
+    verify_confirmed_email(user, authorization)

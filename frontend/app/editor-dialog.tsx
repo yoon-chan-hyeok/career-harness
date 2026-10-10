@@ -9,7 +9,11 @@ import {
   useState,
 } from "react";
 import type { Request } from "./api-client";
-import { editableDraftFields, serializeDraftFields } from "./draft-fields";
+import {
+  draftHasChanges,
+  editableDraftFields,
+  serializeDraftFields,
+} from "./draft-fields";
 
 type FieldValue = { value: string; kind: string };
 type Payload = Record<string, FieldValue>;
@@ -44,6 +48,27 @@ function fields(dialog: HTMLDialogElement) {
 }
 function snapshot(dialog: HTMLDialogElement): Payload {
   return serializeDraftFields(fields(dialog));
+}
+
+function modifiedFields(dialog: HTMLDialogElement | null, baseline: Payload) {
+  if (!dialog) return false;
+  // Asynchronously loaded forms are initially clean. Compare their actual
+  // defaults rather than treating newly visible inputs as user edits.
+  const defaults = serializeDraftFields(
+    fields(dialog).map((field) => ({
+      name: field.name,
+      id: field.id,
+      type: field.type,
+      value:
+        field instanceof HTMLSelectElement
+          ? (Array.from(field.options).find((option) => option.defaultSelected)
+              ?.value ??
+            field.options[0]?.value ??
+            "")
+          : field.defaultValue,
+    })),
+  );
+  return draftHasChanges(snapshot(dialog), baseline, defaults);
 }
 
 export const EditorDialog = forwardRef<
@@ -108,9 +133,7 @@ export const EditorDialog = forwardRef<
       keys.forEach((key) => {
         baseline.current[key] = saved[key];
       });
-      const modified =
-        JSON.stringify(dialog.current ? snapshot(dialog.current) : {}) !==
-        JSON.stringify(baseline.current);
+      const modified = modifiedFields(dialog.current, baseline.current);
       setDirty(modified);
       if (timer.current) clearTimeout(timer.current);
       if (modified)
@@ -181,9 +204,7 @@ export const EditorDialog = forwardRef<
   }, [confirmLeave]);
   const changed = () => {
     if (!dialog.current) return;
-    const modified =
-      JSON.stringify(snapshot(dialog.current)) !==
-      JSON.stringify(baseline.current);
+    const modified = modifiedFields(dialog.current, baseline.current);
     setDirty(modified);
     if (timer.current) clearTimeout(timer.current);
     if (modified) {

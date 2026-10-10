@@ -62,3 +62,27 @@ def test_mapping_rejects_invented_hook_before_question_writer_can_see_it(flow):
     item["understandable_hook"] = "Invented result"
     with pytest.raises(ValueError, match="원문"):
         service.map_evidence(ws.id, {"items": [item], "uncovered_outputs": []})
+
+
+def test_direct_single_question_action_cannot_bypass_missing_portfolio(flow):
+    service, ws, evidence = flow
+    service.approve_strategy(ws.id)
+    q = service.add_question(ws.id, "지원동기", 1000)
+    service.add_question(ws.id, "역량", 1000)
+    with pytest.raises(ValueError, match="여러 문항"):
+        service.question_brief(ws.id, q["id"], {"question_id": q["id"], "question_type": "MOTIVATION",
+            "evaluation_intent": "선택 이유", "primary_message": "평가 경험", "evidence_ids": [evidence.id]})
+
+
+def test_adding_second_question_invalidates_old_single_question_approval(flow):
+    from test_workflow import doc, question
+
+    service, ws, evidence = flow
+    service.approve_strategy(ws.id)
+    q = question(service, ws, evidence)
+    service.approve_question(ws.id, q["id"])
+    document = service.draft(ws.id, q["id"], doc(evidence))
+    service.add_question(ws.id, "협업", 1000)
+    assert document.status == "STALE"
+    with pytest.raises(ValueError):
+        service.draft(ws.id, q["id"], doc(evidence))

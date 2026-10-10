@@ -73,6 +73,7 @@ def workflow_ablation(service, workspace, question_id, systems=("B0", "B1", "B2"
                     flow.approve_strategy(clone.id)
                     q = flow.add_question(clone.id, question["text"], question["limit"])
                     flow.question_brief(clone.id, q["id"])
+                    flow.test_claim(clone.id, q["id"])
                     flow.approve_question(clone.id, q["id"])
                     document = flow.draft(clone.id, q["id"])
                     evidence = flow.selected(document.data["selected_evidence_ids"])

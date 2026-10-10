@@ -275,7 +275,8 @@ def test_cost_limit_blocks_unknown_price_before_call_and_returns_unused_capacity
             "cache_write_usd_per_million": 2, "output_usd_per_million": 8}}))
         with request_budget_scope(db, "owner", "provider_check") as quota:
             ticket = quota.draw(StagePolicy("known", max_output_tokens=100), 100)
-            quota.settle_call(ticket, "known", {"input_tokens": 50, "output_tokens": 20, "input_tokens_details": {}})
+            quota.settle_call(ticket, "known", {"input_tokens": 50, "output_tokens": 20,
+                                               "input_tokens_details": {"cached_tokens": 0}})
         state = usage_status(db, "owner")["daily"]
         assert state["calls"] == 1 and state["tokens"] == 70
         assert 0.00026 <= state["estimated_cost_usd"] <= 0.000261

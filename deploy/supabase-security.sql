@@ -9,7 +9,7 @@ DECLARE
   career_tables text[] := ARRAY[
     'users','domain_records','sources','career_facts','evidences','artifacts',
     'application_workspaces','artifact_feedback_events','document_revision_events','prompt_runs',
-    'execution_runs','ai_usage_settings','ai_usage_buckets','ai_usage_reservations',
+    'execution_runs','ai_usage_settings','ai_usage_buckets','ai_usage_reservations','service_members','request_rate_buckets',
     'editor_drafts','local_evidence_embeddings','projects','decision_episodes','metrics','ownership_records','claim_boundaries',
     'writing_rules','expression_records','capability_records','opportunities','application_questions',
     'opportunity_job_outputs','opportunity_evidence_maps','artifact_dependencies','draft_versions',

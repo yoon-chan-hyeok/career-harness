@@ -1,4 +1,3 @@
-import json
 import os
 import time
 from collections.abc import Callable
@@ -15,6 +14,8 @@ from openai import (
 )
 from pydantic import BaseModel
 
+from career.cache_metrics import cache_observation
+from career.prompt_cache import prepare
 from career.prompts import COMMON_SYSTEM, instructions_for, prompt_version
 from career.provider_policy import (
     BudgetExceeded,
@@ -64,6 +65,9 @@ class LLMProvider(Protocol):
 
 
 class OpenAIProvider:
+    def _validate_input(self, policy: StagePolicy, request_data: dict[str, Any]) -> int:
+        return validate_request_input(policy, request_data)
+
     trace_emitting = True
     provider_name = "OpenAI"
 
@@ -87,6 +91,7 @@ class OpenAIProvider:
         read: Callable[[Any], R],
         policy: StagePolicy | None = None,
         count_tools: Callable[[Any], int | None] | None = None,
+        cache_metadata: dict[str, str] | None = None,
     ) -> R:
         start = time.monotonic()
         trace: dict[str, Any] = {
@@ -99,6 +104,7 @@ class OpenAIProvider:
             "retry_count": getattr(self, "observed_retry_count", None),
             "status": "RUNNING",
         }
+        trace.update(cache_metadata or {})
         response = None
         envelope = ticket = None
         try:
@@ -106,7 +112,7 @@ class OpenAIProvider:
             trace.update({"timeout_seconds": policy.timeout_seconds, "max_output_tokens": policy.max_output_tokens,
                           "max_input_tokens": policy.max_input_tokens, "max_cost_usd": policy.max_cost_usd})
             validate_cost_configuration(policy, uses_tools=count_tools is not None)
-            input_estimate = validate_request_input(policy, request_data)
+            input_estimate = self._validate_input(policy, request_data)
             validate_request_cost(policy, input_estimate, uses_tools=count_tools is not None)
             from career.usage_limits import usage_envelope
 
@@ -142,8 +148,16 @@ class OpenAIProvider:
             ) from None
         finally:
             usage = getattr(response, "usage", None)
+            raw_usage = usage.model_dump() if usage is not None and hasattr(usage, "model_dump") else usage
             if usage is not None:
-                trace["usage"] = numeric_metadata(usage.model_dump() if hasattr(usage, "model_dump") else usage)
+                trace["usage"] = numeric_metadata(raw_usage)
+            if operation != "embed":
+                observation = cache_observation(raw_usage)
+                trace.update({"cache_status": observation["status"],
+                              "cache_input_tokens": observation["input_tokens"],
+                              "cached_input_tokens": observation["cached_tokens"],
+                              "cache_write_tokens": observation["cache_write_tokens"],
+                              "cache_hit_ratio": observation["hit_ratio"]})
             if envelope is not None and ticket is not None:
                 envelope.settle_call(ticket, model, trace.get("usage"),
                                      trace.get("tool_calls", None if count_tools is not None else 0))
@@ -160,11 +174,15 @@ class OpenAIProvider:
         operation: str = "structured",
     ) -> T:
         policy = stage_policy(prompt_id, self.model)
+        schema_data = schema.model_json_schema()
+        prompt = prepare(prompt_id, context, instructions_for(prompt_id), policy.model, "openai", schema_data)
+        cache_arguments: dict[str, Any] = {"prompt_cache_key": prompt.key} if prompt.key else {}
         request_data = {
             "model": policy.model,
-            "instructions": instructions_for(prompt_id),
-            "input": json.dumps(context, ensure_ascii=False, default=str),
-            "schema": schema.model_json_schema(),
+            "instructions": prompt.instructions,
+            "input": prompt.content,
+            "schema": schema_data,
+            **cache_arguments,
         }
 
         def parsed(response) -> T:
@@ -186,17 +204,22 @@ class OpenAIProvider:
                 store=False,
                 timeout=bounded_policy(policy).timeout_seconds,
                 max_output_tokens=policy.max_output_tokens,
+                **cache_arguments,
             ),
             parsed,
             policy=policy,
+            cache_metadata={"prompt_cache_scope": prompt.scope, "prompt_cache_layout_version": prompt.layout_version},
         )
 
     def generate(self, prompt_id: str, context: dict[str, Any]) -> str:
         policy = stage_policy(prompt_id, self.model)
+        prompt = prepare(prompt_id, context, instructions_for(prompt_id), policy.model, "openai")
+        cache_arguments: dict[str, Any] = {"prompt_cache_key": prompt.key} if prompt.key else {}
         request_data = {
             "model": policy.model,
-            "instructions": instructions_for(prompt_id),
-            "input": json.dumps(context, ensure_ascii=False, default=str),
+            "instructions": prompt.instructions,
+            "input": prompt.content,
+            **cache_arguments,
         }
 
         def text(response) -> str:
@@ -212,9 +235,11 @@ class OpenAIProvider:
             lambda: self.client.responses.create(
                 model=policy.model, instructions=request_data["instructions"], input=request_data["input"], store=False,
                 timeout=bounded_policy(policy).timeout_seconds, max_output_tokens=policy.max_output_tokens,
+                **cache_arguments,
             ),
             text,
             policy=policy,
+            cache_metadata={"prompt_cache_scope": prompt.scope, "prompt_cache_layout_version": prompt.layout_version},
         )
 
     def embed(self, texts: list[str]) -> list[list[float]]:
@@ -292,10 +317,14 @@ class OpenAIWebResearchProvider:
 
     def research(self, company: str, role: str, jd_input: str) -> ResearchResult:
         policy = stage_policy("web_search", self.llm.model)
+        prompt = prepare("web_search", {"company": company, "role": role, "jd_untrusted": jd_input},
+                         instructions_for("web_search"), policy.model, "openai", {"tools": [{"type": "web_search"}]})
+        cache_arguments: dict[str, Any] = {"prompt_cache_key": prompt.key} if prompt.key else {}
         request_data = {
             "model": policy.model,
-            "instructions": instructions_for("web_search"),
-            "input": json.dumps({"company": company, "role": role, "jd_untrusted": jd_input}, ensure_ascii=False),
+            "instructions": prompt.instructions,
+            "input": prompt.content,
+            **cache_arguments,
         }
         def searched(response):
             if getattr(response, "status", "completed") != "completed" or not response.output_text:
@@ -317,10 +346,12 @@ class OpenAIWebResearchProvider:
                 model=policy.model, instructions=request_data["instructions"], input=request_data["input"],
                 tools=[{"type": "web_search"}], store=False,
                 timeout=bounded_policy(policy).timeout_seconds, max_output_tokens=policy.max_output_tokens,
+                **cache_arguments,
             ),
             searched,
             policy=policy,
             count_tools=tools,
+            cache_metadata={"prompt_cache_scope": prompt.scope, "prompt_cache_layout_version": prompt.layout_version},
         )
         citations = []
         for output in response.output:

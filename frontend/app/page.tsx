@@ -21,7 +21,16 @@ import { KnowledgeSearch, SemanticMapping } from "./knowledge-search";
 import { CorrectionInbox, RuleControls } from "./correction-controls";
 import { ProviderSettings } from "./provider-settings";
 import { AdminConsole } from "./admin-console";
+import { PublicEntry, Onboarding, PublicFooter } from "./public-entry";
+import { AccountSettings } from "./account-settings";
+import { loadPublicService, type PublicService } from "./public-service";
 import { ExperienceOptions } from "./experience-options";
+import { ClaimEvidencePanel } from "./claim-evidence-test";
+import { ReviewResponsePanel, responsesComplete } from "./review-responses";
+import { ResearchStatus } from "./research-status";
+import { ResearchPanel } from "./research-panel";
+import { ExpressionLibrary } from "./expression-library";
+import { FinalReview } from "./final-review";
 import {
   accessToken,
   clearSession,
@@ -100,20 +109,54 @@ const kindLabels: Record<string, string> = {
   EvidencePack: "직무별 근거",
   ApplicationBrief: "지원 전략",
   QuestionBrief: "문항 메시지",
+  ClaimEvidenceTest: "메시지 근거 검증",
   QuestionPortfolio: "문항별 역할",
   Draft: "자기소개서",
   ResumeBrief: "이력서 구성",
   ResumeContent: "이력서",
   Review: "문항 검수",
   ResumeReview: "이력서 검수",
+  ReviewResponses: "문항 검수 답변",
+  ResumeReviewResponses: "이력서 검수 답변",
   ExperienceSelection: "선택한 경험",
   PortfolioReview: "전체 문서 검수",
   SubmissionBundle: "제출 보관본",
   InterviewHandoff: "면접 준비",
   Postmortem: "결과 회고",
   CompanyResearchResult: "회사 조사",
+  ResearchReview: "채용 배경 확인",
+  ApprovedExpression: "승인한 표현",
+  FinalSubmissionReview: "직업 정체성·마지막 세 질문",
 };
 const fieldLabels: Record<string, string> = {
+  final_questions: "제출 당시 확인한 마지막 세 질문",
+  role_noun: "문서에서 드러나는 직업 명칭",
+  assignment_answer: "맡길 수 있는 업무",
+  motivation_answer: "본업을 하고 싶은 이유",
+  evidence_answer: "경험이 업무 역량의 근거가 되는 이유",
+  gaps_answer: "남아 있는 공백과 한계",
+  return_stage: "돌아가서 보완할 단계",
+  expression_usage: "이번 작성에 참고한 승인 표현",
+  original_excerpt_rechecked: "원문을 현재 근거로 재대조함",
+  source_documents: "조사 원문",
+  extraction_status: "자료 정리 상태",
+  why_now_proposals: "채용 배경 가설 후보",
+  research_id: "조사 버전",
+  limitation: "미확인 정보와 한계",
+  scope_reviewed: "조사 범위 확인",
+  why_now_confirmed: "채용 배경 가설 확인",
+  reviewed_at: "확인 일시",
+  scope: "조사 범위",
+  research_complete: "전체 조사 완료",
+  review_responses: "제출 당시 확인한 검수 답변",
+  response_tasks: "답변·처리가 필요한 질문",
+  entries: "질문별 답변",
+  answer: "내 답변",
+  verification_rationale: "답변 확인 결과",
+  category: "확인할 내용",
+  task: "검수 질문",
+  unanswered_task_ids: "아직 답하지 않은 질문",
+  fact_authority: "사실 자료로 사용 가능 여부",
   implementation_status: "진행·검증 범위",
   measurement_context: "측정 환경",
   measured_at: "측정 시점",
@@ -206,7 +249,7 @@ const fieldLabels: Record<string, string> = {
   constraint: "제약",
   observation: "관찰",
   options: "비교한 선택지",
-  action: "실행",
+  action: "행동·처리",
   outcome: "결과",
   lesson: "배운 점",
   summary: "요약",
@@ -346,6 +389,26 @@ function Field({
 }
 const ReferenceNames = createContext<Record<string, string>>({});
 const valueLabels: Record<string, string> = {
+  JD_ONLY: "등록한 공고 기준",
+  SOURCE_BACKED_PARTIAL: "등록한 출처 범위",
+  HYPOTHESIS: "공개 근거에 따른 가설",
+  INSUFFICIENT: "자료 부족을 확인하고 진행",
+  NEEDS_EXTRACTION: "원문 정보 정리 필요",
+  EXTRACTED: "원문 인용과 함께 정리됨",
+  COLLECTED_PUBLIC_SOURCES: "공개 자료 원문 수집",
+  QUOTED_SOURCE_RESEARCH: "인용에 근거한 조사 정리",
+  RESOLVED: "처리 완료",
+  NEEDS_ACTION: "보완 필요",
+  MIXED_REVIEW: "직접 대조와 AI 검토",
+  ANSWER_WITH_EVIDENCE: "현재 근거로 답변",
+  REVISE_DOCUMENT: "문서에서 보완",
+  ADD_EVIDENCE: "근거 보완 후 재검수",
+  INTERVIEW_PREP: "면접 답변 준비",
+  ACKNOWLEDGE_GAP: "공백 인정과 대응",
+  GROUNDING: "사실 확인",
+  JOB_MOTIVATION: "본업·지원 의향",
+  INTERVIEW_PREPARATION: "면접 설명",
+  RECRUITER_RISK: "채용 관점의 위험",
   IMPLEMENTED: "구현함",
   EXPERIMENT_VERIFIED: "실험으로 검증함",
   PARTIAL_EXPLORATORY: "부분 구현·탐색",
@@ -477,6 +540,9 @@ function DataView({ data }: { data: Json }) {
               "candidate_rule_ids",
               "submission_bundle_id",
               "retrieval_metadata",
+              "source_documents",
+              "extraction_citations",
+              "research_id",
             ].includes(k),
         )
         .map(([k, v]) => (
@@ -959,6 +1025,13 @@ export default function Home() {
   const [authConfiguration, setAuthConfiguration] =
     useState<AuthConfiguration | null>(null);
   const [authConfigurationError, setAuthConfigurationError] = useState("");
+  const [publicService, setPublicService] = useState<PublicService | null>(
+    null,
+  );
+  const [onboardingVersion, setOnboardingVersion] = useState<string | null>(
+    null,
+  );
+  const [accountOnly, setAccountOnly] = useState(false);
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState("");
   const [token, setToken] = useState(""),
@@ -984,6 +1057,8 @@ export default function Home() {
               : token;
           } catch (error) {
             setAuthenticated(false);
+            setOnboardingVersion(null);
+            setAccountOnly(false);
             setWs(null);
             setList([]);
             setEvidence([]);
@@ -994,10 +1069,13 @@ export default function Home() {
         },
         () => {
           setAuthenticated(false);
+          setOnboardingVersion(null);
+          setAccountOnly(false);
           setWs(null);
           setList([]);
           setEvidence([]);
           setTrace(null);
+          setQid("");
           if (authConfiguration?.provider === "supabase") clearSession();
         },
       ),
@@ -1147,11 +1225,14 @@ export default function Home() {
     const saved = sessionStorage.getItem("career-token");
     if (saved) setToken(saved);
     let active = true;
-    fetch("/api/auth/config", {
-      cache: "no-store",
-      signal: AbortSignal.timeout(15000),
-    })
-      .then(async (response) => {
+    Promise.all([
+      fetch("/api/auth/config", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+      }),
+      loadPublicService(),
+    ])
+      .then(async ([response, service]) => {
         if (!response.ok) throw new Error("로그인 설정을 불러오지 못했습니다.");
         const config: AuthConfiguration = await response.json();
         if (!active) return;
@@ -1161,6 +1242,7 @@ export default function Home() {
           setToken("");
         }
         setAuthConfiguration(config);
+        setPublicService(service);
       })
       .catch(() => {
         if (active)
@@ -1183,6 +1265,20 @@ export default function Home() {
       if (authConfiguration?.provider === "supabase" && !restore) {
         await signIn(email, password);
         setPassword("");
+      }
+      if (publicService?.access_mode === "public") {
+        const account = await request("/account");
+        if (account.status === "CLOSED") {
+          setAccountOnly(true);
+          return;
+        }
+        setAccountOnly(false);
+        const onboarding = await request("/account/onboarding");
+        if (onboarding.required) {
+          setOnboardingVersion(onboarding.current_version);
+          return;
+        }
+        setOnboardingVersion(null);
       }
       const settings = await request("/settings");
       if (authConfiguration?.provider === "local")
@@ -1220,6 +1316,23 @@ export default function Home() {
   const [showEditor, setShowEditor] = useState(false);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("전체");
+  const disconnect = async () => {
+    try {
+      if (authConfiguration?.provider === "supabase") await signOut();
+    } finally {
+      clearSession();
+      sessionStorage.removeItem("career-token");
+      setToken("");
+      setAuthenticated(false);
+      setOnboardingVersion(null);
+      setAccountOnly(false);
+      setWs(null);
+      setList([]);
+      setEvidence([]);
+      setTrace(null);
+      setQid("");
+    }
+  };
   const filtered = list.filter(
     (w) =>
       (w.company + " " + w.role).toLowerCase().includes(query.toLowerCase()) &&
@@ -1228,6 +1341,64 @@ export default function Home() {
           ? ["SUBMITTED", "CLOSED"].includes(w.state)
           : !["SUBMITTED", "CLOSED"].includes(w.state))),
   );
+  if (!publicService || !authConfiguration)
+    return (
+      <main className="public-page">
+        <section className="onboarding-card">
+          <h1>Career Harness</h1>
+          <p role={authConfigurationError ? "alert" : "status"}>
+            {authConfigurationError || "작업실을 준비하고 있습니다…"}
+          </p>
+          {authConfigurationError && (
+            <button onClick={() => window.location.reload()}>
+              다시 불러오기
+            </button>
+          )}
+        </section>
+      </main>
+    );
+  if (publicService.access_mode === "public" && accountOnly)
+    return (
+      <main className="public-page">
+        <section className="onboarding-card">
+          <h1>내 계정 관리</h1>
+          <AccountSettings
+            request={request}
+            service={publicService}
+            onDeleted={disconnect}
+          />
+          <div className="public-actions">
+            <button className="secondary" onClick={() => void login(true)}>
+              작업실로 돌아가기
+            </button>
+            <button className="secondary" onClick={() => void run(disconnect)}>
+              로그아웃
+            </button>
+          </div>
+        </section>
+        <PublicFooter service={publicService} />
+      </main>
+    );
+  if (publicService.access_mode === "public" && onboardingVersion)
+    return (
+      <Onboarding
+        service={publicService}
+        version={onboardingVersion}
+        request={request}
+        onAccepted={() => login(true)}
+        onCancel={() => void run(disconnect, "로그아웃했습니다.")}
+        onAccount={() => setAccountOnly(true)}
+      />
+    );
+  if (publicService.access_mode === "public" && !authenticated)
+    return (
+      <PublicEntry
+        service={publicService}
+        onLogin={() => login(true)}
+        message={error}
+        busy={busy}
+      />
+    );
   return (
     <ReferenceNames.Provider
       value={Object.fromEntries([
@@ -1384,7 +1555,8 @@ export default function Home() {
               </p>
             )}
             {busy && <p role="status">처리 중입니다…</p>}
-            {!authenticated || screen === "설정" ? (
+            {(!authenticated || screen === "설정") &&
+            publicService.access_mode !== "public" ? (
               <section>
                 <h3>개인 작업 공간 연결</h3>
                 {authConfigurationError && (
@@ -1483,10 +1655,29 @@ export default function Home() {
             ) : null}
             {authenticated && screen === "설정" && (
               <section>
-                <ProviderSettings
-                  request={request}
-                  onChanged={refreshAiAvailability}
-                />
+                {publicService.access_mode === "public" && (
+                  <>
+                    <AccountSettings
+                      request={request}
+                      service={publicService}
+                      onDeleted={disconnect}
+                    />
+                    <button
+                      className="secondary"
+                      disabled={busy}
+                      onClick={() => void run(disconnect, "로그아웃했습니다.")}
+                    >
+                      로그아웃
+                    </button>
+                    <PublicFooter service={publicService} />
+                  </>
+                )}
+                {(publicService.access_mode !== "public" || adminAccess) && (
+                  <ProviderSettings
+                    request={request}
+                    onChanged={refreshAiAvailability}
+                  />
+                )}
                 <UsageSettings request={request} />
                 <ReferenceSettings
                   request={request}
@@ -1497,40 +1688,44 @@ export default function Home() {
                   refresh={() => refresh(ws?.id)}
                 />
                 <RuleControls request={request} />
-                <div className="admin-settings-entry">
-                  <div>
-                    <h3>관리자 페이지</h3>
-                    <p className="muted">
-                      내 계정의 운영 현황과 소스 저장소 연결을 확인합니다.
-                    </p>
+                {adminAccess && (
+                  <div className="admin-settings-entry">
+                    <div>
+                      <h3>관리자 페이지</h3>
+                      <p className="muted">
+                        내 계정의 운영 현황과 소스 저장소 연결을 확인합니다.
+                      </p>
+                    </div>
+                    <button
+                      className="secondary"
+                      onClick={() => navigateScreen("관리자")}
+                    >
+                      관리자 페이지 열기 →
+                    </button>
                   </div>
-                  <button
-                    className="secondary"
-                    onClick={() => navigateScreen("관리자")}
-                  >
-                    관리자 페이지 열기 →
-                  </button>
-                </div>
+                )}
                 <h3>내 데이터 관리</h3>
-                <button
-                  disabled={busy}
-                  onClick={() =>
-                    void run(async () => {
-                      const data = await request("/export");
-                      const link = document.createElement("a");
-                      link.href = URL.createObjectURL(
-                        new Blob([JSON.stringify(data, null, 2)], {
-                          type: "application/json",
-                        }),
-                      );
-                      link.download = "career-private-export.json";
-                      link.click();
-                      URL.revokeObjectURL(link.href);
-                    }, "개인 자료 내려받기를 시작했습니다.")
-                  }
-                >
-                  내 자료 전체 내려받기
-                </button>
+                {publicService.access_mode !== "public" && (
+                  <button
+                    disabled={busy}
+                    onClick={() =>
+                      void run(async () => {
+                        const data = await request("/export");
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(
+                          new Blob([JSON.stringify(data, null, 2)], {
+                            type: "application/json",
+                          }),
+                        );
+                        link.download = "career-private-export.json";
+                        link.click();
+                        URL.revokeObjectURL(link.href);
+                      }, "개인 자료 내려받기를 시작했습니다.")
+                    }
+                  >
+                    내 자료 전체 내려받기
+                  </button>
+                )}
                 <p className="muted">
                   원자료 삭제는 관련 근거를 무효화합니다. 이미 보관한 제출본은
                   과거 기록으로 유지됩니다. 제출본까지 지우려면 해당 지원 작업을
@@ -1600,6 +1795,12 @@ export default function Home() {
               <AdminConsole
                 request={request}
                 onSettings={() => navigateScreen("설정")}
+                onOpenApplication={(id) =>
+                  navigate(() => {
+                    setScreen("지원 기회");
+                    void run(() => refresh(id), "지원 작업을 열었습니다.");
+                  })
+                }
               />
             )}
             {authenticated && screen === "지원 기회" && !ws && (
@@ -1924,6 +2125,7 @@ export default function Home() {
               <>
                 <ConversationWorkspace
                   key={ws.id}
+                  send={api.send}
                   workspace={ws}
                   questionId={qid}
                   qSelect={setQid}
@@ -2029,6 +2231,24 @@ export default function Home() {
                     </nav>
                     {stage === stages[0] && (
                       <>
+                        <ResearchStatus
+                          research={latest("CompanyResearchResult")}
+                          review={latest("ResearchReview")}
+                        />
+                        <ResearchPanel
+                          research={latest("CompanyResearchResult")}
+                          review={latest("ResearchReview")}
+                          jd={ws.jd_raw}
+                          ai={ai}
+                          act={act}
+                          editable={
+                            ![
+                              "SUBMISSION_FROZEN",
+                              "SUBMITTED",
+                              "CLOSED",
+                            ].includes(ws.state)
+                          }
+                        />
                         <Card a={latest("OpportunityBrief")} />
                         <Panel
                           title="직무 분석"
@@ -2049,6 +2269,15 @@ export default function Home() {
                               act("analyze", {
                                 manual: {
                                   ...(latest("OpportunityBrief")?.data || {}),
+                                  company_facts: [
+                                    ...((latest("CompanyResearchResult")?.data
+                                      .official_facts || []) as Data[]),
+                                    ...((latest("CompanyResearchResult")?.data
+                                      .external_evidence || []) as Data[]),
+                                  ],
+                                  company_inferences:
+                                    latest("CompanyResearchResult")?.data
+                                      .inferences || [],
                                   actual_outputs: lines(v.outputs),
                                   base_profession: v.profession,
                                   main_skills: lines(v.skills),
@@ -2188,71 +2417,6 @@ export default function Home() {
                               </label>
                             ))}
                             <button disabled={busy}>직무 분석 저장</button>
-                          </form>
-                        </Panel>
-                        <Panel title="회사 근거 직접 등록">
-                          <p className="muted">
-                            직접 확인한 출처와 날짜를 기록합니다. 기존 조사
-                            자료를 교체하면 연결된 분석은 재검토 상태가 됩니다.
-                          </p>
-                          <form
-                            onSubmit={submit((v) => {
-                              const stamp = new Date().toISOString();
-                              return act("research", {
-                                manual: {
-                                  official_facts: [],
-                                  external_evidence: [
-                                    {
-                                      statement: v.fact,
-                                      source_id: "manual-company-source",
-                                      source_type: "USER_SUPPLIED",
-                                      published_at: v.date || null,
-                                      retrieved_at: stamp,
-                                      freshness: v.freshness,
-                                    },
-                                  ],
-                                  role_signals: [],
-                                  historical_jd_signals: [],
-                                  selection_process_signals: [],
-                                  inferences: [],
-                                  sources: [
-                                    {
-                                      id: "manual-company-source",
-                                      url: v.url,
-                                      title: v.title,
-                                      published_at: v.date || null,
-                                      retrieved_at: stamp,
-                                    },
-                                  ],
-                                },
-                              });
-                            })}
-                          >
-                            <Field name="title" label="자료 제목" />
-                            <Field name="url" label="출처 주소" type="url" />
-                            <Field
-                              name="date"
-                              label="자료 게시일 (알 수 없으면 비워 두세요)"
-                              type="date"
-                            />
-                            <Field
-                              name="fact"
-                              label="출처에서 직접 확인한 회사 사실"
-                              area
-                            />
-                            <label>
-                              정보 시점
-                              <select name="freshness">
-                                <option value="UNKNOWN">
-                                  현재 유효한지 확인하지 않음
-                                </option>
-                                <option value="CURRENT">
-                                  현재도 유효함을 확인
-                                </option>
-                                <option value="DATED">과거 시점 자료</option>
-                              </select>
-                            </label>
-                            <button disabled={busy}>회사 근거 저장</button>
                           </form>
                         </Panel>
                         <Card a={latest("CompanyResearchResult")} />
@@ -2511,7 +2675,24 @@ export default function Home() {
                                       question_type: v.type,
                                       evaluation_intent: v.intent,
                                       primary_message: v.message,
-                                      evidence_ids: [v.evidence],
+                                      evidence_ids: Array.from(
+                                        new Set([
+                                          v.evidence,
+                                          ...Object.entries(v)
+                                            .filter(
+                                              ([key, value]) =>
+                                                key.startsWith("supporting_") &&
+                                                value === "on",
+                                            )
+                                            .map(([key]) =>
+                                              key.slice("supporting_".length),
+                                            ),
+                                        ]),
+                                      ),
+                                      supporting_claims: (v.claims || "")
+                                        .split("\n")
+                                        .map((s) => s.trim())
+                                        .filter(Boolean),
                                       decision: v.decision,
                                       insight: v.insight,
                                       job_relevance: v.relevance,
@@ -2537,6 +2718,7 @@ export default function Home() {
                                     <option value="STRENGTH_WEAKNESS">
                                       강점·약점
                                     </option>
+                                    <option value="OTHER">포부·기타</option>
                                   </select>
                                 </label>
                                 <Field name="intent" label="평가하려는 것" />
@@ -2545,7 +2727,7 @@ export default function Home() {
                                   label="이 문항에서 남길 핵심 메시지"
                                 />
                                 <label>
-                                  선택 근거
+                                  주된 경험
                                   <select
                                     name="evidence"
                                     key={
@@ -2575,6 +2757,40 @@ export default function Home() {
                                       ))}
                                   </select>
                                 </label>
+                                <details>
+                                  <summary>
+                                    같은 메시지를 뒷받침하는 경험 추가
+                                  </summary>
+                                  <p className="muted">
+                                    경험이 여러 개여도 이 문항의 핵심 메시지는
+                                    하나로 유지합니다.
+                                  </p>
+                                  {good
+                                    .filter((e) =>
+                                      (
+                                        (latest("EvidencePack")?.data
+                                          .items as Data[]) || []
+                                      ).some(
+                                        (i) =>
+                                          i.evidence_id === e.id &&
+                                          i.classification !== "NO_EVIDENCE",
+                                      ),
+                                    )
+                                    .map((e) => (
+                                      <label className="check" key={e.id}>
+                                        <input
+                                          type="checkbox"
+                                          name={`supporting_${e.id}`}
+                                        />
+                                        {e.title}
+                                      </label>
+                                    ))}
+                                </details>
+                                <Field
+                                  name="claims"
+                                  label="뒷받침 주장 (한 줄에 하나씩)"
+                                  area
+                                />
                                 <Field name="decision" label="핵심 판단" />
                                 <Field
                                   name="insight"
@@ -2628,11 +2844,32 @@ export default function Home() {
                                 </label>
                                 <button disabled={busy}>문항 설계 저장</button>
                               </form>
+                              {brief &&
+                                ["ACTIVE", "LOCKED"].includes(brief.status) && (
+                                  <ClaimEvidencePanel
+                                    key={brief.id}
+                                    workspaceId={ws.id}
+                                    brief={brief}
+                                    result={latest("ClaimEvidenceTest", qid)}
+                                    ai={ai}
+                                    request={request}
+                                    act={act}
+                                  />
+                                )}
                               {button(
                                 "메시지 승인·잠금",
                                 "approve-question",
                                 { qid },
-                                !brief || brief.status !== "ACTIVE",
+                                !brief ||
+                                  brief.status !== "ACTIVE" ||
+                                  latest("ClaimEvidenceTest", qid)?.data
+                                    .result !== "PASSED" ||
+                                  latest("ClaimEvidenceTest", qid)?.data
+                                    .brief_id !== brief.id ||
+                                  !["ACTIVE", "LOCKED"].includes(
+                                    latest("ClaimEvidenceTest", qid)?.status ||
+                                      "",
+                                  ),
                               )}
                             </Panel>
                             <Card a={draft} />
@@ -2761,6 +2998,10 @@ export default function Home() {
                                     {
                                       qid,
                                     },
+                                    !responsesComplete(
+                                      latest("Review", qid),
+                                      latest("ReviewResponses", qid),
+                                    ),
                                   )}
                                   <p className="muted">
                                     직접 검수 모드에서도 근거에 없는 숫자와 사용
@@ -2768,6 +3009,30 @@ export default function Home() {
                                   </p>
                                 </section>
                                 <Card a={latest("Review", qid)} />
+                                <ReviewResponsePanel
+                                  workspaceId={ws.id}
+                                  review={latest("Review", qid)}
+                                  result={latest("ReviewResponses", qid)}
+                                  ai={ai}
+                                  request={request}
+                                  act={act}
+                                  editable={
+                                    ![
+                                      "SUBMISSION_FROZEN",
+                                      "SUBMITTED",
+                                      "CLOSED",
+                                    ].includes(ws.state)
+                                  }
+                                />
+                                <ExpressionLibrary
+                                  key={`${ws.id}:${draft?.id || "cover"}`}
+                                  document={draft}
+                                  domain="COVER"
+                                  workspaceId={ws.id}
+                                  request={request}
+                                  act={act}
+                                  evidence={evidence}
+                                />
                               </>
                             )}
                           </>
@@ -2929,9 +3194,17 @@ export default function Home() {
                                 resume: true,
                                 manual_verified: true,
                               })}
-                              {button("이력서 최종 잠금", "final-lock", {
-                                resume: true,
-                              })}
+                              {button(
+                                "이력서 최종 잠금",
+                                "final-lock",
+                                {
+                                  resume: true,
+                                },
+                                !responsesComplete(
+                                  latest("ResumeReview"),
+                                  latest("ResumeReviewResponses"),
+                                ),
+                              )}
                               <button
                                 className="secondary"
                                 onClick={() => {
@@ -2981,6 +3254,30 @@ export default function Home() {
                           )}
                         </section>
                         <Card a={latest("ResumeReview")} />
+                        <ReviewResponsePanel
+                          workspaceId={ws.id}
+                          review={latest("ResumeReview")}
+                          result={latest("ResumeReviewResponses")}
+                          ai={ai}
+                          request={request}
+                          act={act}
+                          editable={
+                            ![
+                              "SUBMISSION_FROZEN",
+                              "SUBMITTED",
+                              "CLOSED",
+                            ].includes(ws.state)
+                          }
+                        />
+                        <ExpressionLibrary
+                          key={`${ws.id}:${resume?.id || "resume"}`}
+                          document={resume}
+                          domain="RESUME"
+                          workspaceId={ws.id}
+                          request={request}
+                          act={act}
+                          evidence={evidence}
+                        />
                       </>
                     )}
                     <RevisionInbox
@@ -2995,6 +3292,19 @@ export default function Home() {
                     />
                     {stage === stages[4] && (
                       <>
+                        <FinalReview
+                          workspaceId={ws.id}
+                          revision={ws.artifacts
+                            .map((a) => `${a.id}:${a.status}`)
+                            .join(",")}
+                          frozen={[
+                            "SUBMISSION_FROZEN",
+                            "SUBMITTED",
+                            "CLOSED",
+                          ].includes(ws.state)}
+                          request={request}
+                          act={act}
+                        />
                         <section>
                           <h3>최종 점검</h3>
                           <p>

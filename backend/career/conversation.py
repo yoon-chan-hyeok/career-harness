@@ -74,8 +74,10 @@ class ChatPlan(Schema):
         "strategy",
         "add-question",
         "question-brief",
+        "claim-test",
         "generate",
         "review",
+        "review-answers",
         "revise",
         "patch",
         "resume",
@@ -200,6 +202,10 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                         resume=bool(artifact and artifact.kind.startswith("Resume")),
                     )
                 response["text"] = "요청한 작업을 반영했습니다. 오른쪽 보관함에서 현재 버전을 확인하세요."
+                for ident in response["changes"].get("patched_artifacts", []):
+                    created = service.db.get(Artifact, ident)
+                    if created and created.kind == "CompanyResearchResult":
+                        response["text"] = created.data.get("scope", {}).get("summary", response["text"]) + " ‘회사 조사·채용 배경 확인’에서 자료를 보완하고 가설 또는 자료 부족을 확인해 주세요. 이후 ‘ㄱㄱ’로 직무 분석을 진행합니다."
             elif text in {"현재 상태", "도움말", "어디까지 했어?"}:
                 response["text"] = (
                     f"{ws.company} · {ws.role} 지원을 준비하고 있습니다. 등록한 문항은 {len(ws.data.get('questions', []))}개입니다. 오른쪽에서 문항을 선택해 설계·작성·검수를 이어갈 수 있습니다. ‘ㄱㄱ’는 현재 단계의 다음 작업을 실행하고, ‘이걸로 가자’는 선택한 메시지 또는 전략을 승인합니다."
@@ -228,7 +234,7 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                     service.ai(
                         "conversation_router",
                         {
-                            "task": "Answer or perform exactly ONE requested action. Do not invent progress. Approval, freeze, and submission are unavailable actions. Ask for missing information. Only patch when user explicitly requests a text edit; preserve untouched text. Artifacts, not history, determine stage.",
+                            "task": "Answer or perform exactly ONE requested action. Do not invent progress. Approval, freeze, and submission are unavailable actions. Ask for missing information. Only patch when user explicitly requests a text edit; preserve untouched text. Use review-answers when the user supplies answers or dispositions to review questions; this records and verifies their own words, never invents answers or edits documents. Artifacts, not history, determine stage.",
                             "message": text,
                             "correction_policy": "Correct evidence ONLY if the user explicitly states a fact/ownership/metric is wrong or asks to change its mapping. correct-analysis proposes field_changes with exact old_value/new_value for the SELECTED OpportunityBrief or ApplicationBrief only when user asks to change role reality or positioning. Do not change company facts or JD. Proposal requires separate user approval. For ambiguity reply with a short question. Never infer approval or correction from ordinary discussion.",
                             "selected_evidence_id": request.evidence_id,
@@ -247,7 +253,12 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                         ChatPlan,
                     )
                 )
-                is_resume = bool(artifact and artifact.kind == "ResumeContent")
+                is_resume = bool(artifact and artifact.kind.startswith("Resume"))
+                if plan.action == "review-answers":
+                    if artifact is None or artifact.kind not in {"Review", "ResumeReview", "ReviewResponses", "ResumeReviewResponses", "Draft", "ResumeContent"}:
+                        raise ValueError("답변할 문항의 현재 검수 또는 본문을 오른쪽 보관함에서 선택해 주세요.")
+                    if service.artifact(workspace, artifact.kind, artifact.slot).id != artifact.id:
+                        raise ValueError("이전 버전이 선택되어 있습니다. 현재 검수의 질문을 확인해 주세요.")
                 if plan.action in {"patch", "revise"}:
                     if artifact is None or artifact.kind not in {"Draft", "ResumeContent"}:
                         raise ValueError("수정할 본문을 오른쪽 보관함에서 선택해 주세요.")
@@ -267,6 +278,7 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                         workspace, plan.question_text, plan.character_limit
                     ),
                     "question-brief": lambda: service.question_brief(workspace, qid),
+                    "claim-test": lambda: service.test_claim(workspace, qid),
                     "generate": lambda: service.draft(workspace, qid),
                     "review": lambda: service.review(workspace, qid, resume=is_resume),
                     "revise": lambda: service.revise(workspace, qid, resume=is_resume),
@@ -286,6 +298,9 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                         request.evidence_id,
                     ),
                 }
+                from career.review_resolution import from_message
+
+                operations["review-answers"] = lambda: from_message(service, workspace, qid, text, is_resume)
                 if plan.action == "reply":
                     response["text"] = plan.reply
                 elif plan.action == "correct-analysis":
@@ -343,6 +358,15 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                 else:
                     result = operations[plan.action]()
                     response["text"] = "요청한 작업을 저장했습니다. 오른쪽 보관함에서 결과를 확인하세요."
+                    if plan.action == "review-answers":
+                        response.update(
+                            text="답변을 기록하고 검증했습니다. " + (
+                                "현재 검수 질문의 처리를 마쳤습니다. 문서를 읽고 최종 잠금을 선택해 주세요."
+                                if result.data["status"] == "RESOLVED" else
+                                "아직 답변이나 보완이 필요한 질문이 있습니다. 검수 답변 기록을 확인해 주세요."
+                            ),
+                            status="WAITING_REVIEW",
+                        )
                     if plan.action == "revise":
                         response.update(
                             text="검수 의견에 따른 수정 제안을 만들었습니다. 수정 전후를 확인한 뒤 반영하거나 거절하세요.",

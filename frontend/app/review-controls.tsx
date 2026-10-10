@@ -10,6 +10,11 @@ type Reference = {
   version: string;
   active: boolean;
   role: string;
+  compilation?: {
+    status: string;
+    requirement_sections: number;
+    notice: string;
+  };
 };
 
 export function OpportunityRankings({
@@ -26,6 +31,8 @@ export function OpportunityRankings({
     fit: string;
     career_value: string;
     action_priority: string;
+    current_deadline_status: string;
+    next_action: string;
   };
   const [data, setData] = useState<{
     fit_order: Ranked[];
@@ -52,8 +59,8 @@ export function OpportunityRankings({
     <section>
       <h3>지원할 가치와 오늘 할 일</h3>
       <p className="muted">
-        저장한 평가를 기준으로 따로 정렬합니다. 마감이 가까워도 직무
-        적합도·커리어 가치는 바뀌지 않습니다.
+        오늘 행동 순서는 현재 마감을 반영합니다. 지난 마감은 뒤로 보내고 저장한
+        적합도와 판단 이력은 유지합니다.
       </p>
       <div className="ranking-columns">
         {(
@@ -80,6 +87,7 @@ export function OpportunityRankings({
                     {level[row.career_value]} · 행동 우선{" "}
                     {level[row.action_priority]}
                   </small>
+                  <small>{row.next_action}</small>
                 </div>
               </button>
             ))}
@@ -206,6 +214,13 @@ export function ReferenceSettings({
             <small>
               {r.version} · {r.active ? "사용 중" : "보관 중"}
             </small>
+            {r.compilation && (
+              <small>
+                {r.compilation.status === "SOURCE_SECTIONS"
+                  ? `원문 기준 ${r.compilation.requirement_sections}개 절 · 단계별 적용`
+                  : "원문 구조 확인 필요"}
+              </small>
+            )}
           </div>
           <button
             className="secondary"

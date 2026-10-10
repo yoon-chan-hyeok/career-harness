@@ -37,6 +37,9 @@ def validate_runtime_settings() -> None:
     if os.getenv("CAREER_ENV", "development").lower() not in {"development", "test", "production", "staging"}:
         raise ValueError("CAREER_ENV must be development, test, staging, or production")
     authentication_configuration()
+    from career.public_service import validate_public_settings
+
+    validate_public_settings()
     if provider_settings().model:
         from career.provider_policy import validate_provider_configuration
 
@@ -246,11 +249,16 @@ class RequestProtection:
 
 
 def install_security(app: FastAPI) -> None:
+    from career.service_access import access_mode
+
+    # Public authenticated traffic also has a database-backed per-user limiter.
+    # The coarse process-local IP guard may see a shared frontend proxy address.
+    default_rate = 1200 if access_mode() == "public" else 120 if is_production() else 10000
     app.add_middleware(
         RequestProtection,
         max_bytes=integer_setting("CAREER_MAX_REQUEST_BYTES", 10_485_760, 1024, 104_857_600),
         per_minute=integer_setting(
-            "CAREER_RATE_LIMIT_PER_MINUTE", 120 if is_production() else 10000, 1, 10000
+            "CAREER_RATE_LIMIT_PER_MINUTE", default_rate, 1, 10000
         ),
     )
     hosts = [x.strip() for x in os.getenv("CAREER_ALLOWED_HOSTS", "").split(",") if x.strip()]

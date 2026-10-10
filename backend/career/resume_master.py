@@ -41,13 +41,17 @@ def save_master(service, artifact_id):
 
 def master_context(service, selected):
     record = current_master(service)
+    fallback = {
+        "mode": "BUILD_FROM_CURRENT_CONFIRMED_FACTS",
+        "instruction": "사용 가능한 마스터가 없으므로 확인된 원자료에서 구조를 만들고 JD에 맞게 선별한다.",
+    }
     if record is None:
-        return {
-            "mode": "BUILD_FROM_CURRENT_CONFIRMED_FACTS",
-            "instruction": "마스터가 아직 없으므로 확인된 원자료에서 기본 구조를 만들고 JD에 맞게 선별한다.",
-        }, None
-    item = owned(service.db, Artifact, service.user, record.data["artifact_id"])
-    fresh(service.db, service.user, item)
+        return fallback, None
+    try:
+        item = owned(service.db, Artifact, service.user, record.data["artifact_id"])
+        fresh(service.db, service.user, item)
+    except (LookupError, ValueError):
+        return fallback, None
     selected_set = set(selected)
     # Do not leak unrelated master facts into this application's writer.
     sections = []
@@ -64,7 +68,7 @@ def master_context(service, selected):
         "sections": sections,
         "authority": "STRUCTURE_ONLY_CURRENT_EVIDENCE_OVERRIDES",
         "version": item.version,
-    }, item.id
+    }, item.id if item.workspace_id != service.current_workspace else None
 
 
 def confirm_file_qa(service, workspace, artifact_id, confirmed):

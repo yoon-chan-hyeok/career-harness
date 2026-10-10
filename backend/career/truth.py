@@ -180,6 +180,9 @@ def add_fact(
         else:
             old.status = "CONFLICTED"
             fact.status = "CONFLICTED"
+            from career.artifacts import stale
+
+            stale(db, user, [old.source_id])
         db.add(
             Record(
                 user_id=user,

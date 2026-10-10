@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { ApiError, type Request } from "./api-client";
 import { safeRepositoryUrl } from "./workroom-state";
+import { CacheUsage } from "./cache-usage";
+import { ServiceConsole } from "./service-console";
+import { inputReuseNotice, type CacheUsageReport } from "./cache-usage-format";
 
 type Total = {
   calls: number;
@@ -11,6 +14,7 @@ type Total = {
   reserved_tokens: number;
   remaining_calls: number;
   estimated_cost_usd: number | null;
+  cache?: CacheUsageReport | null;
 };
 type AdminStatus = {
   is_admin: true;
@@ -72,9 +76,11 @@ const stateLabels: Record<string, string> = {
 export function AdminConsole({
   request,
   onSettings,
+  onOpenApplication,
 }: {
   request: Request;
   onSettings: () => void;
+  onOpenApplication: (workspaceId: string) => void;
 }) {
   const [data, setData] = useState<AdminStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -153,6 +159,7 @@ export function AdminConsole({
       )}
       {data && (
         <>
+          <ServiceConsole request={request} />
           <p className="admin-scope">{data.notice} · 현재 로그인한 계정 기준</p>
           <div className="admin-counts">
             {Object.entries(data.counts).map(([key, count]) => (
@@ -231,8 +238,10 @@ export function AdminConsole({
                       ? `$${total.estimated_cost_usd.toFixed(4)}`
                       : "미확인"}
                   </small>
+                  <CacheUsage cache={total.cache} />
                 </div>
               ))}
+              <p className="muted">{inputReuseNotice}</p>
               <p className="muted">{data.usage.notice}</p>
             </section>
             <section className="admin-card admin-source-card">
@@ -290,6 +299,12 @@ export function AdminConsole({
                         <small>{(run.elapsed_ms / 1000).toFixed(1)}초</small>
                       )}
                       {run.error_code && <small>오류 {run.error_code}</small>}
+                      <button
+                        className="secondary"
+                        onClick={() => onOpenApplication(run.workspace_id)}
+                      >
+                        지원 작업 열기
+                      </button>
                     </div>
                   </li>
                 ))}

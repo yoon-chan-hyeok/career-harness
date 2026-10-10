@@ -79,6 +79,9 @@ def test_question_choice_stales_old_writing_then_drives_approved_writer_context(
     service.approve_strategy(workspace.id)
     q = service.add_question(workspace.id, "직무 역량을 설명하세요.", 1000)
     service.question_brief(workspace.id, q["id"], brief(q["id"], evidence[0].id))
+    from test_workflow import verify_claim
+
+    verify_claim(service, workspace, q["id"])
     service.approve_question(workspace.id, q["id"])
     original = service.draft(workspace.id, q["id"], doc(evidence[0]))
     candidates = options(service, workspace.id, q["id"])
@@ -95,6 +98,7 @@ def test_question_choice_stales_old_writing_then_drives_approved_writer_context(
     assert result["selection"]["id"] in new_brief.depends_on
     with pytest.raises(ValueError, match="승인"):
         service.draft(workspace.id, q["id"], doc(chosen))
+    verify_claim(service, workspace, q["id"])
     service.approve_question(workspace.id, q["id"])
     captured = {}
 
@@ -179,11 +183,40 @@ def test_options_show_actual_other_question_usage_without_banning_reuse(db):
     service.approve_strategy(workspace.id)
     one = service.add_question(workspace.id, "역량", 500)
     two = service.add_question(workspace.id, "협업", 500)
+    from career.portfolio import approve, plan
+
+    plan(service, workspace.id, {"items": [{
+        "question_id": q["id"], "evaluation_intent": q["text"], "identity_role": q["text"],
+        "primary_message_candidates": [q["text"]], "evidence_candidate_ids": [evidence[0].id],
+        "avoided_repetition": [],
+    } for q in (one, two)]})
+    approve(service, workspace.id)
     service.question_brief(workspace.id, one["id"], brief(one["id"], evidence[0].id))
     candidate = options(service, workspace.id, two["id"])
     assert candidate["options"][0]["used_in_slots"] == [one["id"]]
     assert candidate["options"][0]["usage_count"] == 1
     assert choose(service, workspace.id, choice(candidate, evidence[0].id))["selection"]
+
+
+def test_multiple_experiences_can_support_one_claim_without_replacing_primary(db):
+    from test_workflow import verify_claim
+
+    service, workspace, evidence = scene(db, count=2)
+    service.approve_strategy(workspace.id)
+    q = service.add_question(workspace.id, "평가 경험", 1000)
+    candidates = options(service, workspace.id, q["id"])
+    choose(service, workspace.id, choice(candidates, evidence[0].id))
+    designed = service.question_brief(workspace.id, q["id"], {
+        **brief(q["id"], evidence[0].id), "evidence_ids": [evidence[1].id, evidence[0].id],
+    })
+    assert designed.data["evidence_ids"] == [evidence[0].id, evidence[1].id]
+    assert designed.data["selected_experience_id"] == evidence[0].id
+    verify_claim(service, workspace, q["id"])
+    service.approve_question(workspace.id, q["id"])
+    merged = {"text": "\n".join(e.body for e in evidence),
+              "claims": [claim for e in evidence for claim in doc(e)["claims"]]}
+    generated = service.draft(workspace.id, q["id"], merged)
+    assert generated.data["selected_evidence_ids"] == [evidence[0].id, evidence[1].id]
 
 
 def test_experience_options_http_auth_isolation_and_optimistic_conflict(client):

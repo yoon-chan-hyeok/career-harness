@@ -20,22 +20,22 @@
     "M14": "in_progress"
   },
   "last_verified_commit": "de094cc359aaa43b0c3a5ae141b3bbe9bfaf8f78",
-  "last_verified_at": "2026-10-04T03:30:47.700140+09:00",
+  "last_verified_at": "2026-10-06T13:25:13.858996+09:00",
   "verification": {
-    "backend_tests": "363 passed / 3 PG skipped in latest expanded suite; prior 3 real PG16/pgvector checks passed separately",
-    "backend_lint": "pass: final Ruff",
-    "backend_typecheck": "pass: final Pyright 0 errors/warnings",
-    "frontend_lint": "pass: latest expanded UI",
-    "frontend_typecheck": "pass",
-    "frontend_auth_tests": "4 passed",
-    "frontend_build": "pass: latest actual multistage Docker and Windows standalone Next15 builds; runner UID1001 and dev packages removed in Docker",
-    "migrations": "actual SQLite head 0011; actual PG16 check/downgrade base/upgrade head/check passed; FTS GIN exists",
+    "backend_tests": "527 passed, 6 PG skipped in final run; 6 actual PG passed separately",
+    "backend_lint": "pass: current full Ruff",
+    "backend_typecheck": "pass: current Pyright with workspace venv, 0 errors/warnings",
+    "frontend_lint": "pass: current production upgrade TSX",
+    "frontend_typecheck": "pass: current source and optimized build",
+    "frontend_auth_tests": "7 passed",
+    "frontend_build": "pass: final Windows Next15 standalone build including public landing/privacy/terms",
+    "migrations": "SQLite private backup/integrity/head0013/check; isolated PG check/downgrade base/upgrade head/check passed",
     "e2e": "pass: actual isolated HTTP 19 runs through failure/recovery/freeze/handoff/submission confirmation/outcome/CLOSED; workflow/fixture/MCP regressions pass",
-    "browser": "pass: actual latest PDF/provenance/draft/upload/usage/E5 flows and 390px; work/upgrade-browser-audit.json",
+    "browser": "public synthetic desktop/mobile/consent/account flow checked; no live SMTP/CAPTCHA verification; browser JSON download capture timed out",
     "running_state": "pass: separate session observes actual RUNNING, concurrent guard and recovered execution fencing; no live long-running model UI claim",
     "recovery": "actual SQLite and isolated PG16 custom backup/empty restore passed; all 39 PG table counts/content hashes and 384-dimensional vectors match; operating Supabase restore pending",
     "privacy": "pass: tracked/untracked candidate gate; private data/keys/DB/logs excluded; exact known local credential comparison recorded separately",
-    "local_runtime": "pass: latest Windows standalone and restarted backend, health/ready, current owner admin via frontend proxy; QA keys rejected, 6 active references preserved",
+    "local_runtime": "pass: final source restart, owner preserved, synthetic/missing keys rejected, proxy/health/ready200; work/public-normal-runtime.json",
     "free_provider_protocol": "pass: official SDK mocked HTTP HF/Groq structured requests, failures, no retries/redirect/fallback; Workflow cover letter and resume artifacts/trace persist; no live inference token",
     "free_provider_ui": "pass: authenticated settings, HF permission link, masked key entry, truthful configured/live status, no console warnings/errors",
     "role_prompts": "pass: 25 role-specific stage contracts, independent reviewer boundaries and version metadata",
@@ -43,15 +43,16 @@
     "frontend_deployment_tests": "4 passed again after deployment exclusion hardening",
     "serverless_backend": "pass: 24 added checks; minimal runtime package imports/health/auth/migration metadata without dotenv/network/migration; verified TLS, CA and upload exclusions",
     "vercel_cli": "62.2.0 local install, version/login/deploy/link help pass; exact cwd and workspace-only global config; actual CLI --dry source inspection requires authentication and is not completed",
-    "frontend_upgrade_tests": "9 passed; auth 4 + deploy 4 = 17 frontend tests",
+    "frontend_upgrade_tests": "14 passed: upgrade9/cache5",
     "document_export": "actual PDF pages/body verified; DOCX body preserved and unmeasured overflow truthfully unknown, no page count; bundled Word renderer absent",
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
-    "postgres_integration": "3 passed on PostgreSQL 16.15 / pgvector 0.8.7; production protection CLI passed; 39 RLS tables, anon/authenticated grants 0; work/postgres-upgrades-verification/result.json",
-    "source_control": "latest verified code source de094cc359aaa43b0c3a5ae141b3bbe9bfaf8f78; 258 tracked source/metadata files; 254 exported after excluding private_input and source_specs entirely; personal originals/keys/screenshots excluded; no external push or remote CI",
-    "backend_container": "fresh current runtime source Docker build/start/migration 0011/health/auth/two-user isolation/Korean PDF-DOCX/private exclusions pass; QA container and port cleaned",
-    "frontend_tests": "17 passed: auth4/deploy4/upgrades9",
+    "postgres_integration": "6 passed on actual PostgreSQL16/pgvector, includes public request cap and account/vector deletion",
+    "source_control": "public/cache/production changes uncommitted; prior commit retained; no new remote publication or CI",
+    "backend_container": "prior container acceptance predates this upgrade; current serverless package offline import/tokenizer checks pass; no new full backend container build claimed",
+    "frontend_tests": "25 passed: auth7/deploy4/upgrades9/cache5",
     "expanded_browser": "pass: actual 3 choices -> stored selection -> stale old writing -> new brief chosen context -> reapproval gate; pixel office/admin/#admin/403/mobile390; owner console/page/request errors0",
-    "production_fullstack_container": "pass: latest current runtime Python SHA256 match; migration0011; loopback/internal isolation; frontend built proxy; task-only QA containers/networks cleaned"
+    "production_fullstack_container": "historical pre-upgrade container acceptance only; current acceptance uses Windows backend/frontend and separate actual PG16",
+    "prompt_cache": "pass: stable scoped prefixes, SDK raw usage types, durable invalid metrics, UTC periods and conservative quota/cost accounting; no live cache-hit or speed/cost claim"
   },
   "notes": [
     "v2.2 FINAL: implementation plan reordered; M0 is repository bootstrap.",
@@ -70,9 +71,12 @@
     "2026-10-03: Verified source baseline saved locally at 6838db378d18ae1c6e616d9eb51297f2b545a4cc; 248 files, no external push. QA-only PostgreSQL container removed and port released. Subsequent commit only records acceptance metadata. Remote CI and production accounts remain pending.",
     "2026-10-03 container/DOCX audit: unmeasured Word overflow corrected to unknown; 354 general tests pass plus earlier separate real PG 3 pass. Fresh current runtime source backend Docker build/start/migration/auth/user isolation/Korean PDF-DOCX/private exclusions verified; QA container cleaned. Whole production HTTPS/Supabase/live HF/remote CI/Word pages remain pending.",
     "2026-10-03: Current DOCX/container fix and truthful current records saved locally at b5d119ac10900ced38653f6a5030c6ea425fa817; subsequent commit records verified source hash only. Remote/CI/public deployment not performed.",
-    "2026-10-04: Pixel office, admin and up to 3 verified experience alternatives implemented and actual isolated current-image browser/API flow accepted. 363 Python and17 frontend tests pass; old selection display/admin timezone/Supabase admin navigation fixed. Patched runtime dependencies and nonroot standalone frontend runner verified. Live HF/Supabase/HTTPS/GitHub/CI remain pending; no paid upgrade or remote publication."
+    "2026-10-04: Pixel office, admin and up to 3 verified experience alternatives implemented and actual isolated current-image browser/API flow accepted. 363 Python and17 frontend tests pass; old selection display/admin timezone/Supabase admin navigation fixed. Patched runtime dependencies and nonroot standalone frontend runner verified. Live HF/Supabase/HTTPS/GitHub/CI remain pending; no paid upgrade or remote publication.",
+    "2026-10-04: Provider-managed prompt cache prefix optimization completed locally. Current 461 Python/22 frontend checks, full lint/type/build, actual synthetic cache UI/API/owner isolation and normal local restart pass. Cache invalid counters, UTC periods and unknown-cost reservation labeling fixed. No live AI/cache speed/savings, GPU provisioning, paid fallback or source publication. Separate current-deadline ranking P2 reproduced and remains follow-up; operating accounts/HTTPS/Word pages pending.",
+    "2026-10-05: Astra findings fixed; invite-only service, dual user/shared quotas, upload budgets, exact frozen document ZIP, current deadline ranking, offline Groq token preflight implemented. Python488 + PG4 + frontend22 pass; final package/packet34 rerun pass. SQLite0012 backup/restart preserves owner, AI remains none. See docs/PRODUCTION_UPGRADE_2026_10_05.md; no live deployment or remote publication claim.",
+    "2026-10-06: public signup variant added alongside invite mode; Astra two P2 fixes reverified. Latest state: public_release_2026_10_06. External launch remains pending."
   ],
-  "coding_status": "expanded_upgrade_code_verified_external_service_and_source_remote_pending",
+  "coding_status": "invite_service_and_production_upgrade_locally_verified_external_acceptance_pending",
   "implementation_complete": {
     "M0": true,
     "M1": true,
@@ -269,7 +273,7 @@
     "local_evidence": "work/free-service-local-audit.json",
     "screenshot": "work/ui-free-provider-settings.jpg"
   },
-  "last_reviewed_at": "2026-10-03T23:45:41.608757+09:00",
+  "last_reviewed_at": "2026-10-04T18:16:30.689483+09:00",
   "remaining_work_audit": {
     "reviewed_at": "2026-10-03T06:35:47.548049+09:00",
     "document": "docs/REMAINING_WORK_AND_UPGRADES.md",
@@ -445,5 +449,696 @@
     "autonomous_agent_swarm_added": false,
     "verified_source_commit": "de094cc359aaa43b0c3a5ae141b3bbe9bfaf8f78",
     "source_publication_performed": false
+  },
+  "prompt_cache_upgrade": {
+    "checked_at": "2026-10-04T18:16:30.689483+09:00",
+    "report": "docs/PROMPT_CACHE_UPGRADE.md",
+    "implementation": "provider_managed_input_prefix_optimization_not_GPU_server_configuration",
+    "stable_layout": "verified_ordered_common_inputs_and_current_dynamic_content",
+    "scope": "trusted_owner_HMAC_partition_unscoped_request_nonce",
+    "providers": "OpenAI_scoped_key_HF_Groq_stable_messages_only",
+    "metrics": "reported_hit_miss_unknown_invalid_and_user_UTC_daily_monthly_summary",
+    "accounting": "actual_total_tokens_retained_cache_missing_or_invalid_cost_ceiling_distinct_from_observed_estimate",
+    "validation": {
+      "python_passed": 461,
+      "pg_skipped": 3,
+      "frontend_passed": 22,
+      "lint_type_build": "pass",
+      "synthetic_browser_api": "pass",
+      "normal_local_runtime": "pass"
+    },
+    "evidence": [
+      "work/kv-final-tests.xml",
+      "work/kv-ui-qa/seed-verification.json",
+      "work/kv-ui-qa/browser-acceptance.json",
+      "work/kv-normal-runtime.json"
+    ],
+    "live_cache_effect_verified": false,
+    "output_memoization_added": false,
+    "prewarm_or_paid_fallback_added": false,
+    "new_remote_publication": false,
+    "source_commit": "uncommitted_current_working_tree_prior_verified_commit_retained"
+  },
+  "latest_readiness_review": {
+    "checked_at": "2026-10-04T18:16:30.689483+09:00",
+    "report": "docs/READINESS_REVIEW_2026_10_04.md",
+    "current_local": {
+      "checked_at": "2026-10-04T18:13:35.981140+09:00",
+      "http_statuses": {
+        "page": 200,
+        "health": 200,
+        "ready": 200,
+        "admin": 200,
+        "usage": 200
+      },
+      "provider": "none",
+      "configured": false,
+      "live_verified": false,
+      "normal_owner_preserved": true,
+      "synthetic_key_rejected": true,
+      "new_cache_api_present": true,
+      "database_dialect": "sqlite",
+      "source_configured": false,
+      "synthetic_http": {
+        "same_origin_cache_flow": true,
+        "two_owner_cache_isolation": true,
+        "measured_counters_from_mocked_HTTP_only": true
+      }
+    },
+    "code_follow_up": [
+      {
+        "priority": "P2",
+        "item": "Current deadline expiry status and action ranking; stored assessment remains historical",
+        "status": "fixed_and_verified_2026_10_05"
+      }
+    ],
+    "required_service_follow_up": [
+      "HF token and actual end-to-end writing/resume/review",
+      "Supabase operating Auth DB TLS and isolation",
+      "fresh reviewed GitHub source publication and remote CI",
+      "HTTPS Vercel frontend/backend acceptance",
+      "operating backup and Auth recovery",
+      "Word visual pagination"
+    ],
+    "optional_upgrades": [
+      "admin_failure_drilldown",
+      "older_document_and_list_pagination",
+      "optional_semantic_retrieval_in_free_provider_conversation",
+      "later_synthetic_portfolio",
+      "optional_authenticated_remote_read_MCP"
+    ],
+    "corrected_previous_claim": "OpportunityRankings already connected to opportunity screen",
+    "prior_source_zip_includes_current_cache": false,
+    "comparison_experiments": "excluded_by_user",
+    "full_service_complete": false,
+    "external_snapshot": {
+      "checked_at": "2026-10-04T18:15:14+09:00",
+      "read_only": true,
+      "supabase": {
+        "lookup_success": true,
+        "accessible_organizations": 1,
+        "accessible_projects": 0,
+        "career_production_connected": false
+      },
+      "vercel": {
+        "team_lookup_success": true,
+        "project_lookup_success": true,
+        "accessible_teams": 0,
+        "accessible_projects": 0,
+        "project_scoped_cli": "logged_out",
+        "global_cli": "unverified_configuration_directory_permission",
+        "local_project_link_present": false,
+        "career_production_connection_verified": false
+      },
+      "huggingface": {
+        "connector_authenticated": true,
+        "connector_inference_scope_available": false,
+        "app_provider": "none",
+        "app_live_inference_verified": false
+      },
+      "remote_write_or_paid_call_performed": false,
+      "counts_are_connector_scope_not_entire_account_inventory": true
+    },
+    "superseded_by": "production_upgrade_2026_10_05"
+  },
+  "production_upgrade_2026_10_05": {
+    "checked_at": "2026-10-05T03:59:24.182458+09:00",
+    "report": "docs/PRODUCTION_UPGRADE_2026_10_05.md",
+    "code_batch": "complete_locally_verified",
+    "full_service_complete": false,
+    "scope": {
+      "invite_only_small_cohort": true,
+      "operator_shared_keys": true,
+      "free_only_no_paid_fallback": true,
+      "comparison_experiments": "excluded_by_user"
+    },
+    "features": [
+      "operator_member_approval_revocation_and_caps",
+      "atomic_global_and_user_usage_reservation",
+      "bounded_shared_upload_payloads",
+      "frozen_submission_packet_zip_and_checklist",
+      "read_time_deadline_expiry_and_next_action",
+      "error_recovery_and_security_headers"
+    ],
+    "astra_audit": {
+      "reported_findings_fixed": true,
+      "post_fix_read_only_reaudit": "no_additional_confirmed_P1_P2_in_reviewed_critical_scope",
+      "separate_test_rerun_by_astra": false,
+      "production_certification": false
+    },
+    "validation": {
+      "python_passed": 488,
+      "postgres_passed": 4,
+      "frontend_passed": 22,
+      "final_packet_package_passed": 34,
+      "lint_type_build": "pass",
+      "privacy_gate": "pass",
+      "postgres_concurrent_global_cap": "6 connections, 1 allowed",
+      "migration_head": "0012",
+      "normal_runtime": {
+        "checked_at": "2026-10-05T03:46:35.882926+09:00",
+        "http_statuses": {
+          "page": 200,
+          "settings": 200,
+          "usage": 200,
+          "admin": 200,
+          "service": 200,
+          "health": 200,
+          "ready": 200
+        },
+        "owner_preserved": true,
+        "synthetic_keys_rejected": true,
+        "migration_head": "0012",
+        "database_integrity": "ok",
+        "local_shared_mode": false,
+        "provider": "none",
+        "configured": false,
+        "live_verified": false,
+        "frontend_security_headers": true
+      }
+    },
+    "evidence": [
+      "work/production-upgrade-tests.xml",
+      "work/production-pg-final-tests.xml",
+      "work/final-packet-tests.xml",
+      "work/production-ui-qa/acceptance.json",
+      "work/production-normal-runtime.json"
+    ],
+    "pending": [
+      "live_operator_free_AI_key_and_document_response",
+      "Supabase_operating_Auth_DB_TLS_isolation",
+      "reviewed_source_publication_remote_CI",
+      "Vercel_HTTPS_acceptance",
+      "operating_backup_Auth_recovery",
+      "Word_visual_pagination"
+    ],
+    "optional_later": [
+      "list_pagination",
+      "Python_dependency_lock",
+      "optional_free_semantic_retrieval",
+      "portfolio_architecture_RAG_Jev_page"
+    ],
+    "new_remote_publication": false,
+    "source_commit": "uncommitted_working_tree",
+    "superseded_by": "public_release_2026_10_06"
+  },
+  "public_release_2026_10_06": {
+    "checked_at": "2026-10-06T13:25:13.858996+09:00",
+    "report": "docs/PUBLIC_RELEASE_2026_10_06.md",
+    "setup": "docs/PUBLIC_SERVICE_SETUP.md",
+    "code_batch": "complete_locally_verified",
+    "full_service_complete": false,
+    "new_remote_publication": false,
+    "scope": {
+      "additional_public_signup_variant": true,
+      "invite_variant_preserved": true,
+      "current_personal_instance_not_made_public": true,
+      "operator_shared_keys": true,
+      "free_only_no_paid_fallback": true,
+      "comparison_experiments": "excluded_by_user"
+    },
+    "features": [
+      "public_entry_and_email_otp",
+      "signed_nonanonymous_verified_email_admission",
+      "versioned_consent_and_preconsent_account_controls",
+      "atomic_per_account_request_limit",
+      "per_account_storage_object_caps",
+      "operator_member_search_pagination",
+      "own_data_export_and_recent_otp_account_deletion",
+      "deletion_tombstone_and_commit_fence",
+      "public_production_configuration_gate",
+      "invite_public_deployment_templates"
+    ],
+    "validation": {
+      "python_passed": 527,
+      "postgres_skipped_in_final_python_run": 6,
+      "actual_postgres_passed_separately": 6,
+      "frontend_passed": 25,
+      "ruff_pyright_frontend_lint_type_build": "pass",
+      "migration_head": "0013",
+      "isolated_pg_migration_roundtrip": "pass",
+      "privacy_gate": "pass",
+      "browser": "public_desktop_mobile_policy_preconsent_controls_consent_workroom_account_reauth",
+      "browser_live_email_captcha": false,
+      "browser_export_file_capture": "tool_timeout_not_verified",
+      "normal_runtime": {
+        "checked_at": "2026-10-06T13:25:13.562132+09:00",
+        "same_origin_http": {
+          "/": 200,
+          "/privacy": 200,
+          "/terms": 200,
+          "/api/service/public": 200,
+          "/api/settings": 200,
+          "/api/usage": 200,
+          "/api/admin/access": 200,
+          "/api/admin/service": 200
+        },
+        "health_ready": true,
+        "existing_owner_preserved": true,
+        "public_signup_not_enabled_on_personal_instance": true,
+        "synthetic_and_missing_tokens_rejected": true,
+        "database_integrity": "ok",
+        "migration_head": "0013",
+        "security_headers": true,
+        "llm": {
+          "status": "manual_only",
+          "provider": "none",
+          "live_verified": false,
+          "verified_at": null
+        }
+      }
+    },
+    "astra_audit": {
+      "scope": "public_admission_authentication_account_lifecycle_guards_frontend_integration",
+      "confirmed_P1": 0,
+      "confirmed_P2": 2,
+      "fixed_P2": 2,
+      "post_fix_focused_assertions": 8,
+      "report": "work/public-release-astra-audit.md",
+      "external_production_certification": false
+    },
+    "evidence": [
+      "work/public-final-tests.xml",
+      "work/public-release-tests.xml",
+      "work/public-pg-tests.xml",
+      "work/public-normal-runtime.json",
+      "work/public-ui-qa/public-desktop.jpg",
+      "work/public-ui-qa/public-mobile.jpg",
+      "work/public-ui-qa/onboarding.jpg",
+      "work/public-ui-qa/account-management.jpg",
+      "work/public-release-astra-audit.md"
+    ],
+    "pending": [
+      "real_operator_contact_backup_and_processor_policy",
+      "Supabase_operating_Auth_DB_TLS_SMTP_OTP_CAPTCHA_and_two_account_acceptance",
+      "live_operator_free_AI_key_and_document_response",
+      "reviewed_source_publication_remote_CI_and_Vercel_HTTPS",
+      "operating_backup_restore_deletion_reapplication_alerts_and_ingress_load_acceptance",
+      "Word_visual_pagination"
+    ],
+    "source_commit": "uncommitted_working_tree"
+  },
+  "overall_review_2026_10_06": {
+    "checked_at": "2026-10-06T19:44:39.724826+09:00",
+    "report": "docs/OVERALL_STATUS_AND_UPGRADES_2026_10_06.md",
+    "scope": "status_report_targeted_source_review_current_local_runtime_official_provider_documentation",
+    "full_test_suite_rerun_this_review": false,
+    "new_astra_audit_this_review": false,
+    "feature_implementation_this_review": false,
+    "new_remote_publication": false,
+    "full_service_complete": false,
+    "runtime": {
+      "checked_at": "2026-10-06T19:44:39.724826+09:00",
+      "same_origin_http": {
+        "/": 200,
+        "/privacy": 200,
+        "/terms": 200,
+        "/api/service/public": 200,
+        "/api/settings": 200,
+        "/api/usage": 200,
+        "/api/admin/access": 200,
+        "/api/admin/service": 200
+      },
+      "health_ready": true,
+      "existing_owner_preserved": true,
+      "public_signup_not_enabled_on_personal_instance": true,
+      "synthetic_and_missing_tokens_rejected": true,
+      "database_integrity": "ok",
+      "migration_head": "0013",
+      "security_headers": true,
+      "llm": {
+        "status": "manual_only",
+        "provider": "none",
+        "live_verified": false,
+        "verified_at": null
+      }
+    },
+    "source_snapshot_before_report": {
+      "head": "906fb1e",
+      "modified_tracked_files": 50,
+      "untracked_files": 44,
+      "remote_configured": false,
+      "python_lock_present": false,
+      "frontend_lock_present": true
+    },
+    "launch_pending": [
+      "live_free_AI_end_to_end",
+      "operating_Supabase_DB_Auth_SMTP_CAPTCHA_two_account_acceptance",
+      "operator_policy_metadata",
+      "reviewed_release_commit_remote_CI_HTTPS",
+      "operating_backup_restore_deletion_reapplication_alerts",
+      "browser_download_Word_layout_accessibility"
+    ],
+    "recommended_code_work_not_implemented_by_this_review": [
+      "Python_dependency_lock",
+      "workspace_document_conversation_scoped_pagination",
+      "retention_cleanup_and_storage_alerts",
+      "real_browser_end_to_end_coverage",
+      "operations_alert_and_recovery_automation",
+      "CSP_and_accessibility_review"
+    ],
+    "conditional_later": [
+      "durable_jobs_if_runtime_or_volume_requires",
+      "external_attachment_storage_if_volume_requires",
+      "optional_device_semantic_search_workflow_integration"
+    ],
+    "portfolio_later": [
+      "synthetic_readonly_demo",
+      "architecture_provenance_workflow_RAG_Jev_explanation",
+      "public_metadata"
+    ],
+    "preserved_user_decisions": [
+      "public_and_invite_variants",
+      "operator_shared_free_AI",
+      "no_paid_fallback",
+      "comparison_experiments_excluded",
+      "portfolio_exposition_later"
+    ]
+  },
+  "rulebook_v5_1_coverage_audit_2026_10_06": {
+    "checked_at": "2026-10-06T20:03:48.915140+09:00",
+    "report": "docs/RULEBOOK_V5_1_COVERAGE_AUDIT_2026_10_06.md",
+    "scope": "attached_rulebook_requirement_to_implementation_audit",
+    "source_filename": "윤찬혁_자소서_작성전략_v5_1_Canonical_Audited.md",
+    "source_observation": {
+      "source_line_count": 1543,
+      "active_reference_count": 6,
+      "active_cover_count": 1,
+      "attached_file_matches_active_cover": true,
+      "live_llm": {
+        "status": "manual_only",
+        "provider": "none",
+        "live_verified": false,
+        "verified_at": null
+      }
+    },
+    "full_rulebook_coverage": false,
+    "product_code_changed_this_audit": false,
+    "full_suite_rerun": false,
+    "live_provider_called": false,
+    "existing_targeted_regression_passed": 59,
+    "diagnostic_probes_passed": 11,
+    "diagnostic_pass_means": "current_omission_reproduced_not_compliance_achieved",
+    "confirmed_gaps": [
+      {
+        "id": "F1",
+        "summary": "registered_original_is_projected_to_static_seven_cover_rules",
+        "status": "unfixed"
+      },
+      {
+        "id": "F2",
+        "summary": "default_next_skips_research_and_free_providers_have_no_live_web_research_adapter",
+        "status": "unfixed"
+      },
+      {
+        "id": "F3",
+        "summary": "historical_corrections_not_loaded_before_evidence_mapping",
+        "status": "unfixed"
+      },
+      {
+        "id": "F4",
+        "summary": "claim_design_context_lacks_raw_evidence_metrics_and_prior_style",
+        "status": "unfixed"
+      },
+      {
+        "id": "F5",
+        "summary": "claim_approval_has_no_completed_content_support_test_gate",
+        "status": "unfixed"
+      },
+      {
+        "id": "F6",
+        "summary": "multiquestion_portfolio_optional_in_direct_question_design_path",
+        "status": "unfixed"
+      },
+      {
+        "id": "F7",
+        "summary": "approved_phrases_lost_by_style_projection_and_not_registered_on_lock",
+        "status": "unfixed"
+      },
+      {
+        "id": "F8",
+        "summary": "reverse_followups_have_no_answer_resolution_gate_and_lack_explicit_job_context",
+        "status": "unfixed"
+      }
+    ],
+    "additional_partial_coverage": [
+      "non_percent_duplicate_metrics",
+      "question_type_detail_templates",
+      "explicit_role_noun_completion",
+      "red_team_disposition",
+      "final_three_questions_resolution",
+      "multiple_supporting_experiences_after_primary_selection"
+    ],
+    "evidence": [
+      "work/rulebook-v51-current.json",
+      "work/rulebook-v51-audit-tests.xml",
+      "work/rulebook-v51-probes.xml",
+      "work/test_rulebook_v51_audit.py"
+    ],
+    "user_scope_preserved": {
+      "comparison_experiments_excluded": true,
+      "no_automatic_paid_fallback": true,
+      "no_automatic_submission": true
+    }
+  },
+  "rulebook_implementation_2026_10_06": {
+    "status": "IN_PROGRESS",
+    "full_goal_complete": false,
+    "previous_goal_turn": "PROGRESS",
+    "verified_at": "2026-10-06T21:01:20.007122+09:00",
+    "report": "docs/RULEBOOK_IMPLEMENTATION_PROGRESS_2026_10_06.md",
+    "implemented": [
+      "dynamic_source_sections",
+      "scoped_preparation_context",
+      "original_evidence_before_claim",
+      "claim_evidence_test_gate",
+      "multi_question_portfolio_gate",
+      "supporting_experiences",
+      "manual_and_chat_claim_test_ui"
+    ],
+    "verification": {
+      "backend": {
+        "passed": 550,
+        "skipped": 6,
+        "report": "work/rulebook-implementation-slice2-final.xml"
+      },
+      "ruff": "PASS",
+      "pyright": "0 errors/warnings with explicit workspace Python",
+      "frontend_tests": 25,
+      "frontend_typecheck": "PASS",
+      "frontend_lint": "PASS",
+      "frontend_build": "PASS",
+      "browser": "work/rulebook-ui-qa/result.json",
+      "real_source_sections": "work/rulebook-source-compilation.json"
+    },
+    "remaining": [
+      "research_and_why_now_F2",
+      "sanitized_approved_expression_reuse_F7",
+      "reverse_interview_context_answer_disposition_F8",
+      "role_noun_red_team_final_readiness",
+      "full_spec_and_six_rules_acceptance",
+      "real_provider_and_external_production_acceptance"
+    ],
+    "invariants": [
+      "existing_private_data_preserved",
+      "frozen_submission_immutable",
+      "human_approval_not_inferred",
+      "fact_expression_separation",
+      "no_automatic_learned_rule_promotion",
+      "no_paid_fallback",
+      "no_new_quality_comparison_experiments"
+    ],
+    "local_runtime_restarted": true,
+    "external_service_complete": false
+  },
+  "rulebook_v5_1_recheck_2026_10_07": {
+    "status": "audit_completed_implementation_in_progress",
+    "full_requirements_satisfied": false,
+    "report": "docs/RULEBOOK_V5_1_RECHECK_2026_10_07.md",
+    "scope": "Attached v5.1 rulebook: all seven phases, 26 sequence steps and reference/final rules",
+    "source_matches_active_reference": true,
+    "active_reference_count": 6,
+    "verified_source_improvements": [
+      "F1 dynamic source sections",
+      "F3 preparation history",
+      "F4 detailed pre-claim facts",
+      "F5 required ClaimEvidenceTest",
+      "F6 mandatory multiquestion portfolio",
+      "F8 backend version-bound responses and unresolved lock gate (partial, UI missing)"
+    ],
+    "remaining": [
+      "F8 UI/chat/storage integration and app restart only after usable vertical slice",
+      "F8 resume-domain references and frozen response-to-interview handoff",
+      "F2 research/Why Now/default sequence/free-provider research path with explicit JD-only fallback",
+      "F7 approved safe expression reuse and project-specific expression boundaries",
+      "Role Noun, repeated facts/numbers/conclusions and explicit final three readiness answers",
+      "Full implementation-pack and other five rule-document acceptance mapping",
+      "Actual free inference and external production acceptance"
+    ],
+    "validation": {
+      "python_final": {
+        "passed": 550,
+        "skipped": 6,
+        "failed": 0,
+        "evidence": "work/rulebook-current-audit-2026-10-07-final.xml"
+      },
+      "python_first_run": "549 passed, 6 skipped, 1 time-dependent test failure; corrected test clock at execution without relaxing authentication",
+      "diagnostics": {
+        "passed": 20,
+        "implemented_behavior_cases": 11,
+        "gap_reproduction_cases": 9,
+        "evidence": "work/rulebook-current-probes-2026-10-07.xml"
+      },
+      "ruff": "pass",
+      "pyright": "0 errors, 0 warnings with workspace venv",
+      "frontend_typecheck": "pass",
+      "frontend_lint": "pass",
+      "frontend_tests": "25 passed",
+      "production_build": "not rerun in audit",
+      "browser_e2e": "not rerun in audit",
+      "actual_postgres": "not run; six environment-dependent tests skipped"
+    },
+    "runtime": {
+      "checked_at": "2026-10-07T00:57:19.4446499+09:00",
+      "source_line_count": 1543,
+      "source_sha256": "a62c323390b437589960a5be451502e9c31a7867241da0b9b1fbdc0eba89a3de",
+      "active_reference_count": 6,
+      "active_cover_count": 1,
+      "attached_file_matches_active_cover": true,
+      "live_llm": {
+        "provider": "none",
+        "configured": false,
+        "live_verified": false,
+        "verified_at": null
+      },
+      "live_backend_has_review_response_context": false
+    },
+    "product_code_changed_in_audit": false,
+    "test_change": "tests/test_production_security.py computes exp/iat offsets at case execution time",
+    "goal_status": "active"
+  },
+  "review_resolution_2026_10_07": {
+    "status": "implemented_synthetic_vertical_flow_verified",
+    "full_requirements_satisfied": false,
+    "report": "docs/REVIEW_RESPONSE_PROGRESS_2026_10_07.md",
+    "coverage": [
+      "cover_and_resume_response_ui",
+      "partial_answer_merge",
+      "version_bound_validation",
+      "literal_user_chat_answers",
+      "resume_rule_selection",
+      "approval_before_revision",
+      "rereview_after_revision",
+      "explicit_final_lock",
+      "frozen_answers_in_interview_handoff",
+      "late_loaded_editor_fields_do_not_trigger_false_dirty_guard"
+    ],
+    "validation": {
+      "python_full": {
+        "passed": 571,
+        "skipped": 6,
+        "failed": 0,
+        "evidence": "work/review-resolution-final-2026-10-07.xml"
+      },
+      "python_targeted_after_new_revision_cases": {
+        "passed": 23,
+        "failed": 0,
+        "evidence": "work/review-resolution-revision-2026-10-07.xml"
+      },
+      "frontend_tests": 26,
+      "ruff": "pass",
+      "pyright": "0 errors, 0 warnings",
+      "production_build": "pass; includes lint and typecheck",
+      "browser": {
+        "passed": true,
+        "story": "partial answer -> pending -> complete -> explicit cover/resume lock -> frozen interview answers",
+        "layout": {
+          "viewport": 390,
+          "document": 390,
+          "dialog": 356
+        },
+        "pageErrors": [],
+        "externalInference": false,
+        "isolatedSyntheticData": true
+      }
+    },
+    "runtime": {
+      "provider": "none",
+      "configured": false,
+      "live_verified": false,
+      "checked_at": "2026-10-07T03:34:35.5318280Z",
+      "frontend_http_status": 200,
+      "has_review_response_context": true
+    },
+    "remaining": [
+      "research_why_now_and_free_provider_path",
+      "approved_safe_expression_reuse",
+      "role_noun_repetition_and_final_three_checks",
+      "full_pack_and_six_rules_acceptance",
+      "actual_free_inference_and_external_production_acceptance"
+    ],
+    "goal_status": "active"
+  },
+  "research_expression_2026_10_10": {
+    "status": "local_vertical_slices_verified",
+    "report": "docs/RESEARCH_AND_EXPRESSION_PROGRESS_2026_10_10.md",
+    "f2": "public_sources_quote_extraction_explicit_why_now_review",
+    "f7": "approved_expression_library_cover_resume",
+    "python_passed": 627,
+    "postgres_skipped": 6,
+    "privacy_retry_passed": 14,
+    "frontend_tests_passed": 26,
+    "ruff": "passed",
+    "pyright": "passed",
+    "frontend_build": "passed_with_existing_css_warning",
+    "browser": [
+      "research_workspace",
+      "expression_cover_resume_mobile"
+    ],
+    "runtime": {
+      "local_url": "http://127.0.0.1:3000",
+      "provider": "none",
+      "configured": false,
+      "live_verified": false
+    },
+    "full_requirements_met": false,
+    "next": [
+      "final_role_and_three_questions",
+      "project_boundaries",
+      "repetition_rules",
+      "full_pack_acceptance",
+      "real_AI_and_production_acceptance"
+    ]
+  },
+  "final_review_2026_10_10": {
+    "status": "local_flow_verified",
+    "report": "docs/FINAL_REVIEW_PROGRESS_2026_10_10.md",
+    "python_passed": 642,
+    "postgres_skipped": 6,
+    "frontend_tests_passed": 26,
+    "checks": [
+      "ruff",
+      "pyright",
+      "frontend_lint",
+      "frontend_typecheck",
+      "production_build",
+      "browser_cover_resume_final_review_freeze_handoff"
+    ],
+    "whole_requirements_met": false,
+    "actual_ai_verified": false,
+    "remaining": [
+      "project_specific_boundaries",
+      "repetition_rules",
+      "full_pack_and_six_document_acceptance",
+      "external_AI_and_production"
+    ]
+  },
+  "github_publication_2026_10_10": {
+    "repository": "yoon-chan-hyeok/career-harness",
+    "visibility": "private",
+    "status": "prepared_for_push",
+    "private_paths_excluded": true,
+    "working_tree_and_history_credential_scan": "passed",
+    "deployment_completed": false
   }
 }

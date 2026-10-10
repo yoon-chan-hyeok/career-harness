@@ -158,6 +158,15 @@ class ReviewIssue(Schema):
 class Review(Schema):
     issues: list[ReviewIssue]
     followups: list[str]
+    followup_details: list["ReviewFollowup"] = []
+
+
+class ReviewFollowup(Schema):
+    question: str = Field(min_length=1)
+    category: Literal["GROUNDING", "JOB_MOTIVATION", "INTERVIEW_PREPARATION"]
+
+
+Review.model_rebuild()
 
 
 class Patch(Schema):

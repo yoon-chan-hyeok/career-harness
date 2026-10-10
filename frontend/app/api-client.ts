@@ -30,6 +30,17 @@ export async function responseError(response: Response): Promise<Error> {
   } catch {
     /* A proxy may return an HTML error. */
   }
+  if (
+    response.status === 403 &&
+    typeof detail === "object" &&
+    detail !== null &&
+    "code" in detail &&
+    detail.code === "POLICY_ACCEPTANCE_REQUIRED"
+  )
+    return new ApiError(
+      "이용 안내가 변경되었습니다. 로그아웃 후 다시 로그인해 최신 안내를 확인해 주세요. 저장된 자료는 유지됩니다.",
+      403,
+    );
   const readable =
     typeof detail === "string" && /[가-힣]/.test(detail)
       ? detail.slice(0, 500)

@@ -141,7 +141,7 @@ def test_http_e2e_manual_workflow(client):
     )
     act("approve-strategy", {})
     q = act("add-question", {"text": "직무 역량", "limit": 1000})
-    act(
+    brief = act(
         "question-brief",
         {
             "qid": q["id"],
@@ -154,6 +154,12 @@ def test_http_e2e_manual_workflow(client):
             },
         },
     )
+    from types import SimpleNamespace
+
+    from test_workflow import proof_payload
+
+    act("claim-test", {"qid": q["id"], "artifact_id": brief["id"], "confirmed": True,
+                       "manual": proof_payload(brief["data"], SimpleNamespace(**e))})
     act("approve-question", {"qid": q["id"]})
     document = {
         "text": e["body"],
@@ -170,6 +176,13 @@ def test_http_e2e_manual_workflow(client):
     act("generate", {"qid": q["id"], "manual": document})
     act("review", {"qid": q["id"], "manual_verified": True})
     act("final-lock", {"qid": q["id"]})
+    final_context = client.get(f"/api/applications/{w['id']}/final-review-context").json()
+    act("final-review", {"context_hash": final_context["context_hash"], "role_noun": "Analyst",
+        "role_alignment": "MATCH", "assignment_answer": "직접 실험을 설계하고 분석 결과 보고서를 작성할 수 있습니다.",
+        "motivation_answer": "실험과 분석을 통해 문제를 확인하는 분석가의 본업을 배우고 싶습니다.",
+        "wants_core_work": True, "evidence_answer": "직접 실험을 설계한 경험을 분석 업무의 근거로 연결했습니다.",
+        "citations": [{"evidence_id": e["id"], "quote": e["body"]}],
+        "gaps_answer": "실무 분석 업무 경험은 아직 부족합니다.", "decision": "PASS", "return_stage": "NONE", "confirmed": True})
     act("ready", {})
     bundle = act("freeze", {})
     assert bundle["data"]["submitted_at"] is None

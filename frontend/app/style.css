@@ -3438,3 +3438,115 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+
+/* Application packet and invite-only service settings reuse the workspace palette. */
+.packet-card { margin-bottom: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.packet-card > button { width: 100%; margin-top: 8px; white-space: normal; }
+.packet-card > small { display: block; margin-top: 10px; line-height: 1.5; }
+.packet-checklist, .service-members { list-style: none; margin: 12px 0; padding: 0; }
+.packet-check { display: flex; width: 100%; text-align: left; gap: 10px; background: transparent; color: var(--ink); border-radius: 8px; padding: 9px 3px; }
+.packet-check:hover { background: #eceefa; }
+.packet-check > span:first-child { color: var(--accent); }
+.packet-check small, .service-members small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+.service-console { margin: 16px 0; }
+.service-console details { padding: 12px 0; }
+.service-console form { padding: 12px 0; }
+.service-limit-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.service-console label { min-width: 0; }
+.service-console input { width: 100%; }
+.service-members li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.service-members strong { overflow-wrap: anywhere; font-weight: 500; }
+.service-members button { flex-shrink: 0; }
+.recovery-page { max-width: 620px; padding: 48px 24px; margin: 10vh auto; }
+.recovery-page a { display: inline-block; margin-left: 16px; }
+@media(max-width: 700px) { .service-limit-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Public entry shares the private workroom's palette and clear document hierarchy. */
+main.public-page { display: block; min-height: 100vh; background: linear-gradient(145deg, #fbfbff, #fff 65%); padding: 0 clamp(20px, 5vw, 80px); }
+.public-header { max-width: 1280px; margin: auto; padding: 30px 0; display: flex; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 1px solid var(--line); }
+.public-header a { text-decoration: none; color: var(--ink); }
+.public-header .brand { margin: 0; }
+.public-header .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--accent); color: white; font: italic bold 30px Georgia, serif; }
+.public-header .brand small { display: block; margin-top: 4px; font-size: 11px; font-weight: normal; color: var(--muted); }
+.public-top-link { font-size: 13px; white-space: nowrap; }
+.public-hero { max-width: 1280px; margin: 0 auto; padding: 72px 0 90px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: clamp(32px, 6vw, 100px); align-items: start; }
+.public-intro h1 { font-size: clamp(36px, 4vw, 60px); line-height: 1.22; letter-spacing: -.045em; margin: 22px 0; font-weight: 650; }
+.public-lead { font-size: 17px; line-height: 1.9; color: #717483; }
+.public-benefits { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 22px; margin: 42px 0; }
+.public-benefits span { display: block; color: var(--accent); font-size: 11px; margin-bottom: 10px; }
+.public-benefits strong { font-size: 14px; }
+.public-benefits p { color: var(--muted); line-height: 1.8; font-size: 12px; }
+.public-preview { display: grid; grid-template-columns: minmax(0,1fr) minmax(130px,.55fr); border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 10px 36px #535cda09; overflow: hidden; font-size: 12px; }
+.preview-chat { padding: 22px; }
+.preview-chat small { color: var(--muted); font-size: 10px; }
+.preview-chat p { padding: 13px; background: #f0effb; border-radius: 12px; line-height: 1.8; }
+.preview-chat div { padding-top: 8px; color: var(--muted); line-height: 1.8; }
+.preview-storage { border-left: 1px solid var(--line); padding: 24px 18px; background: #fafaff; }
+.preview-storage strong, .preview-storage span { display: block; margin-bottom: 19px; font-size: 11px; }
+.preview-storage span { color: var(--muted); }
+.public-auth-card { border: 1px solid var(--line); border-radius: 20px; padding: 32px; background: white; box-shadow: 0 14px 60px #535cda08; }
+.public-auth-card h2 { font-size: 23px; letter-spacing: -.035em; margin: 17px 0; }
+.public-auth-card p { font-size: 13px; line-height: 1.8; color: var(--muted); }
+.email-code-form label { display: block; font-size: 12px; margin: 20px 0 9px; }
+.email-code-form input { display: block; width: 100%; margin-top: 8px; }
+.email-code-form button { width: 100%; margin-top: 10px; }
+.email-code-form .security-check { margin: 16px 0 6px; min-height: 65px; }
+.public-limit-note { background: var(--surface); border-radius: 12px; padding: 16px; margin: 26px 0 16px; }
+.public-limit-note strong, .public-limit-note span { display: block; font-size: 12px; margin-bottom: 8px; }
+.public-limit-note p { margin: 0; font-size: 11px; }
+.public-footer { max-width: 1280px; margin: 0 auto; padding: 24px 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 11px; }
+.public-footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+.final-review-panel { overflow-wrap: anywhere; }
+.final-review-panel label { display: block; margin: 16px 0; }
+.final-review-panel input:not([type="checkbox"]), .final-review-panel select, .final-review-panel textarea { display: block; width: 100%; margin-top: 6px; }
+.final-review-panel fieldset { min-width: 0; padding: 0; border: 0; }
+.final-review-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.final-review-panel .check { display: flex; gap: 8px; align-items: flex-start; }
+.public-footer a { color: var(--muted); }
+.onboarding-card, .policy-document { max-width: 760px; margin: 60px auto; background: white; border: 1px solid var(--line); border-radius: 18px; padding: clamp(24px, 5vw, 48px); line-height: 1.85; overflow-wrap: anywhere; }
+.onboarding-card h1, .policy-document h1 { letter-spacing: -.035em; font-size: 30px; line-height: 1.4; }
+.onboarding-card > ul { padding-left: 20px; color: #656978; margin: 26px 0; }
+.onboarding-card li { margin-bottom: 12px; }
+.onboarding-card .consent-check { display: flex; align-items: start; gap: 12px; margin: 18px 0; font-size: 13px; }
+.consent-check input { width: 17px; height: 17px; margin-top: 4px; flex-shrink: 0; }
+.consent-check a, .policy-document a { color: var(--accent); }
+.public-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0; }
+.onboarding-card > small { display: block; color: var(--muted); margin-top: 18px; }
+.policy-document h2 { font-size: 17px; margin: 30px 0 12px; }
+.policy-document p { color: #656978; font-size: 14px; }
+.review-response-panel { overflow-wrap: anywhere; }
+.review-response-form { border: 0; padding: 0; min-width: 0; }
+.review-answer-fields { margin: 18px 0; padding: 18px; min-width: 0; border: 1px solid var(--line); border-radius: 12px; }
+.review-answer-fields legend { max-width: 100%; padding: 0 6px; font-weight: 600; }
+.review-response-panel label { display: block; margin: 14px 0; }
+.review-response-panel select, .review-response-panel textarea { display: block; width: 100%; margin-top: 6px; }
+.review-response-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow-y: auto; }
+.review-citation { margin-top: 14px; border-top: 1px solid var(--line); }
+.review-response-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.research-panel { border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin: 20px 0; overflow-wrap: anywhere; }
+.research-panel > details { padding: 14px 0; border-top: 1px solid var(--line); }
+.research-panel summary { cursor: pointer; font-weight: 550; line-height: 1.6; }
+.research-panel fieldset { border: 0; min-width: 0; margin: 14px 0 0; padding: 0; }
+.research-panel label { display: block; margin: 14px 0; }
+.research-panel input:not([type=checkbox]), .research-panel select, .research-panel textarea { display: block; width: 100%; margin-top: 6px; }
+.research-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 300px; overflow-y: auto; }
+.research-source { padding: 12px; margin: 12px 0; background: var(--surface); border-radius: 8px; }
+.research-panel .check { display: flex; align-items: flex-start; gap: 8px; line-height: 1.7; }
+.research-panel .check input { flex-shrink: 0; margin-top: 4px; }
+.expression-library { border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin: 22px 0; overflow-wrap: anywhere; }
+.expression-library > details { border-top: 1px solid var(--line); padding: 14px 0; }
+.expression-library summary { cursor: pointer; font-weight: 550; }
+.expression-library fieldset { border: 0; min-width: 0; padding: 0; margin-top: 16px; }
+.expression-library label { display: block; margin: 12px 0; }
+.expression-library textarea, .expression-library select { width: 100%; display: block; margin-top: 6px; }
+.expression-library pre { white-space: pre-wrap; max-height: 260px; overflow-y: auto; }
+.expression-library .check { display: flex; align-items: flex-start; gap: 8px; line-height: 1.7; }
+.expression-library .check input { flex-shrink: 0; margin-top: 4px; }
+.expression-logic { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+.expression-entry { padding: 16px; margin: 12px 0; border-radius: 10px; background: var(--surface); }
+.account-settings { padding: 20px 0; }
+.account-delete-panel { padding: 20px; border: 1px solid #e9dce2; background: #fdfafb; border-radius: 12px; margin-top: 20px; max-width: 600px; }
+.account-delete-panel label { display: block; }
+.account-delete-panel label input { display: block; margin-top: 10px; width: 100%; }
+@media(max-width: 900px) { .public-hero { grid-template-columns: 1fr; max-width: 630px; padding-top: 42px; gap: 32px; } .public-auth-card { width: 100%; } }
+@media(max-width: 500px) { .public-header { padding: 22px 0; } .public-header .brand small, .public-top-link { display: none; } .public-benefits { gap: 15px; margin: 30px 0; } .public-auth-card { padding: 24px; } .public-preview { grid-template-columns: minmax(0,1fr) 114px; } .preview-chat { padding: 15px; } .preview-storage { padding: 18px 12px; } .public-intro h1 { font-size: 38px; } .public-lead { font-size: 14px; } .desktop-break { display: none; } .onboarding-card, .policy-document { margin: 24px auto; } }

@@ -67,6 +67,10 @@ def test_product_ablation_executes_strategy_writer_review_and_partial_patch_in_i
             self.calls.append(stage)
             if stage == "question_brief":
                 return schema.model_validate({**fixtures[stage], "question_id": context["question"]["id"]})
+            if stage == "claim_evidence_test":
+                from test_workflow import proof_payload
+
+                return schema.model_validate(proof_payload(context["brief"], e))
             if stage == "recruiter":
                 self.review_count += 1
                 if self.review_count == 1:

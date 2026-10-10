@@ -15,6 +15,9 @@ def test_close_requires_confirmed_actual_submission_and_preserves_bundle(flow, d
     with pytest.raises(ValueError, match="제출"):
         f.close_application(w.id, True)
     finish(f, w, e)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     before = deepcopy(bundle.data)

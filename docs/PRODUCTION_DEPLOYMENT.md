@@ -1,5 +1,7 @@
 # Vercel + Supabase + FastAPI 실서비스 준비
 
+초대형과 공개 가입형을 선택할 수 있다. 공개형은 [공개 서비스 설정](PUBLIC_SERVICE_SETUP.md)과 `deploy/public-access.env.example`을 추가로 적용한다. 최신 구현·검증 및 남은 외부 인수는 [공개형 기록](PUBLIC_RELEASE_2026_10_06.md)에 있다.
+
 이 프로젝트의 운영 구성은 Vercel의 Next.js 화면, FastAPI, Supabase PostgreSQL/Auth이다. FastAPI는 기존 별도 컨테이너 구성 또는 [무료 Vercel Hobby 백엔드 준비](VERCEL_FREE_BACKEND.md)의 별도 Python 프로젝트로 배포할 수 있게 준비했다. 실제 계정·비밀키·도메인·외부 서비스 연결이 준비되기 전에는 배포 완료로 판단하지 않는다. Jev는 선택적인 shadow 평가이고 기본 검수 결과를 바꾸지 않는다.
 
 ## 준비된 연결
@@ -22,7 +24,7 @@
 
 Career Harness 전용 프로젝트를 준비한다. 기존 다른 서비스가 사용하는 DB에 이 배포 예시를 그대로 적용하지 않는다.
 
-1. Auth에서 사용할 이메일 사용자를 준비하고 필요한 redirect URL을 실제 Vercel 도메인으로 설정한다. 개인 서비스라면 자체 회원가입을 끄고 사용자 UUID를 `CAREER_ALLOWED_USER_IDS`에 등록한다.
+1. Auth에서 사용할 이메일 사용자를 준비하고 필요한 redirect URL을 실제 Vercel 도메인으로 설정한다. 초대 전용 서비스이므로 자체 회원가입을 끄고 초기 운영자 UUID를 `CAREER_ADMIN_USER_IDS`에 등록한다. 초기 일반 사용자는 `CAREER_ALLOWED_USER_IDS`로 승인할 수 있다. 이후 사용자 승인은 관리자 화면에서 관리한다. 두 목록이 비어 있어도 공개 접근이 허용되지 않는다.
 2. Auth Signing Keys에 ES256 또는 RS256 서명 키를 설정한다. 이 백엔드는 과거 공유 secret HS256 방식으로 자동 fallback하지 않는다. 공개 JWKS와 issuer는 해당 프로젝트 HTTPS origin에서만 가져온다.
 3. Dashboard의 Connect에서 **Direct connection** 또는 IPv4가 필요한 경우 **Session pooler** URL을 가져온다. 비밀번호의 `@`, `:`, `/` 등은 URL 인코딩한다. runtime `DATABASE_URL`과 release 전용 `DATABASE_MIGRATION_URL`을 서버에 저장한다.
 4. DB SSL 설정에서 인증서를 내려받아 서버 `/run/secrets/supabase-ca.crt`에 read-only로 공급하고 `sslmode=verify-full&sslrootcert=/run/secrets/supabase-ca.crt`를 사용한다. 코드의 최소 TLS 검사는 `require`도 허용하지만 예시는 호스트·CA까지 확인한다.
@@ -95,6 +97,20 @@ python scripts/deployment_preflight.py --live-openai --live-jev
 OpenAI 상용 API는 `CAREER_LLM_PROVIDER=openai`, `OPENAI_API_KEY`와 명시적인 `OPENAI_MODEL`이 있어야 한다. 공개 gpt-oss 경로와 별개이며 무료 상용 OpenAI API를 확인한 것으로 표시하지 않는다. `selected_ai.live_verified=true`는 합성 요청의 스키마가 처리됐다는 의미이고, `status=ok`여야 기대한 응답까지 확인한 것이다. CLI 결과는 화면의 연결 검사 기록을 갱신하지 않는다. 실제 채용 자료 품질이나 전체 업무 흐름 검증은 별도로 수행한다.
 
 Jev는 `JEV_API_KEY`, `JEV_MODEL`, 선택적 `JEV_SHADOW_ENABLED=1`로 활성화한다. 공식 무료 제공 조건과 실제 이용 권한이 확인되지 않아 기본값은 꺼짐이다. 실제 어댑터는 고정된 공식 Typesafe endpoint에만 자격증명을 보내고 redirect를 따라가지 않는다. 네트워크 실패가 기본 검수를 중단하거나 shadow 결과를 자동 승격하지 않는다.
+
+## 초대 계정과 공용 무료 한도 운영
+
+`CAREER_ENV=production` 또는 `staging`이면 초대·공용 한도가 항상 활성화된다. 개인 로컬 환경에서 검증하려면 `CAREER_SHARED_SERVICE=1`을 명시한다. `CAREER_SHARED_SERVICE=0`으로 운영 환경의 보호를 해제할 수 없다. migration `0012`와 최신 보호 SQL을 적용한다. `service_members`도 브라우저 직접 접근을 금지한다.
+
+관리자 화면의 “초대 계정과 공용 AI 한도”에서 이미 Supabase Auth에 존재하는 사용자 UUID를 승인한다. 이 화면은 Auth 계정 생성·초대 이메일 발송을 하지 않는다. DB의 `SUSPENDED`는 초기 환경변수의 승인보다 우선하고, 다음 인증 요청부터 기존 JWT도 거절한다. 현재 운영자가 자신을 중지하는 작업은 막는다. 운영자 권한 자체는 `CAREER_ADMIN_USER_IDS`로 별도 지정한다.
+
+개인 일/월 호출·토큰·비용 상한과 서비스 전체 상한을 함께 검사한다. 기본 전체 예산은 하루 100회/200,000토큰, 월 1,000회/2,000,000토큰이며 공급자 무료 잔액을 뜻하지 않는다. 각 계정의 기존 개인 한도가 더 낮으면 낮은 값을 적용한다. 호출 직전에 최대 사용량을 DB에 예약하고 실제 사용량으로 정산한다. 여러 프로세스도 같은 전역→개인 순서로 잠그므로 전체 예산을 동시에 초과 예약할 수 없다. 중단된 요청의 예약은 보수적으로 남는다. 상한을 0으로 낮추면 새 호출을 중단하고, 이미 시작한 호출은 취소하지 않는다. 비용 미확인 요청은 비용 상한을 설정한 상태에서 실행할 수 없다. 호출 횟수는 채팅 메시지 수가 아니라 각 모델 호출 수다.
+
+무료 계정의 순간 TPM/RPM 한도는 공급자가 최종 판정한다. 앱의 일/월 예산은 분당 사용량 제어가 아니며 별도 upstream `429`가 발생할 수 있다. Groq의 `openai/gpt-oss-20b`/`120b` 입력은 배포에 포함한 `o200k_base` 토큰 사전과 안전 여유분으로 사전 계산한다. 이 값은 실제 청구량이나 남은 무료 한도가 아니다. HF 및 다른 모델에는 보수적인 기존 계산을 유지한다. 토큰 사전은 공식 tiktoken 공개 파일의 SHA-256을 검증하며 MIT 고지와 함께 배포해 런타임 다운로드가 필요 없다.
+
+원자료 업로드는 공유 모드에서 계정별 20,000,000바이트/50개, 전체 100,000,000바이트/250개로 제한한다. `CAREER_USER_UPLOAD_BYTES`, `CAREER_USER_UPLOAD_COUNT`, `CAREER_SHARED_UPLOAD_BYTES`, `CAREER_SHARED_UPLOAD_COUNT`로 조정한다. 한도 계산은 원본 base64·추출 텍스트 등 JSON 보관량의 보수적인 추정치이며 실제 PostgreSQL 디스크 용량이나 모든 문서 이력의 총량은 아니다. 같은 파일의 재업로드는 중복 과금하지 않으며 폐기한 원자료는 사용 가능 보관량에서 제외한다. 원자료 삭제는 기존 삭제 흐름으로 처리하고 백업 보존은 별도 관리한다.
+
+공유 서비스는 서버의 개인 seed 가져오기 및 외부 모델을 직접 호출하는 비교 실험 API를 차단한다. 합성 성능 비교 실험은 사용자 범위에서 제외됐다. 개인정보 없는 기존 실행 통계 조회는 유지한다. 운영자 화면은 회원 UUID·정책과 전체 사용량만 추가하며 다른 사용자의 문서 원문을 조회하지 않는다.
 
 ## 5. 백업과 복구
 

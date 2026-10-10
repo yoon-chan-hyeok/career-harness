@@ -1,6 +1,8 @@
 "use client";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { Request } from "./api-client";
+import { CacheUsage } from "./cache-usage";
+import { inputReuseNotice, type CacheUsageReport } from "./cache-usage-format";
 
 type Limits = {
   daily_calls: number;
@@ -19,8 +21,10 @@ type Totals = {
   reserved_tokens: number;
   remaining_calls: number;
   remaining_tokens: number;
+  cache?: CacheUsageReport | null;
 };
 type Usage = {
+  managed?: boolean;
   daily: Totals;
   monthly: Totals;
   limits?: Limits;
@@ -79,6 +83,12 @@ export function UsageSettings({ request }: { request: Request }) {
   return (
     <section className="usage-settings">
       <h3>AI 사용량과 실행 상한</h3>
+      {usage?.managed && (
+        <p className="muted">
+          운영자가 정한 상한 안에서 더 낮은 개인 한도를 설정할 수 있습니다.
+          서비스 전체 공용 한도도 함께 적용됩니다.
+        </p>
+      )}
       <p className="muted">
         사용 한도는 내 계정의 호출을 제한합니다. 제공자 무료 크레딧 잔액은
         제공자 계정에서 확인하세요. 계산할 수 없는 비용은 0원으로 표시하지
@@ -119,9 +129,11 @@ export function UsageSettings({ request }: { request: Request }) {
                     ? `$${total.estimated_cost_usd.toFixed(4)}`
                     : `미확인${total?.unknown_cost_calls ? ` · 미확인 호출 ${total.unknown_cost_calls}회` : ""}`}
                 </small>
+                <CacheUsage cache={total?.cache} />
               </div>
             ))}
           </div>
+          <p className="muted">{inputReuseNotice}</p>
           {usage.notice && <p className="muted">{usage.notice}</p>}
         </>
       )}

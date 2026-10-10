@@ -10,12 +10,34 @@ from career.provider_policy import stage_policy
 from career.providers import ProviderUnavailable, configured_provider
 from career.resume import ResumeContent
 from career.runtime_trace import trace_sink
+from career.schemas import ApplicationBrief, Document, EvidencePack, OpportunityBrief, QuestionBrief, Review
 from openai import DefaultHttpxClient, OpenAI
 from pydantic import BaseModel
 from sqlalchemy import select
 from test_workflow import doc, flow, question  # noqa: F401
 
 SECRET = "hf_fixture_private_token_not_real"
+
+
+@pytest.mark.parametrize("stage,schema", [("opportunity", OpportunityBrief), ("evidence_mapper", EvidencePack),
+    ("strategy", ApplicationBrief), ("question_brief", QuestionBrief), ("writer", Document),
+    ("resume_writer", ResumeContent), ("fact_reviewer", Review), ("recruiter", Review)])
+def test_groq_actual_contracts_and_korean_context_fit_without_network(stage, schema):
+    from career.prompt_cache import prepare
+    from career.prompts import instructions_for
+    from career.provider_policy import BudgetExceeded
+
+    instance = client(lambda _: pytest.fail("Preflight must be offline"), "groq")
+    policy = instance._policy(stage)
+    format = {"type": "json_schema", "json_schema": {"name": schema.__name__, "schema": schema.model_json_schema(), "strict": False}}
+    prompt = prepare(stage, {"evidence": "분석 기준을 정하고 실험 결과를 검토했습니다. " * 10},
+                     instructions_for(stage), policy.model, "groq", format)
+    request = {"messages": [{"role": "system", "content": prompt.instructions}, {"role": "user", "content": prompt.content}],
+               "response_format": format, "model": policy.model}
+    assert instance._validate_input(policy, request) + policy.max_output_tokens + 256 <= 8000
+    with pytest.raises(BudgetExceeded):
+        instance._validate_input(policy, {**request, "extra_evidence": "서로 다른 수치와 정확한 근거 " * 15000})
+    instance.client.close()
 
 
 class Output(BaseModel):
@@ -120,7 +142,8 @@ def test_generic_stage_policy_accepts_hf_identifiers_without_changing_legacy_def
     assert policy.max_output_tokens == 1024 and policy.timeout_seconds == 40
 
 
-def test_chat_adapter_creates_both_cover_letter_and_structured_resume_in_product_workflow(flow):
+@pytest.mark.parametrize("provider", ["huggingface", "groq"])
+def test_chat_adapter_creates_both_cover_letter_and_structured_resume_in_product_workflow(flow, provider):
     service, workspace, evidence = flow
     service.approve_strategy(workspace.id)
     q = question(service, workspace, evidence)
@@ -137,7 +160,7 @@ def test_chat_adapter_creates_both_cover_letter_and_structured_resume_in_product
         data = resume if payload["response_format"]["json_schema"]["name"] == "ResumeContent" else cover_letter
         return httpx.Response(200, json=result(data))
 
-    instance = client(handle)
+    instance = client(handle, provider)
     service.provider = instance
     draft = service.draft(workspace.id, q["id"])
     written_resume = service.resume(workspace.id)
@@ -148,6 +171,6 @@ def test_chat_adapter_creates_both_cover_letter_and_structured_resume_in_product
     assert evidence.body in service.db.get(Artifact, written_resume.id).data["text"]
     traces = list(service.db.scalars(select(PromptRun).where(PromptRun.user_id == service.user)))
     assert [row.stage for row in traces] == ["writer", "resume_writer"]
-    assert all(row.provider == "HuggingFace" for row in traces)
+    assert all(row.provider == ("HuggingFace" if provider == "huggingface" else "Groq") for row in traces)
     assert [call["response_format"]["json_schema"]["name"] for call in calls] == ["Document", "ResumeContent"]
     instance.client.close()

@@ -139,6 +139,10 @@ def test_structured_provider_writing_review_resume_and_freeze(flow):
         }
     )
     f.question_brief(w.id, q["id"])
+    from test_workflow import proof_payload
+
+    f.provider.fixtures["claim_evidence_test"] = proof_payload(f.artifact(w.id, "QuestionBrief", q["id"]).data, e)
+    f.test_claim(w.id, q["id"])
     f.approve_question(w.id, q["id"])
     draft = f.draft(w.id, q["id"])
     assert draft.model_version == "fake-test-only"
@@ -148,6 +152,9 @@ def test_structured_provider_writing_review_resume_and_freeze(flow):
     assert resume.data["sections"][0]["bullets"][0]["evidence_ids"] == [e.id]
     f.review(w.id, resume=True)
     f.final_lock(w.id, resume=True)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     assert f.freeze(w.id).data["submitted_at"] is None
 
@@ -237,6 +244,9 @@ def test_extraction_exact_quote_and_confirmation(flow, db):
 def test_snapshot_content_stays_immutable_on_submission(flow, db):
     f, w, e = flow
     finish(f, w, e)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     snapshot = db.scalar(select(SubmissionSnapshot).where(SubmissionSnapshot.artifact_id == bundle.id))

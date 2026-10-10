@@ -10,6 +10,7 @@ METRIC_FIELDS = ("dataset", "subset", "experiment_version", "baseline", "denomin
 
 def ownership(evidence):
     raw = evidence.get("data", {}).get("ownership", {})
+    raw = raw if isinstance(raw, dict) else {}
     return {key: raw.get(key, "UNKNOWN") for key in OWNERSHIP_FIELDS}
 
 
@@ -130,6 +131,25 @@ def build_handoff(bundle: dict, bundle_id: str):
                                "status": "GAP_ACKNOWLEDGEMENT_NOT_INVENTED_REMEDIATION"} for gap in strategy.get("fatal_gaps", [])],
         "project_explanations": {key: [] for key in ("one_minute", "three_minute", "five_minute")},
     }
+    frozen_ids = {artifact["id"] for artifact in artifacts}
+    result["final_questions"] = [
+        {"review_artifact_id": artifact["id"], "basis": "EXACT_FROZEN_USER_DECISION", "fact_authority": False,
+         **{key: artifact["data"][key] for key in ("role_noun", "assignment_answer", "motivation_answer", "evidence_answer", "citations", "gaps_answer")}}
+        for artifact in artifacts if artifact["kind"] == "FinalSubmissionReview"
+        and artifact.get("status") == "LOCKED" and artifact["data"].get("decision") == "PASS"
+        and set(artifact["data"].get("document_ids", [])) <= frozen_ids
+    ]
+    result["review_responses"] = [
+        {"response_artifact_id": artifact["id"], "question_id": artifact.get("slot", ""),
+         "document_id": artifact["data"]["document_id"], "document_version": artifact["data"]["document_version"],
+         "mode": artifact["data"]["mode"], "entries": artifact["data"]["entries"],
+         "fact_authority": False, "basis": "EXACT_FROZEN_REVIEW_RESPONSES"}
+        for artifact in artifacts
+        if artifact["kind"] in {"ReviewResponses", "ResumeReviewResponses"}
+        and artifact.get("status") == "LOCKED" and artifact["data"].get("status") == "RESOLVED"
+        and artifact["data"].get("document_id") in frozen_ids
+        and artifact["data"].get("review_id") in frozen_ids
+    ]
     for evidence in evidence_by_id.values():
         speaking = speaking_notes(evidence)
         for duration in result["project_explanations"]:

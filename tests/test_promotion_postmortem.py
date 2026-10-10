@@ -184,6 +184,9 @@ def test_explicit_user_preference_is_separate_from_learning(db):
 def test_postmortem_maps_exact_frozen_evidence_and_not_later_jd(flow):
     f, w, e = flow
     finish(f, w, e)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     w.jd_raw = "현재는 완전히 다른 직무"

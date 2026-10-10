@@ -1,6 +1,18 @@
-# Career Harness — Codex One-Shot Implementation Pack v2.2 FINAL
+# Career Harness
 
-최신 검증과 남은 작업은 [업그레이드 현황](docs/UPGRADE_PROGRESS.md)을 확인하세요. 로컬 실행은 [실행 안내](RUN_LOCAL.md), 이전 단계의 기록은 [구현 현황](IMPLEMENTATION_REPORT.md)에 있습니다. 아래는 제공된 원본 구현 팩 안내입니다.
+근거를 확인한 뒤 자소서와 레쥬메를 작성하는 개인 취업 작업실입니다. 회사 조사 → 경험·근거 연결 → 전략 승인 → 문항 설계·작성 → 검수 답변 → 제출 전 직접 확인 → 최종본 보관·면접 준비를 지원합니다. FastAPI·SQLAlchemy와 Next.js로 구성하며, MCP는 동일한 코어의 어댑터입니다.
+
+2026-10-10 최신 검증: Python 642개 통과, 별도 PostgreSQL 환경 검사 6개 미실행, 프런트엔드 26개 통과 및 production build 완료. 조사·승인 표현 보관·제출 전 확인을 합성 브라우저에서 검증했습니다. **전체 명세 인수와 실제 외부 AI·운영 배포는 진행 중입니다.**
+
+- [로컬 실행](RUN_LOCAL.md)
+- [회사 조사·표현 재사용](docs/RESEARCH_AND_EXPRESSION_PROGRESS_2026_10_10.md)
+- [직업 정체성·제출 전 세 질문 및 남은 작업](docs/FINAL_REVIEW_PROGRESS_2026_10_10.md)
+- [공개 가입형 운영 준비](docs/PUBLIC_SERVICE_SETUP.md)
+- [전체 구현 상태](IMPLEMENTATION_STATUS.json)
+
+GitHub 소스에는 개인 자료·DB·접속 토큰·API 키가 포함되지 않습니다. 새 환경에서 자료를 등록하고 AI 제공자를 직접 연결해야 합니다. 직접 작성 모드는 외부 AI 없이 사용할 수 있으며, 최종본 보관과 실제 제출 확인은 별도입니다.
+
+아래는 제공된 v2.2 구현 팩의 원래 설계 안내입니다.
 
 이 패키지는 사용자가 GPT와 수동으로 수행하는 취업 준비 절차를
 프로덕션 수준의 반복 가능한 AI workflow로 자동화하기 위한 최종 구현 명세다.

@@ -160,7 +160,17 @@ def test_serverless_allows_only_exact_platform_hostname(serverless_environment, 
     assert os.environ["AUTH_MODE"] == "supabase" and os.environ["AUTH_TOKENS"] == "{}"
 
 
-def test_packaged_entrypoint_imports_without_local_secrets_or_network(serverless_environment, tmp_path):
+@pytest.mark.parametrize("mode", ["invite", "public"])
+def test_packaged_entrypoint_imports_without_local_secrets_or_network(serverless_environment, tmp_path, monkeypatch, mode):
+    monkeypatch.setenv("CAREER_ACCESS_MODE", mode)
+    for name, value in {
+        "CAREER_OPERATOR_NAME": "Synthetic Operator", "CAREER_SUPPORT_EMAIL": "support@example.test",
+        "CAREER_CAPTCHA_SITE_KEY": "synthetic-turnstile-site-key",
+        "CAREER_CAPTCHA_ENABLED_CONFIRMED": "1", "CAREER_SMTP_CONFIGURED_CONFIRMED": "1",
+        "CAREER_EMAIL_CONFIRMATION_CONFIRMED": "1", "SUPABASE_SECRET_KEY": "sb_secret_synthetic-only",
+        "CAREER_BACKUP_RETENTION_DAYS": "14",
+    }.items():
+        monkeypatch.setenv(name, value)
     stage = tmp_path / "package"
     stage.mkdir()
     for relative in ("app.py", "pyproject.toml", "vercel.json", "alembic.ini"):
@@ -174,6 +184,7 @@ def test_packaged_entrypoint_imports_without_local_secrets_or_network(serverless
     (stage / "evals").mkdir()
     shutil.copy2(PROJECT / "evals/historical_cases.jsonl", stage / "evals/historical_cases.jsonl")
     fonts = stage / "backend/career/assets/fonts"
+    shutil.copytree(PROJECT / "backend/career/assets/tokenizer", stage / "backend/career/assets/tokenizer")
     fonts.mkdir(parents=True)
     for name in FONT_ASSETS:
         shutil.copy2(PROJECT / "backend/career/assets/fonts" / name, fonts / name)
@@ -194,7 +205,9 @@ from fastapi.testclient import TestClient
 from pypdf import PdfReader
 assert engine.url.query["sslmode"] == "verify-full"
 assert engine.url.query["sslrootcert"]
-assert migration_heads() == {"0011"}
+assert migration_heads() == {"0013"}
+from career.token_estimation import gpt_oss_input_tokens
+assert gpt_oss_input_tokens({"messages": [{"role": "user", "content": "합성 한국어 근거"}]}) > 256
 assert FONT_PATH.resolve().is_relative_to(Path.cwd().resolve())
 font_metadata = json.loads((FONT_PATH / "SOURCE.json").read_text(encoding="utf-8"))
 for name in ["CareerKR-Regular.ttf", "CareerKR-Bold.ttf", "OFL.txt"]:
@@ -241,6 +254,8 @@ def test_deployment_ignore_blocks_nested_private_files_but_keeps_runtime(tmp_pat
         "migrations/versions/0011_editor_drafts.py",
         "evals/historical_cases.jsonl",
         *["backend/career/assets/fonts/" + name for name in FONT_ASSETS],
+        "backend/career/assets/tokenizer/o200k_base.tiktoken",
+        "backend/career/assets/tokenizer/LICENSE.txt",
     ]
     denied = [
         ".provider-settings.json",

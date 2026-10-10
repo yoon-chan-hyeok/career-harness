@@ -58,6 +58,22 @@ def approve_question(workspace: str, qid: str, body: dict[str, Any], db: DB, ide
     return action(workspace, "approve-question", {**body, "qid": qid}, db, ident, key)
 
 
+@router.post("/api/applications/{workspace}/questions/{qid}/evidence-test")
+def evidence_test(workspace: str, qid: str, body: dict[str, Any], db: DB, ident: User, key: RequestKey = None):
+    return action(workspace, "claim-test", {**body, "qid": qid}, db, ident, key)
+
+
+@router.get("/api/applications/{workspace}/questions/{qid}/evidence-test-context")
+def evidence_test_context(workspace: str, qid: str, db: DB, ident: User):
+    from career.claim_test import CHECKS, claim_texts
+
+    service = Workflow(db, ident)
+    service.ws(workspace)
+    brief = service.artifact(workspace, "QuestionBrief", qid)
+    return {"brief_id": brief.id, "brief_version": brief.version, "claims": claim_texts(brief.data),
+            "checks": CHECKS, "evidence": service.selected(brief.data["evidence_ids"])}
+
+
 @router.post("/api/applications/{workspace}/questions/{qid}/generate")
 def generate(workspace: str, qid: str, body: dict[str, Any], db: DB, ident: User, key: RequestKey = None):
     return action(workspace, "generate", {**body, "qid": qid}, db, ident, key)
@@ -71,6 +87,13 @@ def review(workspace: str, qid: str, body: dict[str, Any], db: DB, ident: User, 
 @router.post("/api/applications/{workspace}/resume/generate")
 def resume(workspace: str, body: dict[str, Any], db: DB, ident: User, key: RequestKey = None):
     return action(workspace, "resume", body, db, ident, key)
+
+
+@router.get("/api/applications/{workspace}/review-response-context")
+def review_response_context(workspace: str, db: DB, ident: User, qid: str = "", resume: bool = False):
+    from career.review_resolution import context
+
+    return context(Workflow(db, ident), workspace, qid, resume)
 
 
 @router.post("/api/applications/{workspace}/submission/freeze")

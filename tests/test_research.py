@@ -1,4 +1,8 @@
 import pytest
+from career.artifacts import latest
+from career.conversation import ChatRequest, converse
+from career.providers import FakeLLMProvider, ManualResearchProvider
+from career.research_context import scope
 from career.workflow import Workflow
 
 
@@ -75,3 +79,56 @@ def test_fake_research_preserves_dated_sources_and_rejects_unbacked_inference():
     fixture["inferences"] = [{"text": "Inference", "supporting_source_ids": ["invented"], "confidence": "LOW"}]
     with pytest.raises(ValueError, match="추론"):
         FakeResearchProvider(fixture).research("Demo", "Analyst", "JD")
+
+
+def test_next_starts_with_recorded_research_then_analyzes_exactly_one_stage(db, monkeypatch):
+    monkeypatch.setenv("CAREER_LLM_PROVIDER", "none")
+    service = Workflow(db, "a", provider=FakeLLMProvider({
+        "opportunity": {"actual_outputs": ["분석 보고서"], "base_profession": "분석가"},
+    }))
+    workspace = service.create("합성 회사", "분석가", "분석 보고서를 작성합니다.")
+    request = ChatRequest(text="ㄱㄱ", client_id="research-first-message")
+    turn = converse(service, workspace.id, request)
+    research = service.artifact(workspace.id, "CompanyResearchResult")
+    assert research.data["scope"]["basis"] == "JD_ONLY"
+    assert research.data["scope"]["research_complete"] is False
+    assert "공고만으로" in turn["data"]["response"]["text"]
+    assert latest(db, "a", workspace.id, "OpportunityBrief", required=False) is None
+    assert workspace.state == "CREATED"
+    assert converse(service, workspace.id, request)["id"] == turn["id"]
+    assert service.artifact(workspace.id, "CompanyResearchResult").version == 1
+    blocked = converse(service, workspace.id, ChatRequest(text="ㄱㄱ", client_id="needs-research-confirmation"))
+    assert "채용 배경" in blocked["data"]["response"]["text"]
+    assert latest(db, "a", workspace.id, "OpportunityBrief", required=False) is None
+    from career.research_workspace import decision
+
+    review = decision(service, workspace.id, {"research_id": research.id, "mode": "INSUFFICIENT",
+        "limitation": "공고 외에는 공개된 채용 배경 자료가 없습니다.", "confirmed": True})
+    converse(service, workspace.id, ChatRequest(text="ㄱㄱ", client_id="analyze-next-message"))
+    brief = service.artifact(workspace.id, "OpportunityBrief")
+    assert brief.depends_on == [research.id, review.id] and workspace.state == "OPPORTUNITY_READY"
+
+
+def test_direct_manual_analysis_records_jd_basis_without_ai_or_blocking(db):
+    service = Workflow(db, "a")
+    workspace = service.create("회사", "분석가", "자료를 분석합니다.")
+    brief = service.analyze(workspace.id, {"actual_outputs": ["보고서"], "base_profession": "분석가"})
+    research = service.artifact(workspace.id, "CompanyResearchResult")
+    assert research.data["mode"] == "MANUAL_JD_ONLY"
+    assert research.data["scope"]["missing_information"]
+    assert brief.depends_on == [research.id] and brief.data["company_facts"] == []
+    service.analyze(workspace.id, {"actual_outputs": ["보고서"], "base_profession": "분석가"})
+    assert service.artifact(workspace.id, "CompanyResearchResult").id == research.id
+    service.research(workspace.id)
+    previous = latest(db, "a", workspace.id, "OpportunityBrief")
+    assert previous and previous.status == "STALE"
+
+
+def test_unbacked_historical_notes_do_not_claim_source_coverage():
+    result = ManualResearchProvider().research("company", "role", "jd")
+    from career.schemas import HistoricalJDSignal
+
+    result.historical_jd_signals = [HistoricalJDSignal(statement="old unsourced note")]
+    status = scope(result, "MANUAL_JD_ONLY")
+    assert "출처가 연결된 과거·경력·유사 공고" in status["missing_information"]
+    assert status["why_now_confirmed"] is False and status["basis"] == "JD_ONLY"

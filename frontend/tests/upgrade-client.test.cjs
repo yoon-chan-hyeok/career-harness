@@ -149,6 +149,38 @@ test("draft serializer excludes credentials and approvals while retaining actual
   });
 });
 
+test("late-loaded review fields are clean while real edits in other forms stay protected after saving", () => {
+  const { draftHasChanges } = moduleApi("draft-fields.ts");
+  const field = (value) => ({ value, kind: "textarea" });
+  const initial = { "0:essay": field("saved essay") };
+  const defaults = {
+    "0:essay": field("saved essay"),
+    "1:proof": field("source quote"),
+    "2:answer": field(""),
+  };
+  assert.equal(draftHasChanges(defaults, initial, defaults), false);
+  const edited = { ...defaults, "2:answer": field("my answer") };
+  assert.equal(draftHasChanges(edited, initial, defaults), true);
+  const afterSave = { ...initial, "2:answer": field("my answer") };
+  assert.equal(draftHasChanges(edited, afterSave, defaults), false);
+  assert.equal(
+    draftHasChanges(
+      { ...edited, "0:essay": field("unsaved essay") },
+      afterSave,
+      defaults,
+    ),
+    true,
+  );
+  assert.equal(
+    draftHasChanges(
+      { ...edited, "1:proof": field("changed proof") },
+      afterSave,
+      defaults,
+    ),
+    true,
+  );
+});
+
 test("resume budget label preserves version goals and does not invent missing page counts", () => {
   const { resumeBudgetLabel } = moduleApi("resume-budget.ts");
   assert.equal(resumeBudgetLabel({ page_budget: 2 }), "2페이지");

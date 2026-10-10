@@ -5,6 +5,20 @@ export type DraftField = {
   value: string;
 };
 export type DraftPayload = Record<string, { value: string; kind: string }>;
+export function draftHasChanges(
+  current: DraftPayload,
+  baseline: DraftPayload,
+  defaults: DraftPayload,
+): boolean {
+  return Object.entries(current).some(([key, field]) => {
+    const original = baseline[key] || defaults[key];
+    return (
+      !original ||
+      field.value !== original.value ||
+      field.kind !== original.kind
+    );
+  });
+}
 export function editableDraftFields<T extends DraftField>(fields: T[]): T[] {
   const allowed = new Set([
     "text",

@@ -2,7 +2,7 @@
 
 from pydantic import Field
 
-from career.artifacts import lock, save
+from career.artifacts import fresh, latest, lock, save
 from career.schemas import Schema
 from career.telemetry import feedback
 
@@ -18,6 +18,18 @@ class QuestionAllocation(Schema):
 
 class QuestionPortfolio(Schema):
     items: list[QuestionAllocation]
+
+
+def require_current(service, workspace, brief):
+    ws = service.ws(workspace)
+    if len(ws.data.get("questions", [])) < 2:
+        return
+    portfolio = latest(service.db, service.user, workspace, "QuestionPortfolio", required=False)
+    if portfolio is None or portfolio.status != "LOCKED":
+        raise ValueError("여러 문항의 역할과 메시지 후보를 먼저 배분하고 승인해 주세요.")
+    fresh(service.db, service.user, portfolio)
+    if portfolio.id not in brief.depends_on:
+        raise ValueError("현재 문항별 역할 배분을 반영해 메시지를 다시 설계해 주세요.")
 
 
 def plan(service, workspace, manual=None):
@@ -68,6 +80,7 @@ def plan(service, workspace, manual=None):
         "QuestionPortfolio",
         value,
         deps=[strategy.id, pack.id],
+        sources=service.reference_sources("question_portfolio"),
         model="manual" if manual else service.current_model,
     )
     return result

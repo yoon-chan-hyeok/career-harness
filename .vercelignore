@@ -15,6 +15,9 @@
 !/backend/career/assets/fonts/CareerKR-Bold.ttf
 !/backend/career/assets/fonts/OFL.txt
 !/backend/career/assets/fonts/SOURCE.json
+!/backend/career/assets/tokenizer/
+!/backend/career/assets/tokenizer/o200k_base.tiktoken
+!/backend/career/assets/tokenizer/LICENSE.txt
 !/alembic.ini
 !/migrations/
 /migrations/*

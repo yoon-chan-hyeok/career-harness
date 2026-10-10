@@ -10,7 +10,7 @@ from career import (
     semantic_models,  # noqa: F401
     upgrade_models,  # noqa: F401
 )
-from career.db import Base, Owned
+from career.db import Base, Owned, now
 
 
 class Source(Owned, Base):
@@ -121,11 +121,31 @@ class AIUsageSettings(Owned, Base):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
+class ServiceMember(Base):
+    """Operator-controlled access and ceilings; contains no application content."""
+
+    __tablename__ = "service_members"
+    user_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    status: Mapped[str] = mapped_column(String(20), default="ACTIVE")
+    limits: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class AIUsageBucket(Owned, Base):
     __tablename__ = "ai_usage_buckets"
     __table_args__ = (UniqueConstraint("user_id", "period", name="uq_ai_usage_bucket_period"),)
     period: Mapped[str] = mapped_column(String(16))
     data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+
+class RequestRateBucket(Base):
+    """One current window per account, shared by all API workers."""
+
+    __tablename__ = "request_rate_buckets"
+    user_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    minute: Mapped[int] = mapped_column(Integer)
+    requests: Mapped[int] = mapped_column(Integer)
+    mutations: Mapped[int] = mapped_column(Integer)
 
 
 class AIUsageReservation(Owned, Base):

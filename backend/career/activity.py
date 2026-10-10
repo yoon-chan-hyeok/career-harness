@@ -22,15 +22,20 @@ from career.truth import owned
 execution_id: ContextVar[str | None] = ContextVar("career_execution_id", default=None)
 
 STAGES = (
-    ("research", "기업·공고 조사", ("CompanyResearchResult",)),
+    ("research", "기업·공고 조사", ("CompanyResearchResult", "ResearchReview")),
     ("opportunity", "직무 분석", ("OpportunityBrief", "OpportunityAssessment")),
     ("evidence", "경험·근거 연결", ("EvidencePack",)),
     ("strategy", "지원 전략", ("ApplicationBrief", "QuestionPortfolio")),
-    ("writing", "문항·이력서 작성", ("QuestionBrief", "Draft", "ResumeBrief", "ResumeContent")),
-    ("review", "근거·채용 관점 검수", ("Review", "ResumeReview", "PortfolioReview")),
+    ("writing", "문항·이력서 작성", ("QuestionBrief", "ClaimEvidenceTest", "Draft", "ResumeBrief", "ResumeContent")),
+    ("review", "근거·채용 관점 검수", ("Review", "ResumeReview", "PortfolioReview", "ReviewResponses", "ResumeReviewResponses", "FinalSubmissionReview")),
 )
 ACTION_STAGE = {
     "research": "research",
+    "research-source": "research",
+    "research-extract": "research",
+    "research-confirm": "research",
+    "expression-save": "writing",
+    "final-review": "review",
     "analyze": "opportunity",
     "assess-opportunity": "opportunity",
     "decide-opportunity": "opportunity",
@@ -39,12 +44,14 @@ ACTION_STAGE = {
     "approve-strategy": "strategy",
     "add-question": "writing",
     "question-brief": "writing",
+    "claim-test": "writing",
     "approve-question": "writing",
     "generate": "writing",
     "resume": "writing",
     "patch": "writing",
     "revise": "review",
     "review": "review",
+    "review-answers": "review",
     "ledger": "review",
     "final-lock": "review",
     "ready": "review",
@@ -59,11 +66,17 @@ ACTION_STAGE = {
 }
 ACTION_LABELS = {
     "research": "기업·공고 자료 조사",
+    "research-source": "조사 원문 수집",
+    "research-extract": "출처와 대조해 조사 정리",
+    "research-confirm": "채용 배경·조사 범위 확인",
+    "expression-save": "승인한 표현 보관",
+    "final-review": "직업 정체성·제출 전 세 질문 확인",
     "analyze": "실제 직무 산출물 분석",
     "evidence-map": "확인된 경험 연결",
     "strategy": "지원 전략 구성",
     "generate": "문항 본문 작성",
     "review": "문장과 근거 검수",
+    "review-answers": "검수 질문 답변 확인",
     "resume": "이력서 구성",
     "revise": "수정안 제안",
     "conversation": "대화 요청 처리",
@@ -77,6 +90,7 @@ ACTION_LABELS = {
     "assess-opportunity": "지원 가치·우선순위 평가",
     "decide-opportunity": "지원 결정 기록",
     "question-brief": "문항 메시지 구성",
+    "claim-test": "문항 주장·근거 대조",
     "final-lock": "최종 문서 잠금",
     "patch": "직접 수정 반영",
     "ledger": "주장 근거 갱신",
@@ -90,8 +104,8 @@ ACTION_LABELS = {
     "select-experience": "작성 경험 선택 반영",
 }
 AI_ACTIONS = frozenset({
-    "conversation", "commands", "research", "analyze", "assess-opportunity", "evidence-map",
-    "strategy", "question-portfolio", "question-brief", "generate", "review", "resume",
+    "conversation", "commands", "research", "research-extract", "analyze", "assess-opportunity", "evidence-map",
+    "strategy", "question-portfolio", "question-brief", "claim-test", "generate", "review", "review-answers", "resume",
     "revise", "ready", "freeze", "interview-handoff", "postmortem",
 })
 

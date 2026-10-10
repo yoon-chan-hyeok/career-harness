@@ -18,6 +18,7 @@ LOW_RISK_STAGES = frozenset(
         "style_projection",
         "summarization",
         "research_extract",
+        "research_source_extract",
     }
 )
 POLICY_FIELDS = frozenset(
@@ -137,12 +138,21 @@ def _usage_count(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
-def usage_counts(usage: dict[str, Any] | None) -> tuple[int, int, int, int] | None:
+def token_totals(usage: dict[str, Any] | None) -> tuple[int, int] | None:
+    """Actual token quota is independent of an optional cache breakdown."""
     if not isinstance(usage, dict):
         return None
     input_tokens = _usage_count(usage.get("input_tokens", usage.get("prompt_tokens")))
     # Embeddings have prompt_tokens/total_tokens and no generation output.
     output_tokens = _usage_count(usage.get("output_tokens", usage.get("completion_tokens", 0 if "prompt_tokens" in usage else None)))
+    return (input_tokens, output_tokens) if input_tokens is not None and output_tokens is not None else None
+
+
+def usage_counts(usage: dict[str, Any] | None) -> tuple[int, int, int, int] | None:
+    totals = token_totals(usage)
+    if totals is None or not isinstance(usage, dict):
+        return None
+    input_tokens, output_tokens = totals
     details = usage.get("input_tokens_details") or {}
     if not isinstance(details, dict):
         return None
@@ -180,7 +190,11 @@ def estimated_cost(model: str, usage: dict[str, Any] | None, tool_calls: int | N
     if (
         isinstance(usage, dict)
         and "input_tokens" in usage
-        and not isinstance(usage.get("input_tokens_details"), dict)
+        and (not isinstance(usage.get("input_tokens_details"), dict)
+             or "cached_tokens" not in usage["input_tokens_details"]
+             or ("cache_write_tokens" not in usage["input_tokens_details"]
+                 and rates is not None
+                 and rates.get("cache_write_usd_per_million") != rates.get("input_usd_per_million")))
     ):
         return None
     if counts is None or rates is None or tool_calls is None or _usage_count(tool_calls) is None:
@@ -263,7 +277,7 @@ def evaluate_response(
 ) -> dict[str, Any]:
     """Validate actual latency and usage before accepting a provider result into application state."""
     cost = estimated_cost(policy.model, usage, tool_calls)
-    counts = usage_counts(usage)
+    counts = token_totals(usage)
     if latency_ms > policy.timeout_seconds * 1000:
         raise BudgetExceeded("LATENCY_BUDGET_EXCEEDED")
     if counts and counts[1] > policy.max_output_tokens:

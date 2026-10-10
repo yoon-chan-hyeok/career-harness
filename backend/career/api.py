@@ -28,7 +28,9 @@ from career.models import (
     Fact,
     Feedback,
     PromptRun,
+    RequestRateBucket,
     Revision,
+    ServiceMember,
     Source,
     Workspace,
 )
@@ -46,6 +48,7 @@ from career.provider_config import (
 )
 from career.provider_policy import BudgetExceeded
 from career.providers import ProviderUnavailable
+from career.public_guard import bind_request, limit_request
 from career.retrieval import configured_embedder, index_embeddings, search
 from career.semantic_models import LocalEvidenceEmbedding
 from career.telemetry import export_events
@@ -75,6 +78,8 @@ install_security(app)
 
 @app.exception_handler(RequestValidationError)
 async def validation_error(request: Request, error: RequestValidationError):
+    if request.url.path.startswith("/api/account/delete"):
+        return JSONResponse(status_code=422, content={"detail": "계정 삭제 확인과 본인 인증을 확인해 주세요."})
     if request.url.path.startswith("/api/providers"):
         # FastAPI's normal error includes the invalid input; this route may carry a key.
         return JSONResponse(status_code=422, content={"detail": "AI 제공자 입력 형식과 무료 사용 확인을 확인해 주세요."})
@@ -83,8 +88,9 @@ async def validation_error(request: Request, error: RequestValidationError):
     return await request_validation_exception_handler(request, error)
 
 
-def database():
+def database(request: Request):
     with SessionLocal() as session:
+        session.info["career_request_method"] = request.method
         try:
             yield session
             session.commit()
@@ -93,12 +99,42 @@ def database():
             raise
 
 
-def user(authorization: Annotated[str | None, Header()] = None) -> str:
-    return authenticate(authorization)
+def identity_only(authorization: Annotated[str | None, Header()] = None,
+                  db: Session = Depends(database, scope="function")) -> str:
+    ident = authenticate(authorization)
+    limit_request(db.get_bind(), ident, db.info.get("career_request_method", "GET"))
+    return ident
 
 
-DB = Annotated[Session, Depends(database)]
+def identity_member(authorization: Annotated[str | None, Header()] = None,
+                    db: Session = Depends(database, scope="function")) -> str:
+    from career.public_service import ensure_public_member
+    from career.service_access import require_member, shared_service
+
+    ident = identity_only(authorization, db)
+    if shared_service() or ident.startswith("__career_"):
+        # Release the access read before the independent AI reservation transaction.
+        with Session(db.get_bind()) as access:
+            ensure_public_member(access, ident, authorization)
+            require_member(access, ident)
+            access.commit()
+    bind_request(db, ident)
+    return ident
+
+
+def user(authorization: Annotated[str | None, Header()] = None,
+         db: Session = Depends(database, scope="function")) -> str:
+    from career.public_service import require_public_consent
+
+    ident = identity_member(authorization, db)
+    with Session(db.get_bind()) as access:
+        require_public_consent(access, ident)
+    return ident
+
+
+DB = Annotated[Session, Depends(database, scope="function")]
 User = Annotated[str, Depends(user)]
+MemberUser = Annotated[str, Depends(identity_member)]
 
 
 @app.exception_handler(ValueError)
@@ -134,7 +170,7 @@ def auth_config():
 
 
 @app.get("/api/settings")
-def settings(db: DB, ident: User):
+def settings(db: DB, ident: MemberUser):
     return {
         "user": ident,
         "ai_available": provider_available(),
@@ -377,6 +413,23 @@ def resume_master(db: DB, ident: User):
 
     item = current_master(Workflow(db, ident))
     return view(item) if item else None
+
+
+@app.get("/api/expressions")
+def expressions(db: DB, ident: User):
+    from career.expressions import listing
+
+    return listing(Workflow(db, ident))
+
+
+@app.patch("/api/expressions/{expression_id}")
+def expression_use(expression_id: str, body: dict[str, Any], db: DB, ident: User):
+    from career.expressions import set_active
+
+    active = body.get("active")
+    if type(active) is not bool:
+        raise ValueError("표현 사용 여부를 선택해 주세요.")
+    return view(set_active(Workflow(db, ident), expression_id, active))
 
 
 @app.post("/api/resume-master")
@@ -661,6 +714,7 @@ def confirm_evidence(evidence_id: str, body: dict[str, Any], db: DB, ident: User
 
 @app.post("/api/sources/import")
 def source_import(db: DB, ident: User):
+    require_local_owner(ident)
     return import_corpus(db, ident, Path(os.getenv("PRIVATE_INPUT_DIR", "private_input")))
 
 
@@ -702,6 +756,13 @@ def correction(body: dict[str, Any], db: DB, ident: User):
     return view(add_fact(db, ident, source.id, body.get("fact_type", "profile"), body["key"], body["value"]))
 
 
+@app.get("/api/applications/{workspace}/final-review-context")
+def final_review_context(workspace: str, db: DB, ident: User):
+    from career.final_decision import context
+
+    return context(Workflow(db, ident), workspace)
+
+
 @app.post("/api/applications/{workspace}/actions/{action}")
 def action(
     workspace: str,
@@ -725,12 +786,18 @@ def action(
     qid = body.get("qid", "")
     manual = body.get("manual")
     from career.assessment import assess, decide
+    from career.expressions import approve as approve_expression
+    from career.final_decision import confirm as final_review
     from career.portfolio import approve as approve_portfolio
     from career.portfolio import plan as plan_portfolio
+    from career.research_workspace import collect as collect_research
+    from career.research_workspace import decision as research_decision
+    from career.research_workspace import extract as extract_research
 
     approval_kind = {
         "approve-strategy": "ApplicationBrief",
         "approve-question": "QuestionBrief",
+        "claim-test": "QuestionBrief",
         "approve-portfolio": "QuestionPortfolio",
         "final-lock": "ResumeContent" if body.get("resume") else "Draft",
     }.get(action)
@@ -738,6 +805,11 @@ def action(
         "assess-opportunity": lambda: assess(service, workspace, manual),
         "decide-opportunity": lambda: decide(service, workspace, body["artifact_id"], body["decision"]),
         "research": lambda: service.research(workspace, body.get("live") is True, manual),
+        "research-source": lambda: collect_research(service, workspace, body),
+        "research-extract": lambda: extract_research(service, workspace, body.get("research_id"), manual),
+        "research-confirm": lambda: research_decision(service, workspace, body),
+        "expression-save": lambda: approve_expression(service, workspace, body),
+        "final-review": lambda: final_review(service, workspace, body),
         "analyze": lambda: service.analyze(workspace, manual),
         "evidence-map": lambda: service.map_evidence(workspace, manual,
             local_vector=body.get("semantic_query_vector"), local_profile_id=body.get("semantic_profile_id")),
@@ -747,10 +819,14 @@ def action(
         "approve-strategy": lambda: service.approve_strategy(workspace),
         "add-question": lambda: service.add_question(workspace, body["text"], int(body.get("limit", 1000))),
         "question-brief": lambda: service.question_brief(workspace, qid, manual),
+        "claim-test": lambda: service.test_claim(workspace, qid, manual, body.get("confirmed") is True),
         "approve-question": lambda: service.approve_question(workspace, qid),
         "generate": lambda: service.draft(workspace, qid, manual),
         "review": lambda: service.review(
             workspace, qid, body.get("manual_verified") is True, body.get("resume", False)
+        ),
+        "review-answers": lambda: service.answer_review(
+            workspace, qid, body["responses"], body.get("resume") is True, body.get("manual_verified") is True
         ),
         "patch": lambda: service.patch_document(
             workspace,
@@ -781,6 +857,8 @@ def action(
 
     def execute():
         service.ws(workspace)
+        if action == "claim-test" and manual is not None and not body.get("artifact_id"):
+            raise ValueError("원문과 대조한 문항 메시지 버전을 지정해 주세요.")
         if approval_kind and body.get("artifact_id"):
             current = service.artifact(
                 workspace,
@@ -793,10 +871,12 @@ def action(
                 raise ValueError("검토 중 문서 버전이 바뀌었습니다. 현재 내용을 다시 확인해 주세요.")
         return operations[action]()
 
-    manual_supported = {"assess-opportunity", "research", "analyze", "evidence-map", "strategy",
-                        "question-portfolio", "question-brief", "generate", "resume"}
+    manual_supported = {"assess-opportunity", "research", "research-extract", "analyze", "evidence-map", "strategy",
+                        "question-portfolio", "question-brief", "claim-test", "generate", "resume"}
     manual_action = (action in manual_supported and bool(manual)) or (action == "review" and body.get("manual_verified") is True)
     manual_action = manual_action or (action == "research" and body.get("live") is not True)
+    manual_action = manual_action or (action == "research-extract" and manual is not None)
+    manual_action = manual_action or (action == "review-answers" and body.get("manual_verified") is True)
     manual_action = manual_action or (action == "postmortem" and body.get("draft_hypotheses") is not True)
     result = run_operation(db, ident, workspace, action, execute, uses_ai=False if manual_action else None)
     result = view(result) if hasattr(result, "__table__") else result
@@ -930,7 +1010,7 @@ def label_review(artifact_id: str, body: ReviewLabel, db: DB, ident: User):
 
 
 @app.get("/api/export")
-def personal_export(db: DB, ident: User):
+def personal_export(db: DB, ident: MemberUser):
     return {
         model.__tablename__: [view(row) for row in db.scalars(select(model).where(model.user_id == ident))]
         for model in (
@@ -949,6 +1029,8 @@ def personal_export(db: DB, ident: User):
             AIUsageSettings,
             AIUsageBucket,
             AIUsageReservation,
+            ServiceMember,
+            RequestRateBucket,
             *ENTITY_MODELS.values(),
             *APPLICATION_MODELS,
             CorrectionRecord,
@@ -956,17 +1038,25 @@ def personal_export(db: DB, ident: User):
     }
 
 
+from career.account_routes import build_account_router  # noqa: E402
 from career.expanded_routes import build_expanded_router  # noqa: E402
+from career.public_routes import make_router as build_public_router  # noqa: E402
 from career.rest_routes import router  # noqa: E402
 from career.upgrade_routes import build_router  # noqa: E402
 
 app.include_router(router)
 app.include_router(build_router(database, user))
+app.include_router(build_public_router(database, identity_member))
+app.include_router(build_account_router(database, identity_only))
 app.include_router(build_expanded_router(database, user))
 
 
 @app.post("/api/evals/run")
 def run_evaluation(body: dict[str, Any], db: DB, ident: User):
+    from career.service_access import shared_service
+
+    if shared_service() and body.get("mode") in {"workflow_ablation", "historical", "ablation"}:
+        raise HTTPException(403, "공용 서비스에서는 외부 모델 비교 실험을 실행하지 않습니다.")
     from career.evaluation import benchmark, historical_smoke, production_metrics
     from career.providers import OpenAIProvider
 

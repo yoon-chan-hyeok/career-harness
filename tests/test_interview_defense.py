@@ -54,6 +54,9 @@ def test_handoff_preserves_frozen_metric_scope_and_unknown_ownership(flow):
     f.update_ledger(w.id, q["id"], [{**c, "metric_ids": [metric.id]} for c in document.data["claims"]])
     f.review(w.id, q["id"], manual_verified=True)
     f.final_lock(w.id, q["id"])
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.ready(w.id)
     bundle = f.freeze(w.id)
     frozen = deepcopy(bundle.data)

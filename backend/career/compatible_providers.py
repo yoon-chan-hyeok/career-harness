@@ -1,6 +1,5 @@
 """Official HF/Groq chat adapters. No automatic paid fallback or fake output."""
 
-import json
 from collections.abc import Callable
 from dataclasses import replace
 from types import SimpleNamespace
@@ -9,9 +8,10 @@ from typing import Any, TypeVar
 from openai import DefaultHttpxClient, OpenAI
 from pydantic import BaseModel
 
+from career.prompt_cache import prepare
 from career.prompts import instructions_for
 from career.provider_config import ProviderSettings
-from career.provider_policy import StagePolicy, stage_policy
+from career.provider_policy import BudgetExceeded, StagePolicy, stage_policy
 from career.providers import OpenAIProvider, ProviderUnavailable
 from career.request_budget import bounded_policy
 
@@ -23,23 +23,35 @@ ENDPOINTS = {
 
 
 def _usage(response: Any) -> dict[str, Any] | None:
-    value = getattr(response, "usage", None)
+    value = response.get("usage") if isinstance(response, dict) else getattr(response, "usage", None)
     if value is None:
         return None
     raw = value.model_dump() if hasattr(value, "model_dump") else value
     if not isinstance(raw, dict):
         return None
-    details = raw.get("prompt_tokens_details") or {}
+    details = raw.get("prompt_tokens_details")
     return {
         "input_tokens": raw.get("prompt_tokens"),
         "output_tokens": raw.get("completion_tokens"),
         "total_tokens": raw.get("total_tokens"),
-        "input_tokens_details": {"cached_tokens": details.get("cached_tokens", 0)} if isinstance(details, dict) else {},
+        "input_tokens_details": {key: details[key] for key in ("cached_tokens", "cache_write_tokens")
+                                 if key in details} if isinstance(details, dict) else
+                                 ({"cached_tokens": -1} if details is not None else {}),
     }
 
 
 class CompatibleProvider(OpenAIProvider):
     """The shared observer is reused; the upstream protocol is Chat Completions."""
+
+    def _validate_input(self, policy: StagePolicy, request_data: dict[str, Any]) -> int:
+        if self.provider_id == "groq" and policy.model in {"openai/gpt-oss-20b", "openai/gpt-oss-120b"}:
+            from career.token_estimation import gpt_oss_input_tokens
+
+            estimate = gpt_oss_input_tokens(request_data)
+            if policy.max_input_tokens is not None and estimate > policy.max_input_tokens:
+                raise BudgetExceeded("INPUT_TOKEN_BUDGET_EXCEEDED")
+            return estimate
+        return super()._validate_input(policy, request_data)
 
     def __init__(self, settings: ProviderSettings):
         if settings.provider not in ENDPOINTS or not settings.token or not settings.free_only_confirmed:
@@ -61,9 +73,8 @@ class CompatibleProvider(OpenAIProvider):
         policy = stage_policy(stage, self.model)
         # A bounded default avoids reserving 16K output against a small free-plan quota.
         output = min(policy.max_output_tokens, 4096)
-        # The shared free Groq request budget is conservative; it is not a
-        # statement about the account's live remaining tokens. HF also receives
-        # a bounded byte estimate even when no stage override was configured.
+        # Groq GPT-OSS uses offline BPE + framing margin. Other models use the
+        # byte bound. This request cap is not the account's live TPM balance.
         input_cap = 32768 if self.provider_id == "huggingface" else max(256, 8000 - output - 256)
         return replace(policy, max_output_tokens=output,
                        max_input_tokens=min(policy.max_input_tokens or input_cap, input_cap))
@@ -81,9 +92,13 @@ class CompatibleProvider(OpenAIProvider):
             arguments["response_format"] = response_format
         if self.provider_id == "groq" and policy.model.startswith("openai/gpt-oss-"):
             arguments["reasoning_effort"] = "low"
-        raw = self.client.chat.completions.create(**arguments)
+        wire = self.client.chat.completions.with_raw_response.create(**arguments)
+        # Read usage before SDK parsing can coerce malformed booleans/strings
+        # into apparent integer measurements. Keep only the allowlisted counters.
+        usage = _usage(wire.http_response.json())
+        raw = wire.parse()
         # Never forward reasoning, raw errors or additional provider fields to telemetry.
-        return SimpleNamespace(raw=raw, usage=_usage(raw))
+        return SimpleNamespace(raw=raw, usage=usage)
 
     @staticmethod
     def _content(response: Any) -> str:
@@ -107,10 +122,6 @@ class CompatibleProvider(OpenAIProvider):
         operation: str = "structured",
     ) -> T:
         policy = self._policy(prompt_id)
-        messages = [
-            {"role": "system", "content": instructions_for(prompt_id)},
-            {"role": "user", "content": json.dumps(context, ensure_ascii=False, default=str)},
-        ]
         response_format = {
             "type": "json_schema",
             "json_schema": {
@@ -121,6 +132,9 @@ class CompatibleProvider(OpenAIProvider):
                 "strict": self.provider_id == "huggingface",
             },
         }
+        prompt = prepare(prompt_id, context, instructions_for(prompt_id), policy.model, self.provider_id, response_format)
+        messages = [{"role": "system", "content": prompt.instructions},
+                    {"role": "user", "content": prompt.content}]
 
         def parsed(response) -> T:
             result = schema.model_validate_json(self._content(response))
@@ -135,15 +149,15 @@ class CompatibleProvider(OpenAIProvider):
             lambda: self._call(policy, messages, response_format),
             parsed,
             policy=policy,
+            cache_metadata={"prompt_cache_scope": prompt.scope, "prompt_cache_layout_version": prompt.layout_version},
         )
         return result
 
     def generate(self, prompt_id: str, context: dict[str, Any]) -> str:
         policy = self._policy(prompt_id)
-        messages = [
-            {"role": "system", "content": instructions_for(prompt_id)},
-            {"role": "user", "content": json.dumps(context, ensure_ascii=False, default=str)},
-        ]
+        prompt = prepare(prompt_id, context, instructions_for(prompt_id), policy.model, self.provider_id)
+        messages = [{"role": "system", "content": prompt.instructions},
+                    {"role": "user", "content": prompt.content}]
         return self._observe(
             prompt_id,
             "generate",
@@ -152,6 +166,7 @@ class CompatibleProvider(OpenAIProvider):
             lambda: self._call(policy, messages, None),
             self._content,
             policy=policy,
+            cache_metadata={"prompt_cache_scope": prompt.scope, "prompt_cache_layout_version": prompt.layout_version},
         )
 
     def embed(self, texts: list[str]) -> list[list[float]]:

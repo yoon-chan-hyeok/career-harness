@@ -14,7 +14,11 @@ def test_current_company_fact_has_its_own_ledger_source_and_frozen_defense(flow)
     fact = {"statement": statement, "source_id": source["id"], "source_type": "OFFICIAL", "published_at": source["published_at"], "retrieved_at": source["retrieved_at"], "freshness": "CURRENT"}
     pack = service.artifact(ws.id, "EvidencePack")
     strategy = deepcopy(service.artifact(ws.id, "ApplicationBrief").data)
-    service.research(ws.id, manual={"official_facts": [fact], "external_evidence": [], "role_signals": [], "historical_jd_signals": [], "selection_process_signals": [], "inferences": [], "sources": [source]})
+    research = service.research(ws.id, manual={"official_facts": [fact], "external_evidence": [], "role_signals": [], "historical_jd_signals": [], "selection_process_signals": [], "inferences": [], "sources": [source]})
+    from career.research_workspace import decision
+
+    decision(service, ws.id, {"research_id": research.id, "mode": "INSUFFICIENT",
+        "limitation": "조직 신설 사실은 확인했으나 이 직무의 내부 채용 사유는 미확인입니다.", "confirmed": True})
     service.analyze(ws.id, {"actual_outputs": ["평가 보고서"], "base_profession": "평가 연구원"})
     service.map_evidence(ws.id, {"items": [{k: v for k, v in pack.data["items"][0].items() if k in EvidenceItem.model_fields}], "uncovered_outputs": []})
     # Derived assessment bookkeeping is not a caller-authored strategy field.
@@ -39,6 +43,9 @@ def test_current_company_fact_has_its_own_ledger_source_and_frozen_defense(flow)
     issues = hard_qa(statement + "\n제가 2026개의 실험을 수행했습니다.", service.selected([evidence.id]), company_facts=current_facts)
     assert any(issue["code"] == "UNSUPPORTED_METRIC" for issue in issues)
     service.final_lock(ws.id, q["id"])
+    from final_review_fixture import confirm_final
+
+    confirm_final(service, ws.id)
     service.ready(ws.id)
     bundle = service.freeze(ws.id)
     handoff = service.handoff(ws.id)

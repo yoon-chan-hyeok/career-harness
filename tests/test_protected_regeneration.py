@@ -46,5 +46,8 @@ def test_remove_last_evidence_applies_correction_and_blocks_writing(flow):  # no
 def test_go_after_locked_document_only_prepares_not_submits(flow):  # noqa: F811
     f, w, e = flow
     q = finish(f, w, e)
+    from final_review_fixture import confirm_final
+
+    confirm_final(f, w.id)
     f.command(w.id, "ㄱㄱ", qid=q["id"])
     assert w.state == "READY_TO_FREEZE"

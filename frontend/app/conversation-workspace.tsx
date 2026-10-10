@@ -13,6 +13,8 @@ import { AssessmentDecision, RevisionInbox } from "./review-controls";
 import { AgentWorkspace } from "./agent-workspace";
 import { CorrectionInbox } from "./correction-controls";
 import { ExperienceOptions } from "./experience-options";
+import { ApplicationPacket } from "./application-packet";
+import { ResearchStatus } from "./research-status";
 
 type Turn = {
   id: string;
@@ -32,15 +34,21 @@ const names: Record<string, string> = {
   OpportunityBrief: "직무 분석",
   OpportunityAssessment: "지원 가치·우선순위",
   CompanyResearchResult: "회사 조사",
+  ResearchReview: "채용 배경 확인",
+  ApprovedExpression: "승인한 표현",
+  FinalSubmissionReview: "직업 정체성·마지막 세 질문",
   EvidencePack: "경험 연결",
   ApplicationBrief: "지원 전략",
   QuestionPortfolio: "문항별 역할",
   QuestionBrief: "문항 설계",
+  ClaimEvidenceTest: "메시지 근거 검증",
   Draft: "자기소개서",
   ResumeBrief: "이력서 구성",
   ResumeContent: "이력서",
   Review: "문항 검수",
   ResumeReview: "이력서 검수",
+  ReviewResponses: "문항 검수 답변",
+  ResumeReviewResponses: "이력서 검수 답변",
   PortfolioReview: "전체 문서 검수",
   SubmissionBundle: "최종 보관본",
   InterviewHandoff: "면접 준비",
@@ -62,6 +70,7 @@ export function ConversationWorkspace({
   evidenceOptions,
   sourceNames,
   request,
+  send: sendRequest,
   refresh,
   onEdit,
   onBack,
@@ -74,6 +83,7 @@ export function ConversationWorkspace({
   evidenceOptions: { id: string; title: string }[];
   sourceNames: Record<string, string>;
   request: Request;
+  send: (path: string) => Promise<Response>;
   refresh: (id: string) => Promise<void>;
   onEdit: (stage: number, qid?: string) => void;
   onBack: () => void;
@@ -129,7 +139,11 @@ export function ConversationWorkspace({
     ? 3
     : selected?.kind === "ApplicationBrief"
       ? 1
-      : ["SubmissionBundle", "PortfolioReview"].includes(selected?.kind || "")
+      : [
+            "SubmissionBundle",
+            "PortfolioReview",
+            "FinalSubmissionReview",
+          ].includes(selected?.kind || "")
         ? 4
         : ["InterviewHandoff", "Postmortem"].includes(selected?.kind || "")
           ? 5
@@ -217,7 +231,12 @@ export function ConversationWorkspace({
           "ResumeBrief",
           "ResumeContent",
           "ResumeReview",
+          "Review",
+          "ReviewResponses",
+          "ResumeReviewResponses",
           "PortfolioReview",
+          "FinalSubmissionReview",
+          "ClaimEvidenceTest",
         ].includes(a.kind),
       ),
     },
@@ -291,6 +310,14 @@ export function ConversationWorkspace({
             aria-label="지원 준비 대화"
             aria-live="polite"
           >
+            {(!latest("OpportunityBrief") ||
+              latest("CompanyResearchResult")?.data.scope) && (
+              <ResearchStatus
+                research={latest("CompanyResearchResult")}
+                review={latest("ResearchReview")}
+                onOpen={() => onEdit(0)}
+              />
+            )}
             {!turns.length && (
               <div className="chat-welcome">
                 <span className="welcome-mark">h</span>
@@ -482,6 +509,15 @@ export function ConversationWorkspace({
           작성한 문항과 문서가 여기에 쌓입니다.
         </p>
         <div className="storage-scroll">
+          <ApplicationPacket
+            workspaceId={w.id}
+            version={
+              w.state + w.artifacts.map((a) => a.id + a.status).join(":")
+            }
+            request={request}
+            send={sendRequest}
+            onEdit={onEdit}
+          />
           <ExperienceOptions
             ready={[latest("OpportunityBrief"), latest("EvidencePack")].every(
               (artifact) =>
@@ -601,6 +637,25 @@ export function ConversationWorkspace({
                 />
               )}
               <div className="chat-quick-actions">
+                {selected &&
+                  [
+                    "Review",
+                    "ResumeReview",
+                    "ReviewResponses",
+                    "ResumeReviewResponses",
+                  ].includes(selected.kind) && (
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        onEdit(
+                          selected.kind.startsWith("Resume") ? 3 : 2,
+                          selected.slot,
+                        )
+                      }
+                    >
+                      검수 질문에 답변하기
+                    </button>
+                  )}
                 {ai && (
                   <button disabled={sending} onClick={() => void send("ㄱㄱ")}>
                     다음 작업 진행

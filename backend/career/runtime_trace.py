@@ -11,6 +11,8 @@ from typing import Any
 TraceSink = Callable[[str, str, dict[str, Any]], None]
 trace_sink: ContextVar[TraceSink | None] = ContextVar("career_trace_sink", default=None)
 trace_context: ContextVar[dict[str, Any]] = ContextVar("career_trace_context", default={})
+_CACHE_COUNTER_KEYS = {"input_tokens", "prompt_tokens", "cached_tokens", "cache_write_tokens"}
+_CACHE_DETAILS_KEYS = {"input_tokens_details", "prompt_tokens_details"}
 
 _CONTEXT_KEYS = {
     "execution_run_id",
@@ -49,6 +51,13 @@ _DATA_KEYS = {
     "max_input_tokens",
     "max_cost_usd",
     "tool_calls",
+    "cache_status",
+    "cache_input_tokens",
+    "cached_input_tokens",
+    "cache_write_tokens",
+    "cache_hit_ratio",
+    "prompt_cache_scope",
+    "prompt_cache_layout_version",
 }
 
 
@@ -70,13 +79,21 @@ def numeric_metadata(value: Any) -> Any:
     if isinstance(value, int | float):
         return value if math.isfinite(value) else None
     if isinstance(value, dict):
-        return {
-            key: numeric_metadata(item)
-            for key, item in value.items()
-            if isinstance(key, str)
-            and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", key)
-            and isinstance(item, int | float | dict)
-        }
+        result = {}
+        for key, item in value.items():
+            if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", key):
+                continue
+            if key in _CACHE_COUNTER_KEYS:
+                # Preserve invalidity for independent cache aggregation without
+                # storing provider prose, objects, booleans or nonfinite JSON.
+                result[key] = item if item is None or (
+                    isinstance(item, int) and not isinstance(item, bool) and item >= 0
+                ) else -1
+            elif key in _CACHE_DETAILS_KEYS and item is not None and not isinstance(item, dict):
+                result[key] = {"cached_tokens": -1}
+            elif isinstance(item, int | float | dict):
+                result[key] = numeric_metadata(item)
+        return result
     return None
 
 
@@ -123,6 +140,23 @@ def emit_trace(stage: str, provider: str, data: dict[str, Any]) -> None:
     for key in ("confidence", "primary_confidence", "shadow_confidence"):
         if key in metadata:
             metadata[key] = numeric_confidence(metadata[key])
+    for key, allowed in (("cache_status", {"HIT", "MISS", "UNKNOWN", "INVALID"}),
+                         ("prompt_cache_scope", {"USER", "REQUEST", "DISABLED"})):
+        if key in metadata and (not isinstance(metadata[key], str) or metadata[key] not in allowed):
+            metadata[key] = None
+    if "prompt_cache_layout_version" in metadata and not (
+        isinstance(metadata["prompt_cache_layout_version"], str)
+        and re.fullmatch(r"[0-9.]{1,20}", metadata["prompt_cache_layout_version"])
+    ):
+        metadata["prompt_cache_layout_version"] = None
+    for key in ("cache_input_tokens", "cached_input_tokens", "cache_write_tokens"):
+        if key in metadata and not (
+            isinstance(metadata[key], int) and not isinstance(metadata[key], bool) and metadata[key] >= 0
+        ):
+            metadata[key] = None
+    if "cache_hit_ratio" in metadata:
+        value = metadata["cache_hit_ratio"]
+        metadata["cache_hit_ratio"] = numeric_confidence(value) if isinstance(value, int | float) and not isinstance(value, bool) else None
     safe_stage = stage if re.fullmatch(r"[A-Za-z0-9_:-]{1,100}", stage) else "provider_call"
     safe_provider = provider if re.fullmatch(r"[A-Za-z0-9_.:-]{1,100}", provider) else "unknown"
     try:
