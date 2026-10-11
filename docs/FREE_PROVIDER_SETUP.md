@@ -2,13 +2,15 @@
 
 이 안내는 사용자가 이미 가진 Hugging Face 계정으로 실제 생성 API를 연결하는 절차다. Hugging Face 토큰을 발급받았다는 사실과 무료 추론 잔액이 있다는 사실은 다르다. 계정 청구 설정은 이 앱이 원격으로 검증하지 않는다. 현재 연결 성공과 한국어 작성 품질은 실제 진단·작성 결과로 확인해야 한다.
 
+**2026-10-11 공식 요금 재확인:** HF Free 계정의 기본 월 추론 크레딧은 현재 **없음**이다. 이전의 월 $0.10 안내는 현재 연결 판단에 사용하지 않는다. 사용자의 무료 우선·구매 제외 결정에 따라 신규 무료 연결은 이미 지원하는 Groq Free를 먼저 검토한다. 실제 계정에서 무료 이용 조건을 확인하기 전에는 키만 발급하거나 확인 값을 `1`로 설정하지 않는다. [HF 최신 요금](https://huggingface.co/docs/inference-providers/pricing), [Groq 실제 한도](https://console.groq.com/docs/rate-limits).
+
 2026-10-03 Hugging Face 연결 도구에서 계정 로그인과 Free 계정 상태를 확인했다. 현재 연결의 OAuth 권한에는 Inference Providers 호출 권한이 없으며, 앱에 저장할 수 있는 토큰도 제공하지 않는다. 도구 연결과 이 서비스의 생성 API 연결은 별도다. 아래 절차로 본인 전용 추론 토큰을 만들어 앱의 **AI 연결**에 직접 입력해야 한다.
 
 ## 제공자 선택
 
 | `CAREER_LLM_PROVIDER` | 모델 설정 | 서버 비밀 설정 | 무료 사용의 조건 |
 |---|---|---|---|
-| `huggingface` | `HF_MODEL=openai/gpt-oss-120b:fireworks-ai` | `HF_TOKEN` | HF 무료 크레딧 잔액, 청구·custom key 설정 확인, `HF_FREE_ONLY_CONFIRMED=1` |
+| `huggingface` | `HF_MODEL=openai/gpt-oss-120b:fireworks-ai` | `HF_TOKEN` | 기본 무료 크레딧 없음. 별도의 실제 무료 이용 권한이 없으면 현재 무료 운영 경로로 사용하지 않음 |
 | `groq` | `GROQ_MODEL=openai/gpt-oss-120b` | `GROQ_API_KEY` | 실제 계정 Free tier, 현재 요청·토큰 한도, `GROQ_FREE_ONLY_CONFIRMED=1` |
 | `openai` | 명시적인 `OPENAI_MODEL` | `OPENAI_API_KEY` | 무료 상용 API라고 가정하지 않는다. 계정의 실제 요금·이용 권한 필요 |
 | `none` | 없음 | 없음 | 외부 생성 호출 없이 직접 작성·승인·검수 |
@@ -21,7 +23,7 @@ gpt-oss는 Apache 2.0으로 공개된 OpenAI 가중치 모델이다. Hugging Fac
 
 ## 1. 기존 Hugging Face 계정 확인
 
-1. 본인 계정의 [Inference Providers 설정](https://huggingface.co/settings/inference-providers)과 [청구 설정](https://huggingface.co/settings/billing)을 확인한다. 무료 개인 계정의 공식 기본 크레딧은 월 $0.10이며 변경될 수 있다. 이 작은 한도만으로 무제한 실서비스를 운영할 수 있다고 판단하지 않는다.
+1. 본인 계정의 [Inference Providers 설정](https://huggingface.co/settings/inference-providers)과 [청구 설정](https://huggingface.co/settings/billing)을 확인한다. 2026-10-11 공식 안내상 무료 개인 계정의 기본 월 크레딧은 없다. 별도의 실제 무료 이용 권한이 없으면 HF 경로를 켜지 않고 Groq Free 또는 직접 작성으로 진행한다. 크레딧 구매나 유료 구독은 현재 사용자 요청에 포함되지 않는다.
 2. 무료 범위만 사용하려면 추가 크레딧 구매·자동 충전·custom provider key를 사용하지 않는다. custom key가 등록된 제공자는 HF 무료 크레딧 대신 외부 제공자에게 직접 청구될 수 있다. 유료 잔액이 있거나 청구 상태를 모르면 확인 값을 `0`으로 유지한다.
 3. [토큰 설정](https://huggingface.co/settings/tokens)에서 이 앱 전용 fine-grained 토큰을 만들고 **Make calls to Inference Providers** 권한만 부여한다. 불필요한 저장소 쓰기 권한은 부여하지 않는다. 토큰은 대화나 공개 저장소에 보내지 않는다.
 4. 개인 로컬에서는 앱의 **설정 → AI 연결**에 입력한다. 서버 환경으로 관리할 때는 프로젝트 루트의 Git 제외 `.env` 또는 백엔드 호스트의 secret manager에 저장한다. 프런트엔드, `NEXT_PUBLIC_*`, Vercel 화면 프로젝트에는 넣지 않는다.
@@ -33,7 +35,7 @@ HF는 요청을 공식 라우터로 보내면 제공자별 별도 계정 없이 
 ```dotenv
 CAREER_LLM_PROVIDER=huggingface
 HF_MODEL=openai/gpt-oss-120b:fireworks-ai
-HF_FREE_ONLY_CONFIRMED=1
+HF_FREE_ONLY_CONFIRMED=0
 CAREER_LLM_TIMEOUT_SECONDS=60
 CAREER_LLM_MAX_OUTPUT_TOKENS=4096
 CAREER_LLM_STAGE_POLICIES={}
@@ -41,7 +43,7 @@ CAREER_LLM_PRICING_JSON={}
 JEV_SHADOW_ENABLED=0
 ```
 
-`HF_TOKEN`은 비밀 설정에 별도로 넣는다. 예제의 확인 값 `1`은 위 청구 확인을 완료했을 때만 사용한다. 여러 작성·검토 호출과 추론 출력이 무료 잔액을 소모할 수 있다. 작은 합성 입력으로 먼저 연결을 확인한다.
+`HF_TOKEN`은 실제 무료 이용 권한이 확인된 경우에만 비밀 설정에 별도로 넣는다. 예제의 확인 값 `0`은 실제 무료 사용 조건을 확인하기 전의 기본값이다. 확인 값은 청구를 차단하지 않으며, 현재 Free 계정에 기본 무료 크레딧을 제공하지도 않는다. 별도의 무료 이용 권한을 확인한 경우에만 `1`로 바꾸고 작은 합성 입력으로 먼저 연결을 확인한다.
 
 ## 2. Groq Free tier를 선택하는 경우
 

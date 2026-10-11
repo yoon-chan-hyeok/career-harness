@@ -91,6 +91,7 @@ Next.js / TypeScript · FastAPI / Pydantic · SQLAlchemy / Alembic · PostgreSQL
 - [회사 조사와 승인 표현 재사용](docs/RESEARCH_AND_EXPRESSION_PROGRESS_2026_10_10.md)
 - [제출 전 확인과 남은 작업](docs/FINAL_REVIEW_PROGRESS_2026_10_10.md)
 - [서비스 소개·모션 데모 구현](docs/SERVICE_PRESENTATION_2026_10_11.md)
+- [실제 AI·공개 회원가입 연결 순서](docs/OPERATING_CONNECTION_2026_10_11.md)
 - [원래 구현 팩 안내 — 보관본](docs/IMPLEMENTATION_PACK_README.md)
 
 개인 원문·실제 지원서·DB·API 키는 Git에서 제외합니다. 데모와 영상에는 가상 자료만 사용합니다.

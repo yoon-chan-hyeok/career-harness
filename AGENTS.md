@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-11 운영 연결 재확인: 현재 도구에서 Supabase 프로젝트/Vercel Career 프로젝트·팀 없음, HF Free 로그인은 있으나 추론 OAuth 권한 없음. 실제 로컬 AI none/configured=false/live_verified=false, Auth local. 최신 공식 HF Free 기본 크레딧 없음으로 안내·화면 수정, 신규 연결 폼은 Groq를 제안하되 실제 설정/호출은 변경하지 않았다. frontend 26/lint/typecheck/build 및 실제 설정 화면/로컬 API 확인 통과. docs/OPERATING_CONNECTION_2026_10_11.md와 JSON operating_connection_2026_10_11 참조. 실제 AI·공개 회원가입 운영과 남은 규칙 구현은 여전히 미완이다.
+
 2026-10-11 공개 완료: GitHub PUBLIC, 소개 사이트 public 배포 성공 및 비로그인 브라우저 검증. 커밋 82af982의 GitHub CI 성공. 실제 작업실은 /workspace이며 공개 소개는 가상 데모다. Docker public 자산 복사를 추가했으나 컨테이너 실행은 미검증. 전체 AI 서비스 운영 미완은 유지한다.
 
 2026-10-11 사용자 우선순위 변경: 서비스 소개·모션·GitHub 공개를 먼저 수행한다. 소개와 실제 작업실(/workspace)을 연결했으며, 가상 6단계 데모·MP4·GIF·README를 작성했다. 소개 및 소스 공개를 직접 승인받았다. 검증·배포 상세는 docs/SERVICE_PRESENTATION_2026_10_11.md와 JSON service_presentation_2026_10_11 참조. 실제 AI·공개 가입 운영 완료는 아니다. 표현 제한 초안은 work/pending-boundary에 보존했다.

@@ -90,7 +90,7 @@ python scripts/deployment_preflight.py --live-ai
 python scripts/deployment_preflight.py --live-openai --live-jev
 ```
 
-사용자 본인의 HF 계정이 있다. [무료 제공자 연결 안내](FREE_PROVIDER_SETUP.md)에 따라 `CAREER_LLM_PROVIDER=huggingface`, `HF_TOKEN`, `HF_MODEL=openai/gpt-oss-120b:fireworks-ai`를 백엔드에 설정한다. 계정의 무료 크레딧과 청구 설정을 직접 확인한 뒤에만 `HF_FREE_ONLY_CONFIRMED=1`을 설정한다. Groq Free 계정은 `CAREER_LLM_PROVIDER=groq`, `GROQ_API_KEY`, `GROQ_MODEL=openai/gpt-oss-120b`, `GROQ_FREE_ONLY_CONFIRMED=1`로 선택한다. 확인 값은 사용자의 계정 확인 기록이며 제공자 청구 상태의 원격 검증이나 요금 차단 장치가 아니다. 무료 한도 소진 후 다른 제공자로 자동 전환하지 않으며 `CAREER_LLM_PROVIDER=none`으로 직접 작성을 이어갈 수 있다. `CAREER_REQUIRE_AI=1`을 사용하는 운영 환경은 직접 작성 전환 계획에 맞게 이 설정도 검토해야 한다.
+사용자 본인의 HF 계정이 있으나 2026-10-11 공식 안내상 HF Free에는 기본 월 추론 크레딧이 없다. [무료 제공자 연결 안내](FREE_PROVIDER_SETUP.md)에 따라 현재 무료 운영은 Groq Free를 먼저 검토한다. 실제 계정의 Free 조건을 확인한 뒤 `CAREER_LLM_PROVIDER=groq`, `GROQ_API_KEY`, `GROQ_MODEL=openai/gpt-oss-120b`, `GROQ_FREE_ONLY_CONFIRMED=1`로 선택한다. HF는 별도의 실제 무료 이용 권한이 확인된 경우에만 연결한다. 확인 값은 사용자의 계정 확인 기록이며 제공자 청구 상태의 원격 검증이나 요금 차단 장치가 아니다. 무료 한도 소진 후 다른 제공자로 자동 전환하지 않으며 `CAREER_LLM_PROVIDER=none`으로 직접 작성을 이어갈 수 있다. `CAREER_REQUIRE_AI=1`을 사용하는 운영 환경은 직접 작성 전환 계획에 맞게 이 설정도 검토해야 한다.
 
 공통 생성 설정은 `CAREER_LLM_TIMEOUT_SECONDS`, `CAREER_LLM_MAX_OUTPUT_TOKENS`, `CAREER_LLM_SMALL_MODEL`, `CAREER_LLM_STAGE_POLICIES`, `CAREER_LLM_PRICING_JSON`이다. 생략하면 기존 `OPENAI_*` 설정과 호환한다. 예시의 출력 한도는 4096이며 실제 무료 계정 한도와 요청 크기에 맞춰 조정한다. 가격 정보가 없으면 비용을 0으로 확정하지 않는다. HF/Groq 생성 연결만으로 OpenAI 웹 조사나 1536차원 임베딩도 연결되지 않는다.
 

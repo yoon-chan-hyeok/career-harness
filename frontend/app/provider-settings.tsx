@@ -80,7 +80,7 @@ export function ProviderSettings({
     setSummary(next);
     const selected =
       next.provider === "none"
-        ? "huggingface"
+        ? "groq"
         : next.provider === "openai"
           ? "none"
           : next.provider;
@@ -308,15 +308,14 @@ export function ProviderSettings({
               }}
             >
               <option value="none">직접 작성</option>
-              <option value="huggingface">Hugging Face · 추천</option>
-              <option value="groq">Groq</option>
+              <option value="huggingface">Hugging Face</option>
+              <option value="groq">Groq · 무료 한도 확인 후 연결</option>
             </select>
           </label>
           {summary.provider === "none" && (
             <p className="muted">
-              현재는 직접 작성 모드입니다. 보유한 Hugging Face 계정으로
-              연결하려면 토큰을 입력하고 저장하세요. 선택만으로 연결되지는
-              않습니다.
+              현재는 직접 작성 모드입니다. 제공자의 무료 사용 조건을 확인한 뒤
+              키를 입력하고 저장하세요. 선택만으로 연결되지는 않습니다.
             </p>
           )}
           {summary.provider === "openai" && (
@@ -329,8 +328,8 @@ export function ProviderSettings({
               <p className="muted">
                 {provider === "huggingface" ? (
                   <>
-                    무료 계정에는 월 $0.10의 사용 크레딧이 안내돼 있으며 정책은
-                    바뀔 수 있습니다.{" "}
+                    현재 공식 안내상 무료 계정에는 기본 추론 크레딧이 없습니다.
+                    토큰 발급만으로 무료 호출이 가능해지지 않습니다.{" "}
                     <a
                       href="https://huggingface.co/docs/inference-providers/pricing"
                       target="_blank"

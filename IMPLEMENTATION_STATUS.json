@@ -1198,5 +1198,43 @@
     "ci_url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38118656532",
     "verified_code_commit": "82af98271ca54c3bcc544a95becba5a0b99ee637",
     "docker_public_assets": "copy_added_container_runtime_not_tested"
+  },
+  "operating_connection_2026_10_11": {
+    "status": "instructions_and_ui_verified_external_connection_pending",
+    "guide": "docs/OPERATING_CONNECTION_2026_10_11.md",
+    "visible_connected_accounts": {
+      "supabase_projects": 0,
+      "vercel_career_projects": 0,
+      "vercel_teams": 0,
+      "hf_authenticated": true,
+      "hf_pro": false,
+      "hf_oauth_inference_scope": false,
+      "other_accounts_or_unavailable_scopes_verified": false
+    },
+    "local_runtime": {
+      "ai_provider": "none",
+      "configured": false,
+      "live_verified": false,
+      "auth_provider": "local"
+    },
+    "official_hf_free_monthly_credits": "none_as_checked_2026_10_11",
+    "ui": "Groq suggestion in new connection form; no provider configuration saved; no external AI calls",
+    "verification": {
+      "frontend_tests": "26 passed",
+      "lint": "passed",
+      "typecheck": "passed",
+      "production_build": "passed",
+      "browser": "passed: local login, Groq suggestion, HF credit notice, empty key, no page errors",
+      "privacy": "passed: working files and Git history",
+      "local_runtime": "restarted and independent API/browser checks passed"
+    },
+    "actual_ai_and_public_signup_operating": false,
+    "remaining": [
+      "operator accounts and private credentials",
+      "SMTP sender verification and Turnstile",
+      "Supabase migrations and production HTTPS deployments",
+      "real signup and AI writing acceptance, backup restore and alerts",
+      "remaining project boundaries, repetition checks and full rulebook acceptance"
+    ]
   }
 }

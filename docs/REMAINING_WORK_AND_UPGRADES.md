@@ -31,7 +31,7 @@
 4. **운영 PostgreSQL 백업/복구:** 기존 도구로 별도 빈 대상 복구를 검증하고 일정·보존·별도 보관·암호화를 설정한다. Career 테이블 백업에는 Supabase Auth 계정·환경변수가 포함되지 않는다. 실제 PostgreSQL 복구를 SQLite 검사로 대신하지 않는다.
 5. **Git 기록과 기존 CI 활성화:** 감사 당시 검토 가능한 commit/remote가 없었다. 개인자료 제외 검사를 통과한 소스를 버전으로 보관하고 준비된 Linux/PostgreSQL/pgvector CI를 실행할 계획이었다. 이후 로컬 commit은 완료했다. 원격 저장소·실제 CI의 최신 상태는 업그레이드 현황을 확인한다.
 
-공식 HF 무료 크레딧은 현재 기본 계정 월 $0.10이며 변경 가능하다. Groq Free도 모델별 요청·토큰 한도가 있다. 입력 제한이나 일일 호출 상한은 앱의 실행량을 줄이는 장치이며 원격 잔액·계정 청구 상태를 보장하지 않는다. [HF 요금](https://huggingface.co/docs/inference-providers/pricing), [Groq 한도](https://console.groq.com/docs/rate-limits).
+2026-10-11 재확인 결과 공식 HF Free의 기본 월 추론 크레딧은 없다. 기존 월 $0.10 안내는 현재 연결 판단에서 제외한다. Groq Free도 모델별 요청·토큰 한도가 있다. 입력 제한이나 일일 호출 상한은 앱의 실행량을 줄이는 장치이며 원격 잔액·계정 청구 상태를 보장하지 않는다. [HF 요금](https://huggingface.co/docs/inference-providers/pricing), [Groq 한도](https://console.groq.com/docs/rate-limits).
 
 ## 감사 당시 제안한 업그레이드 — 1~6은 이후 구현
 
