@@ -6,7 +6,7 @@ import {
   workroomRoles,
   type WorkroomRole,
 } from "./workroom-state";
-import type { Artifact } from "./page";
+import type { Artifact } from "./workroom";
 
 const labels: Record<string, string> = {
   RUNNING: "작업 중",

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useContext, useEffect, useState } from "react";
-import type { Artifact } from "./page";
+import type { Artifact } from "./workroom";
 import { EditorSaveContext } from "./editor-dialog";
 
 type Pattern = { id: string; label: string; text: string };

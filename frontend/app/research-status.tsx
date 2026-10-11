@@ -1,4 +1,4 @@
-import type { Artifact } from "./page";
+import type { Artifact } from "./workroom";
 
 export function ResearchStatus({
   research,

@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { EditorSaveContext } from "./editor-dialog";
-import type { Artifact } from "./page";
+import type { Artifact } from "./workroom";
 
 type Context = {
   context_hash: string;

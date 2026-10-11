@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-11 사용자 우선순위 변경: 서비스 소개·모션·GitHub 공개를 먼저 수행한다. 소개와 실제 작업실(/workspace)을 연결했으며, 가상 6단계 데모·MP4·GIF·README를 작성했다. 소개 및 소스 공개를 직접 승인받았다. 검증·배포 상세는 docs/SERVICE_PRESENTATION_2026_10_11.md와 JSON service_presentation_2026_10_11 참조. 실제 AI·공개 가입 운영 완료는 아니다. 표현 제한 초안은 work/pending-boundary에 보존했다.
+
 2026-10-10 GitHub 업로드 완료: `yoon-chan-hyeok/career-harness` 비공개 main, 코드 `ab47b1d`의 CI backend/frontend 모두 성공. 별도 PostgreSQL·마이그레이션·privacy 검사도 성공했다. `docs/GITHUB_PUBLICATION_2026_10_10.md` 및 JSON `github_publication_2026_10_10` 참조. 프로젝트별 경계·반복 규칙·전체 인수·실제 AI/외부 운영은 계속 남는다. 이전 업로드 대기 기록은 과거다.
 
 2026-10-10 최신 제출 전 확인 구현은 `docs/FINAL_REVIEW_PROGRESS_2026_10_10.md`와 JSON `final_review_2026_10_10` 참조. Role Noun·마지막 세 질문 직접 확인, 버전/근거 변경 시 재확인, API·대화 우회 차단, 제출본·면접 답변 연결과 모바일 브라우저 검증 완료. 전체 Python 642/PG 6 skipped, frontend 26, Ruff/Pyright/lint/typecheck/build 통과. 프로젝트별 경계·반복 규칙·전체 통합 인수·실제 AI/외부 운영은 남는다. GitHub 비공개 업로드 요청을 우선 처리한다.

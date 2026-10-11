@@ -2,7 +2,7 @@
 
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { EditorSaveContext } from "./editor-dialog";
-import type { Artifact } from "./page";
+import type { Artifact } from "./workroom";
 
 type Data = Record<string, unknown>;
 export type Evidence = { id: string; title: string; body: string; data: Data };

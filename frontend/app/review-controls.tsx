@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { EditorSaveContext } from "./editor-dialog";
-import type { Artifact, Workspace } from "./page";
+import type { Artifact, Workspace } from "./workroom";
 
 type Request = (path: string, body?: unknown, method?: string) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 type Reference = {

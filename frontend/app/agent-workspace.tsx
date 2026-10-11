@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Artifact, Workspace } from "./page";
+import type { Artifact, Workspace } from "./workroom";
 import { PixelOffice } from "./pixel-office";
 import type { WorkroomRole } from "./workroom-state";
 

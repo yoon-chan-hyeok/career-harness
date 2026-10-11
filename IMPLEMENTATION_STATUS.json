@@ -1161,5 +1161,34 @@
       "full_pack_and_reference_acceptance",
       "real_AI_and_production"
     ]
+  },
+  "service_presentation_2026_10_11": {
+    "status": "implemented_local_verified_publication_in_progress",
+    "report": "docs/SERVICE_PRESENTATION_2026_10_11.md",
+    "user_authorized_audience": "public_site_and_github",
+    "intro_url": "https://career-harness.lilacdegu3.chatgpt.site",
+    "workspace_path": "/workspace",
+    "synthetic_demo": true,
+    "motion_formats": [
+      "mp4",
+      "gif"
+    ],
+    "frontend_tests": 26,
+    "production_build": "passed",
+    "browser_showcase": "passed",
+    "browser_workspace": "passed",
+    "ruff": "passed",
+    "pyright": "passed",
+    "source_and_history_privacy": "passed",
+    "public_AI_service_complete": false,
+    "boundary_draft_preserved": "work/pending-boundary/project_boundaries.py",
+    "remaining": [
+      "project_boundaries",
+      "repetition_rules",
+      "full_rule_acceptance",
+      "real_AI",
+      "operating_auth_db_mail_captcha",
+      "production_recovery_acceptance"
+    ]
   }
 }

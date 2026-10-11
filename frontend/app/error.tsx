@@ -15,7 +15,7 @@ export default function ErrorPage({
         여부를 확인해야 합니다.
       </p>
       <button onClick={reset}>다시 불러오기</button>
-      <Link href="/">작업실로 돌아가기</Link>
+      <Link href="/workspace">작업실로 돌아가기</Link>
     </main>
   );
 }

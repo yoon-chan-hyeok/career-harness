@@ -3,7 +3,7 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { EditorSaveContext } from "./editor-dialog";
 import { sources, type Evidence } from "./claim-evidence-test";
-import type { Artifact } from "./page";
+import type { Artifact } from "./workroom";
 
 type Citation = { evidence_id: string; record_id?: string; quote: string };
 type Task = { id: string; text: string; category: string; priority: string };

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { Workspace } from "./page";
+import type { Workspace } from "./workroom";
 
 type Request = (path: string, body?: unknown, method?: string) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 type Proposal = {

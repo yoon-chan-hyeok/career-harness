@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Artifact, Workspace } from "./page";
+import type { Artifact, Workspace } from "./workroom";
 import { AssessmentDecision, RevisionInbox } from "./review-controls";
 import { AgentWorkspace } from "./agent-workspace";
 import { CorrectionInbox } from "./correction-controls";
