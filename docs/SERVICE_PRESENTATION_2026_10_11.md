@@ -35,3 +35,9 @@ GitHub: https://github.com/yoon-chan-hyeok/career-harness
 실제 AI, 운영 인증·메일·CAPTCHA·DB, 공개 가입 서비스의 전체 인수와 복구 검증은 남아 있다. 소개 페이지 공개를 전체 서비스 운영 완료로 간주하지 않는다.
 
 프로젝트별 표현 제한·반복 검사·원문 전체 인수도 아직 완료되지 않았다. 중단 직전 작성하던 표현 제한 초안은 로컬 `work/pending-boundary/project_boundaries.py`에 보존했고 제품 코드에는 연결하지 않았다. 비교·성능 개선 실험 제외는 유지한다.
+
+## 공개 완료 확인
+
+소개 사이트 배포 성공과 public 접근 설정을 확인했다. GitHub도 PUBLIC으로 전환했고 홈페이지 링크를 연결했다. 로그인 없는 브라우저에서 공개 소개의 6단계·자동 재생·모바일 검사를 통과했다.
+
+소개 구현 커밋 `82af982`의 [GitHub CI](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38118656532)는 backend/frontend 모두 성공했다. 후속 배포 점검에서 Docker 실행 이미지에도 `public` 자산을 복사하도록 수정했다. Docker 실행 환경은 없어 실제 컨테이너 실행은 미검증이며, 로컬 standalone 실행과 공개 정적 사이트는 별도로 검증했다.
