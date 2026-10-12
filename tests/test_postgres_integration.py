@@ -15,6 +15,52 @@ from sqlalchemy.orm import Session
 
 
 @pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
+def test_project_boundary_binding_serializes_confirmations_in_postgres(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    from career.db import Record
+    from career.project_boundaries import bind, catalog, fingerprint
+    from career.references import register
+    from sqlalchemy import select
+
+    url = os.environ["TEST_POSTGRES_URL"]
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.delenv("DATABASE_MIGRATION_URL", raising=False)
+    command.upgrade(Config("alembic.ini"), "head")
+    engine = create_engine(url, pool_size=2, max_overflow=0)
+    user = "boundary-" + str(uuid4())
+    with Session(engine) as db:
+        register(db, user, "cover", "# 10. Projects\n## Concurrent component\n전체 시스템을 처음부터 개발했다고 쓰지 않는다.")
+        source, _ = register_source(db, user, "synthetic", "구성요소를 수정했다.", "RAW_RESULT")
+        evidence = add_evidence(db, user, source.id, "Concurrent component", "구성요소를 수정했다.", status="VERIFIED")
+        db.flush()
+        evidence_id = evidence.id
+        payload = {"rule_id": catalog(db, user)[0]["id"], "evidence_hash": fingerprint(evidence), "confirmed": True}
+        db.commit()
+    barrier = Barrier(2)
+
+    def confirm(_):
+        barrier.wait(timeout=10)
+        with Session(engine) as db:
+            result = bind(db, user, evidence_id, payload)
+            db.commit()
+            return result["binding"]
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        confirmations = list(pool.map(confirm, range(2)))
+    assert confirmations[0] == confirmations[1]
+    with Session(engine) as db:
+        records = list(db.scalars(select(Record).where(Record.user_id == user, Record.kind == "ProjectBoundary")))
+        assert len(records) == 1 and records[0].data["version"] == 1
+        excluded = bind(db, user, evidence_id, {**payload, "rule_id": ""})
+        assert excluded["binding"]["version"] == 2
+        assert records[0].data["rule_id"] == payload["rule_id"]
+        db.commit()
+    engine.dispose()
+
+
+@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
 def test_shared_budget_is_serialized_across_postgres_connections(monkeypatch):
     from concurrent.futures import ThreadPoolExecutor
     from threading import Barrier

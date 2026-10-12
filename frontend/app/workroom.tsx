@@ -31,6 +31,7 @@ import { ResearchStatus } from "./research-status";
 import { ResearchPanel } from "./research-panel";
 import { ExpressionLibrary } from "./expression-library";
 import { FinalReview } from "./final-review";
+import { ProjectBoundary } from "./project-boundary";
 import {
   accessToken,
   clearSession,
@@ -2089,6 +2090,9 @@ export default function Home() {
                         >
                           내용을 직접 확인하고 승인
                         </button>
+                      )}
+                      {e.kind !== "EXPRESSION" && (
+                        <ProjectBoundary evidence={e} request={request} refresh={() => refresh()} />
                       )}
                       {e.kind !== "EXPRESSION" && (
                         <ExperienceStructure

@@ -628,6 +628,10 @@ class Workflow:
         return run(self, ident, qid, manual, confirmed=confirmed)
 
     def selected(self, identifiers: list[str]):
+        from career.project_boundaries import catalog as boundary_catalog
+        from career.project_boundaries import projection as boundary_projection
+
+        boundary_rules = boundary_catalog(self.db, self.user)
         result = []
         for ident in identifiers:
             e = owned(self.db, Evidence, self.user, ident)
@@ -660,6 +664,10 @@ class Workflow:
             from career.entities import ClaimBoundaryRecord, DecisionEpisodeRecord, OwnershipRecord
 
             context_sources = {e.source_id}
+            item["data"].pop("project_boundary", None)
+            if boundary := boundary_projection(self.db, self.user, e, rules=boundary_rules):
+                item["data"]["project_boundary"] = boundary
+                context_sources.add(boundary["source_id"])
             context_sources.update(m["source_id"] for m in item["data"]["metric_ledger"] if m["status"] in GOOD)
             for key, model in [("confirmed_decision_episodes", DecisionEpisodeRecord),
                                ("confirmed_ownership", OwnershipRecord),
@@ -749,6 +757,7 @@ class Workflow:
             deps=[brief.id, proof.id],
             sources=list(
                 {e["source_id"] for e in evidence}
+                | {source for e in evidence for source in e["context_source_ids"]}
                 | {f["source_id"] for f in profile.values()}
                 | {r["source_id"] for r in rules}
                 | set(self.reference_sources("writer"))
@@ -820,6 +829,9 @@ class Workflow:
         if resume:
             issues.extend(skimmability_qa(document.data["text"]))
         issues.extend(ledger_coverage(document.data))
+        from career.project_boundaries import document_issues
+
+        issues.extend(document_issues(document.data, evidence))
         for claim in document.data["claims"]:
             if claim["support"] != "SUPPORTED" or not claim["ownership_ok"]:
                 issues.append({"code": "CLAIM_SUPPORT", "priority": "P0", "message": claim["text"]})
@@ -1102,6 +1114,10 @@ class Workflow:
         self.editable(self.ws(ident))
         document = self.artifact(ident, "ResumeContent" if resume else "Draft", qid)
         review = self.artifact(ident, "ResumeReview" if resume else "Review", qid)
+        from career.project_boundaries import document_issues
+
+        if document_issues(document.data, self.selected(document.data["selected_evidence_ids"])):
+            raise ValueError("프로젝트 표현 제한과 충돌하는 문장을 먼저 수정하고 검수해 주세요.")
         if document.id not in review.depends_on or any(
             i["priority"] in {"P0", "P1"} for i in review.data["issues"]
         ):
@@ -1234,6 +1250,7 @@ class Workflow:
             deps=[brief.id],
             sources=list(
                 {e["source_id"] for e in evidence}
+                | {source for e in evidence for source in e["context_source_ids"]}
                 | {r["source_id"] for r in rules}
                 | {f["source_id"] for f in canonical(self.db, self.user).values()}
                 | set(self.reference_sources("resume_writer"))

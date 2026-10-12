@@ -103,6 +103,12 @@ def run(service: "Workflow", workspace: str, qid: str, manual=None, *, confirmed
     if any(not check["rationale"].strip() for check in data["checks"]):
         raise ValueError("네 가지 기준의 판단 이유를 기록해 주세요.")
     issues = hard_qa("\n".join(texts), evidence, limit=20000)
+    from career.project_boundaries import document_issues
+
+    issues.extend(document_issues({"claims": [
+        {"text": claim["claim"], "evidence_ids": list(dict.fromkeys(c["evidence_id"] for c in claim["citations"]))}
+        for claim in data["claims"]
+    ]}, evidence))
     passed = (not issues and not data["followups"]
               and all(c["support"] == "SUPPORTED" for c in data["claims"])
               and all(c["verdict"] == "PASS" for c in data["checks"]))

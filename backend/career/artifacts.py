@@ -56,7 +56,10 @@ def stale(db: Session, user: str, identifiers: list[str]):
             historical_sources = (
                 artifact.data.get("historical_source_ids", []) if artifact.kind == "InterviewHandoff" else []
             )
-            if batch.intersection(artifact.depends_on + artifact.source_ids + historical_sources):
+            evidence_ids = list(artifact.data.get("selected_evidence_ids", [])) + list(artifact.data.get("evidence_ids", []))
+            evidence_ids.extend(item["evidence_id"] for item in artifact.data.get("items", [])
+                                if isinstance(item, dict) and isinstance(item.get("evidence_id"), str))
+            if batch.intersection(artifact.depends_on + artifact.source_ids + historical_sources + evidence_ids):
                 artifact.status = "STALE"
                 changed.append(artifact.id)
                 pending.add(artifact.id)

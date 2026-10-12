@@ -35,6 +35,7 @@ from career.models import (
     Workspace,
 )
 from career.production import install_security, readiness, validate_runtime_settings
+from career.project_boundaries import Binding as ProjectBoundaryBinding
 from career.projections import APPLICATION_MODELS, CorrectionRecord
 from career.provider_config import (
     ProviderCheckRequest,
@@ -710,6 +711,20 @@ def confirm_evidence(evidence_id: str, body: dict[str, Any], db: DB, ident: User
         raise ValueError("충돌한 근거는 정정된 새 근거로 교체해 주세요.")
     e.status = "USER_CONFIRMED"
     return view(e)
+
+
+@app.get("/api/evidence/{evidence_id}/project-boundary")
+def project_boundary_context(evidence_id: str, db: DB, ident: User):
+    from career.project_boundaries import context
+
+    return context(db, ident, evidence_id)
+
+
+@app.post("/api/evidence/{evidence_id}/project-boundary")
+def project_boundary_bind(evidence_id: str, body: ProjectBoundaryBinding, db: DB, ident: User):
+    from career.project_boundaries import bind
+
+    return bind(db, ident, evidence_id, body)
 
 
 @app.post("/api/sources/import")

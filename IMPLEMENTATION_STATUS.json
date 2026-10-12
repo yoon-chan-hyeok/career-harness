@@ -1298,5 +1298,42 @@
       "production backup restore, deletion reapplication and alerts",
       "project boundaries, cross-document facts/numbers/repetition, full rulebook acceptance"
     ]
+  },
+  "project_boundaries_2026_10_12": {
+    "status": "implemented_locally_and_browser_verified_latest_remote_postgres_validation_pending",
+    "guide": "docs/PROJECT_BOUNDARIES_2026_10_12.md",
+    "implementation": [
+      "user-owned current §10 catalog",
+      "explicit binding/exclusion with strict confirmation and evidence hash",
+      "bound guidance shared by cover/resume generation and review",
+      "known source-enabled prohibition checks in claim test, review and final lock",
+      "evidence-scoped stale propagation; frozen and unrelated artifacts preserved",
+      "read-only MCP fourth tool"
+    ],
+    "candidate_facts_imported": false,
+    "personal_bindings_automatically_changed": false,
+    "verification": {
+      "boundary_tests": "25 passed",
+      "final_related_tests": "50 passed including actual stdio MCP",
+      "initial_full_python": "664 passed, 6 PG skipped before 3 additional future-expression cases and new PG concurrency test",
+      "postgres": "7 integration tests collected; new concurrent binding test requires actual PG and remote validation pending",
+      "ruff": "passed",
+      "pyright": "0 errors/warnings",
+      "frontend": "26 tests, lint/typecheck/build passed; improved labels and first binding message rebuilt",
+      "browser": "latest served chunk verified; explicit confirmation, change reset, save persistence, related pack stale; 390px no overflow/errors",
+      "personal_runtime": "owner/auth/proxy/sources passed; actual catalog5/prohibitions5; no binding writes",
+      "ai": "none/configured=false/live_verified=false; synthetic generation input checks only",
+      "qa_cleanup": "exact synthetic process identities and ports checked, API/frontend stopped, fixtures preserved"
+    },
+    "known_limits": [
+      "bounded assertion patterns do not prove every semantic paraphrase",
+      "no real AI writing or external service acceptance"
+    ],
+    "remaining": [
+      "cross-document general metric/fact/ownership contradictions",
+      "question-level repeated facts/numbers/similar messages",
+      "full 26-step original pack and six-reference acceptance",
+      "real AI, HTTPS/signup/mail/captcha and production recovery"
+    ]
   }
 }

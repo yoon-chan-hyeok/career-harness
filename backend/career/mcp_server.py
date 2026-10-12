@@ -33,6 +33,15 @@ def career_evidence(query: str) -> list[dict]:
 
 
 @mcp.tool()
+def career_project_boundary(evidence_id: str) -> dict:
+    """Read current project guidance and confirmation state; never confirms a binding."""
+    from career.project_boundaries import context
+
+    with SessionLocal() as db:
+        return context(db, identity(), evidence_id)
+
+
+@mcp.tool()
 def career_submission(workspace_id: str) -> dict:
     """Read an immutable submission snapshot. Never changes submission status."""
     with SessionLocal() as db:
