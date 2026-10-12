@@ -19,10 +19,10 @@
     "M13": "in_progress",
     "M14": "in_progress"
   },
-  "last_verified_commit": "de094cc359aaa43b0c3a5ae141b3bbe9bfaf8f78",
-  "last_verified_at": "2026-10-06T13:25:13.858996+09:00",
+  "last_verified_commit": "deda96a6b458f582bac0028f37ab1a6dfa19b257",
+  "last_verified_at": "2026-10-12T20:34:45.857066+09:00",
   "verification": {
-    "backend_tests": "527 passed, 6 PG skipped in final run; 6 actual PG passed separately",
+    "backend_tests": "667 passed, 7 PG skipped; 7 actual isolated PG tests passed separately in CI",
     "backend_lint": "pass: current full Ruff",
     "backend_typecheck": "pass: current Pyright with workspace venv, 0 errors/warnings",
     "frontend_lint": "pass: current production upgrade TSX",
@@ -47,7 +47,7 @@
     "document_export": "actual PDF pages/body verified; DOCX body preserved and unmeasured overflow truthfully unknown, no page count; bundled Word renderer absent",
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
     "postgres_integration": "6 passed on actual PostgreSQL16/pgvector, includes public request cap and account/vector deletion",
-    "source_control": "public/cache/production changes uncommitted; prior commit retained; no new remote publication or CI",
+    "source_control": "public main source deda96a pushed and CI passed; follow-up acceptance metadata records that verified source revision",
     "backend_container": "prior container acceptance predates this upgrade; current serverless package offline import/tokenizer checks pass; no new full backend container build claimed",
     "frontend_tests": "25 passed: auth7/deploy4/upgrades9/cache5",
     "expanded_browser": "pass: actual 3 choices -> stored selection -> stale old writing -> new brief chosen context -> reapproval gate; pixel office/admin/#admin/403/mobile390; owner console/page/request errors0",
@@ -76,7 +76,7 @@
     "2026-10-05: Astra findings fixed; invite-only service, dual user/shared quotas, upload budgets, exact frozen document ZIP, current deadline ranking, offline Groq token preflight implemented. Python488 + PG4 + frontend22 pass; final package/packet34 rerun pass. SQLite0012 backup/restart preserves owner, AI remains none. See docs/PRODUCTION_UPGRADE_2026_10_05.md; no live deployment or remote publication claim.",
     "2026-10-06: public signup variant added alongside invite mode; Astra two P2 fixes reverified. Latest state: public_release_2026_10_06. External launch remains pending."
   ],
-  "coding_status": "invite_service_and_production_upgrade_locally_verified_external_acceptance_pending",
+  "coding_status": "project_expression_limits_verified_remaining_rulebook_acceptance_and_external_operations_pending",
   "implementation_complete": {
     "M0": true,
     "M1": true,
@@ -1300,7 +1300,7 @@
     ]
   },
   "project_boundaries_2026_10_12": {
-    "status": "implemented_locally_and_browser_verified_latest_remote_postgres_validation_pending",
+    "status": "implemented_and_verified_locally_browser_and_remote_postgres_ci",
     "guide": "docs/PROJECT_BOUNDARIES_2026_10_12.md",
     "implementation": [
       "user-owned current §10 catalog",
@@ -1316,14 +1316,20 @@
       "boundary_tests": "25 passed",
       "final_related_tests": "50 passed including actual stdio MCP",
       "initial_full_python": "664 passed, 6 PG skipped before 3 additional future-expression cases and new PG concurrency test",
-      "postgres": "7 integration tests collected; new concurrent binding test requires actual PG and remote validation pending",
+      "postgres": "7 passed on actual isolated PG in CI, including concurrent binding confirmation",
       "ruff": "passed",
       "pyright": "0 errors/warnings",
       "frontend": "26 tests, lint/typecheck/build passed; improved labels and first binding message rebuilt",
       "browser": "latest served chunk verified; explicit confirmation, change reset, save persistence, related pack stale; 390px no overflow/errors",
       "personal_runtime": "owner/auth/proxy/sources passed; actual catalog5/prohibitions5; no binding writes",
       "ai": "none/configured=false/live_verified=false; synthetic generation input checks only",
-      "qa_cleanup": "exact synthetic process identities and ports checked, API/frontend stopped, fixtures preserved"
+      "qa_cleanup": "exact synthetic process identities and ports checked, API/frontend stopped, fixtures preserved",
+      "latest_full_python": "667 passed, 7 PG skipped in latest source CI",
+      "remote_ci": {
+        "result": "success",
+        "url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38242570803",
+        "scope": "backend/frontend, privacy, full migration downgrade/upgrade/check, production dependency audit"
+      }
     },
     "known_limits": [
       "bounded assertion patterns do not prove every semantic paraphrase",
@@ -1334,6 +1340,7 @@
       "question-level repeated facts/numbers/similar messages",
       "full 26-step original pack and six-reference acceptance",
       "real AI, HTTPS/signup/mail/captcha and production recovery"
-    ]
+    ],
+    "verified_source_commit": "deda96a6b458f582bac0028f37ab1a6dfa19b257"
   }
 }
