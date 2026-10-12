@@ -28,14 +28,14 @@ class Fact(Owned, Base):
     key: Mapped[str] = mapped_column(String(200), index=True)
     fact_type: Mapped[str] = mapped_column(String(40))
     value: Mapped[dict[str, Any]] = mapped_column(JSON)
-    source_id: Mapped[str] = mapped_column(ForeignKey("sources.id"))
+    source_id: Mapped[str] = mapped_column(ForeignKey("sources.id"), index=True)
     status: Mapped[str] = mapped_column(String(30), default="SOURCE_BACKED")
     supersedes_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class Evidence(Owned, Base):
     __tablename__ = "evidences"
-    source_id: Mapped[str] = mapped_column(ForeignKey("sources.id"))
+    source_id: Mapped[str] = mapped_column(ForeignKey("sources.id"), index=True)
     title: Mapped[str] = mapped_column(Text)
     body: Mapped[str] = mapped_column(Text)
     kind: Mapped[str] = mapped_column(String(40), default="EVIDENCE")

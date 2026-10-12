@@ -205,7 +205,7 @@ from fastapi.testclient import TestClient
 from pypdf import PdfReader
 assert engine.url.query["sslmode"] == "verify-full"
 assert engine.url.query["sslrootcert"]
-assert migration_heads() == {"0013"}
+assert migration_heads() == {"0014"}
 from career.token_estimation import gpt_oss_input_tokens
 assert gpt_oss_input_tokens({"messages": [{"role": "user", "content": "합성 한국어 근거"}]}) > 256
 assert FONT_PATH.resolve().is_relative_to(Path.cwd().resolve())

@@ -1236,5 +1236,67 @@
       "real signup and AI writing acceptance, backup restore and alerts",
       "remaining project boundaries, repetition checks and full rulebook acceptance"
     ]
+  },
+  "production_connection_2026_10_12": {
+    "status": "cloud_schema_and_project_configuration_verified_runtime_secrets_pending",
+    "guide": "docs/PRODUCTION_CONNECTION_2026_10_12.md",
+    "supabase": {
+      "project_created": true,
+      "plan": "free",
+      "region": "ap-northeast-2",
+      "head": "0014",
+      "app_tables": 41,
+      "rls_tables": 41,
+      "browser_granted_tables": 0,
+      "vector_schema": "extensions",
+      "private_rows_uploaded": 0,
+      "security_error_or_warning_count": 0,
+      "remaining_security_info": "41 RLS no-policy notices intentionally deny browser data access",
+      "foreign_key_indexes_added": 3,
+      "foreign_key_index_advisor_cleared": true,
+      "runtime_connected": false
+    },
+    "vercel": {
+      "owner_scope_verified": true,
+      "plan": "hobby",
+      "projects_created": [
+        "career-harness-api",
+        "career-harness-web"
+      ],
+      "cli_links_verified": true,
+      "production_baseline_environment_variables_saved": 31,
+      "deployments_created": false,
+      "registration_open": false,
+      "ai_provider": "none",
+      "secrets_saved": false
+    },
+    "verification": {
+      "backend_tests": "642 passed, 6 PG skipped",
+      "ruff": "passed",
+      "pyright": "0 errors/warnings",
+      "frontend_tests": "26 passed",
+      "frontend_lint_typecheck_build": "passed",
+      "postgres_migrations": "original and schema-restored synthetic PG upgrade/downgrade/upgrade/check passed for 0014",
+      "local_db": "private backup integrity, per-table row counts preserved, head0014 and Alembic check passed",
+      "local_runtime": "restarted; health/ready/workspace200; existing owner and invalid token checks; sources readable through backend and frontend proxy",
+      "browser": "actual login screen, no warnings/errors; no new authenticated browser writing acceptance",
+      "ai": {
+        "provider": "none",
+        "configured": false,
+        "live_verified": false
+      },
+      "synthetic_containers": "two exact owned IDs/labels/no bind mounts verified, removed"
+    },
+    "secret_input_file": "work/production-private.json",
+    "editor_open_result": "queued; direct absolute file link provided; not claimed visible",
+    "actual_ai_and_public_signup_operating": false,
+    "remaining": [
+      "private DB/Auth credentials and CA verification",
+      "real free AI call and document writing acceptance",
+      "SMTP/OTP/Turnstile and operator details",
+      "actual HTTPS app deploy and two-account signup/isolation/deletion acceptance",
+      "production backup restore, deletion reapplication and alerts",
+      "project boundaries, cross-document facts/numbers/repetition, full rulebook acceptance"
+    ]
   }
 }

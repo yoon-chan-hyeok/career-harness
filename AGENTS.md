@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-12 실제 운영 연결: 사용자 생성 Supabase Free/Seoul 프로젝트에 기존 빈 스키마 41개 설치, RLS 41개·브라우저 역할 권한 0개·pgvector extensions 확인. 외래키 인덱스 3개를 모델/새 Alembic0014에 반영하고 합성 원본/복원 PG 왕복·check, 실제 Supabase head0014·누락 지적 해소 확인. 로컬 개인 DB 비공개 백업/행 수/무결성 보존 후0014 갱신. Vercel OWNER/Hobby 확인 후 API/Web 두 프로젝트 생성·CLI 연결·Production 기본 설정31개 저장. Python642/PG6 skipped·frontend26·lint/type/build 통과, 실제 로컬 작업실 재실행 및 HTTP/인증/프록시/자료 읽기 검증 완료. 편집창 열기는 queued이므로 열렸다고 안내하지 않으며 work/production-private.json 절대 경로 링크로 입력 안내. DB/Auth/AI 비밀값, 실제 HTTPS 앱·SMTP·CAPTCHA·공개 가입·AI 작성 및 남은 규칙 구현은 미완. docs/PRODUCTION_CONNECTION_2026_10_12.md와 JSON production_connection_2026_10_12가 최신이다.
+
 2026-10-11 운영 연결 재확인: 현재 도구에서 Supabase 프로젝트/Vercel Career 프로젝트·팀 없음, HF Free 로그인은 있으나 추론 OAuth 권한 없음. 실제 로컬 AI none/configured=false/live_verified=false, Auth local. 최신 공식 HF Free 기본 크레딧 없음으로 안내·화면 수정, 신규 연결 폼은 Groq를 제안하되 실제 설정/호출은 변경하지 않았다. frontend 26/lint/typecheck/build 및 실제 설정 화면/로컬 API 확인 통과. docs/OPERATING_CONNECTION_2026_10_11.md와 JSON operating_connection_2026_10_11 참조. 실제 AI·공개 회원가입 운영과 남은 규칙 구현은 여전히 미완이다.
 
 2026-10-11 공개 완료: GitHub PUBLIC, 소개 사이트 public 배포 성공 및 비로그인 브라우저 검증. 커밋 82af982의 GitHub CI 성공. 실제 작업실은 /workspace이며 공개 소개는 가상 데모다. Docker public 자산 복사를 추가했으나 컨테이너 실행은 미검증. 전체 AI 서비스 운영 미완은 유지한다.

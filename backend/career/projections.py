@@ -81,7 +81,7 @@ class SubmissionSnapshot(ArtifactRow):
 
 class InterviewHandoff(ArtifactRow):
     __tablename__ = "interview_handoff_records"
-    submission_bundle_id: Mapped[str] = mapped_column(ForeignKey("artifacts.id"))
+    submission_bundle_id: Mapped[str] = mapped_column(ForeignKey("artifacts.id"), index=True)
     content: Mapped[dict[str, Any]] = mapped_column(JSON)
 
 
