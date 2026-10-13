@@ -7,13 +7,13 @@ import hashlib
 import re
 from dataclasses import dataclass
 
-COMPILER_VERSION = "rule-sections-v1"
+COMPILER_VERSION = "rule-sections-v2"
 
 # Rule domains intentionally exclude personal snapshots, project Fact Locks,
 # archived workflows and worked examples. Expression exemplars have a separate,
 # evidence-bound selection path; they are not instructions or candidate facts.
 ALLOWED = {
-    "registry": {"1", "8", "9", "10"},
+    "registry": {"1", "6", "7", "8", "9", "10", *map(str, range(11, 18))},
     "integrity": {str(n) for n in range(12)},
     "opportunity": {"0", *map(str, range(2, 12)), "13", "14", "15"},
     "cover": {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "13", "17"},
@@ -39,13 +39,30 @@ COVER_SECTIONS = {
     "issue_patch_compression": {"1-4", "7", "8-5", "8-6", "13"},
     "submission_readiness": {"8", "17"},
 }
-REGISTRY_SECTIONS = {
-    "postmortem": {"1", "8", "9"},
-    "truth_extraction": {"1", "9"},
+REGISTRY_COMMON = {"1", "6", "7", "9", "10"}
+# The application chooses the pack; source text cannot switch domains or grant
+# permissions. Reuse references.compile_pack's resolved pack (including RESUME).
+REGISTRY_PACK_SECTIONS = {
+    "opportunity": {"11"},
+    "research": {"12"},
+    "strategy": {"12"},
+    "cover": {"13"},
+    "resume": {"14"},
+    "fact": {"15"},
+    "interview": {"16"},
+    "postmortem": {"8", "17"},
 }
 _HEADER = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 _NUMBER = re.compile(r"^(\d+(?:-[\dA-Z]+)?)(?:[.\s]|$)")
 _EXCLUDED = re.compile(r"예시|\bexample\b|\bfact\s*lock\b|snapshot|스냅샷|archive|아카이브", re.I)
+# These exact source-role definitions describe authority, not personal examples.
+# Exceptions are restricted to their reference key/chapter and checked at every
+# ancestor. A nested Example/Snapshot, or a similar title elsewhere, stays out.
+_SOURCE_ROLE_HEADINGS = {
+    ("integrity", "9"): {"example db", "submission snapshot"},
+    ("registry", "6"): {"6-b. example db"},
+    ("registry", "7"): {"7. application state & snapshot", "submission snapshot"},
+}
 
 
 @dataclass(frozen=True)
@@ -117,29 +134,37 @@ def _matches(number: str, selected: set[str]) -> bool:
     return any(number == value or number.startswith(value + "-") for value in selected)
 
 
-def selected_sections(key: str, content: str, stage: str):
+def _excluded_section(key: str, section: Section) -> bool:
+    definitions = _SOURCE_ROLE_HEADINGS.get((key, section.chapter), set())
+    return any(
+        _EXCLUDED.search(title) and " ".join(title.casefold().split()) not in definitions
+        for title in section.path
+    )
+
+
+def selected_sections(key: str, content: str, stage: str, *, pack: str = ""):
     allowed = ALLOWED.get(key, set())
     selected = COVER_SECTIONS.get(stage, ALLOWED["cover"]) if key == "cover" else (
-        REGISTRY_SECTIONS.get(stage, {"1", "9", "10"}) if key == "registry" else allowed
+        REGISTRY_COMMON | REGISTRY_PACK_SECTIONS.get(pack, set()) if key == "registry" else allowed
     )
     return [
         section for section in sections(content)
-        if section.chapter in allowed and not section.excluded and _matches(section.number, selected)
+        if section.chapter in allowed and not _excluded_section(key, section) and _matches(section.number, selected)
     ]
 
 
-def compile_sections(key: str, content: str, stage: str):
-    return [section.view(key) for section in selected_sections(key, content, stage)]
+def compile_sections(key: str, content: str, stage: str, *, pack: str = ""):
+    return [section.view(key) for section in selected_sections(key, content, stage, pack=pack)]
 
 
 def overview(key: str, content: str):
     parsed = sections(content)
-    applicable = [s for s in parsed if s.chapter in ALLOWED.get(key, set()) and not s.excluded]
+    applicable = [s for s in parsed if s.chapter in ALLOWED.get(key, set()) and not _excluded_section(key, s)]
     return {
         "compiler_version": COMPILER_VERSION,
         "status": "SOURCE_SECTIONS" if applicable else "NEEDS_SECTION_MAPPING",
         "requirement_sections": len(applicable),
-        "excluded_sections": sum(s.excluded or s.chapter not in ALLOWED.get(key, set()) for s in parsed),
+        "excluded_sections": len(parsed) - len(applicable),
         "source_backed": bool(applicable),
         "notice": "원문에서 단계별 규칙을 선택합니다. 예시·개인 스냅샷은 사실로 등록하지 않습니다."
         if applicable else "원문의 절 번호를 확인해 주세요. 기본 일반 지침만 적용 중입니다.",

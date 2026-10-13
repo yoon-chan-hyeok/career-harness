@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-13 추가 자료 대조: Registry의 PACK A~G 원문 누락과 일반 자료 역할 정의(Example DB/Submission Snapshot)의 과도한 제외를 수정했다. 현재 앱 묶음별 원문만 전달하며 실제 예시·스냅샷·아카이브 제외와 권한 경계는 유지한다. 레쥬메 압축도 고정 10,000자 대신 현재 1/2/MASTER 분량을 사용한다. 신규31개 포함 최종 Python729/PG7 skipped·Ruff/Pyright 통과, 실제 원문6종/대표8경로 격리 검증, 개인 작업실 재실행 후 인증·프록시·6종 compiler v2·HTTP200 확인. 현재 provider none/configured=false/live_verified=false. 26단계 예비 인수표와 남은 전체 여정·실제 AI/외부 운영은 docs/RULE_PACK_AND_RESUME_AUDIT_2026_10_13.md 및 JSON rule_pack_resume_2026_10_13 참조. 최종 원격 검사 결과는 JSON에서 확인한다. 파일 편집기 미표시 건은 메모장 실행으로 후속 처리했으며 접속값 입력 완료 답변은 아직 없다.
+
 2026-10-13 검사 운영 보완: 공식 checkout7.0.1/setup-node7.1.0/setup-python7.0.0 실제 SHA·node24 확인 후 CI 고정, ubuntu-24.04·contents:read·인증정보 비보존·npm 자동 캐시 비활성화 적용. 앱 Python3.12/Node22와 검사 조건 유지. Windows 검증 임시 경로 단축·재사용 거부, 전역 설정 없이 privacy14 통과. 최신 코드3c6354d의 CI38353112051 성공(698/PG7·마이그레이션/프런트/audit/privacy·양쪽annotation0)이며 docs/CI_REFRESH_2026_10_13.md 및 JSON ci_refresh_2026_10_13 참조. 실제 배포는 수행하지 않았다.
 
 2026-10-13 추가 구현: 일반 수치·문서 간 사실/수행 범위·문항 반복 검사를 현재 지표/근거/§5-4 원문 기준으로 보완했다. 별도 PortfolioReview 저장·대화/화면·문서/근거/규칙 변경 재검토·보관 체크리스트·최종 보관에 연결했다. 마지막 세 질문과 기존 ㄱㄱ 동작은 유지한다. 새 합성31·전체697/PG7 skipped 후 Windows 경로 문제의 privacy14 재검사 통과(서로 다른 전체698 사례), frontend26/lint/type/build·Ruff/Pyright·실제 합성 충돌→정정→검사2차→보관/390px/오류0 확인. 개인 작업실을 재실행해 기존 인증/프록시/자료 읽기/HTTP200 확인. docs/DOCUMENT_CONSISTENCY_2026_10_13.md 및 JSON document_consistency_2026_10_13 참조. 코드ba8cf5b의 GitHub CI38352487730 성공(698/별도PG7·마이그레이션/프런트/audit)이며, 전체26단계/6종 인수·실제 AI/외부 운영 완료는 아니다.

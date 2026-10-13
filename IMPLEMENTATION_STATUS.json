@@ -1434,5 +1434,56 @@
       "backend_annotations": 0,
       "frontend_annotations": 0
     }
+  },
+  "rule_pack_resume_2026_10_13": {
+    "date": "2026-10-13",
+    "status": "CODE_AND_LOCAL_RUNTIME_VERIFIED_REMOTE_CI_PENDING",
+    "report": "docs/RULE_PACK_AND_RESUME_AUDIT_2026_10_13.md",
+    "changes": [
+      "Registry PACK A-G source sections selected by the application's resolved domain pack",
+      "Exact source-role definitions retained; nested examples and historical snapshots excluded",
+      "Resume compression uses the current document's 3500/7000/20000 character budget"
+    ],
+    "validation": {
+      "regression_before_fix": {
+        "rule_failures": 26,
+        "resume_budget_failures": 3
+      },
+      "new_cases": 31,
+      "python": {
+        "passed": 729,
+        "skipped_postgres": 7,
+        "junit": "work/rules-final-2026-10-13.xml"
+      },
+      "ruff": "PASS",
+      "pyright": "0 errors / 0 warnings",
+      "private_originals": {
+        "references": 6,
+        "stage_paths": 8,
+        "facts_imported": 0,
+        "owner_database_modified": false
+      },
+      "runtime": {
+        "owner_auth_and_proxy": "PASS",
+        "compiler": "rule-sections-v2",
+        "active_references": 6,
+        "health_ready_workspace": "HTTP_200",
+        "provider": "none",
+        "configured": false,
+        "live_verified": false
+      },
+      "github_ci": "PENDING"
+    },
+    "scope_limitations": [
+      "The 26-step table identifies current wiring and verification limits; full scenario acceptance remains",
+      "Synthetic provider checks do not establish real AI semantic quality",
+      "No production deployment, credential submission, public signup or real AI acceptance was performed"
+    ],
+    "next": [
+      "Verify this exact code commit in GitHub CI including PostgreSQL and frontend build",
+      "Run complete hybrid and technical application journeys, including cover/resume/correction/review/freeze",
+      "After owner input completion, connect free AI and production credentials and perform real acceptance"
+    ],
+    "overall_requirement_acceptance_complete": false
   }
 }

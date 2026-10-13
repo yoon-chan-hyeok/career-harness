@@ -1,3 +1,4 @@
+import pytest
 from career.references import compile_pack, listing, register
 from career.rulebook import compile_sections, overview, sections
 
@@ -100,3 +101,144 @@ def test_fenced_headings_do_not_override_actual_section_selection():
     parsed = sections(content)
     assert len(parsed) == 2 and parsed[0].chapter == "6"
     assert parsed[1].chapter == "8"
+
+
+REGISTRY = """# Session registry
+# 1. Authority
+Current corrections outrank derived summaries.
+# 6. REFERENCE LAYERS
+## 6-A. Expression DB
+Expression is style, not fact authority.
+## 6-B. Example DB
+Past wording never establishes current facts.
+### Example
+Archived applicant achieved 999%.
+# 7. APPLICATION STATE & SNAPSHOT
+Application state and submitted content have different roles.
+## Submission Snapshot
+A frozen copy proves only what was submitted then.
+### Snapshot 2024
+Archived applicant achieved 888%.
+# 8. Learning
+An outcome alone cannot establish a causal writing rule.
+# 9. Staleness
+Recheck affected work after corrections.
+# 10. Session scope
+Only use the current task's relevant rule pack.
+# 11. PACK A — Opportunity
+PACK_A_REQUIREMENT
+# 12. PACK B — Strategy
+PACK_B_REQUIREMENT
+# 13. PACK C — Cover
+PACK_C_REQUIREMENT
+# 14. PACK D — Resume
+PACK_D_REQUIREMENT
+# 15. PACK E — Fact audit
+PACK_E_REQUIREMENT
+# 16. PACK F — Interview
+PACK_F_REQUIREMENT
+# 17. PACK G — Outcome review
+PACK_G_REQUIREMENT
+# 18. ARCHIVE / SOURCE
+Outdated rules must not be injected.
+"""
+
+
+@pytest.mark.parametrize(("stage", "domain", "expected"), [
+    ("opportunity", "", "A"), ("evidence_mapper", "", "A"),
+    ("opportunity_assessment", "", "A"),
+    ("research_source_extract", "", "B"), ("strategy", "", "B"),
+    ("question_portfolio", "", "B"),
+    ("question_brief", "", "C"), ("claim_evidence_test", "", "C"),
+    ("writer", "", "C"), ("recruiter", "", "C"),
+    ("submission_readiness", "", "C"), ("issue_patch_compression", "", "C"),
+    ("resume_writer", "", "D"), ("recruiter", "RESUME", "D"),
+    ("reverse_interview", "RESUME", "D"), ("review_answers", "RESUME", "D"),
+    ("review_answer_extract", "RESUME", "D"), ("interview_handoff", "RESUME", "D"),
+    ("issue_patch_compression", "RESUME", "D"),
+    ("fact_reviewer", "", "E"), ("truth_extraction", "", "E"),
+    ("reverse_interview", "", "F"), ("interview_handoff", "", "F"),
+    ("postmortem", "", "G"),
+])
+def test_registry_current_stage_pack_is_source_backed_and_domain_scoped(db, stage, domain, expected):
+    register(db, "a", "registry", REGISTRY)
+    packet = compile_pack(db, "a", stage, domain)
+    reference = packet["references"][0]
+    text = "\n".join(reference["guidance"])
+    for letter in "ABCDEFG":
+        assert (f"PACK_{letter}_REQUIREMENT" in text) == (letter == expected)
+    assert "Past wording never establishes current facts." in text
+    assert "A frozen copy proves only what was submitted then." in text
+    assert "999%" not in text and "888%" not in text and "Outdated rules" not in text
+    assert not reference["fact_authority"]
+    assert ("An outcome alone" in text) == (expected == "G")
+    selected = next(r for r in reference["requirements"] if r["chapter"] == str(11 + "ABCDEFG".index(expected)))
+    assert REGISTRY.splitlines()[selected["start_line"] - 1].startswith("#")
+
+
+def test_registry_pack_source_revision_changes_resume_guidance_and_keeps_cover_out(db):
+    register(db, "a", "registry", REGISTRY)
+    before = compile_pack(db, "a", "resume_writer")["references"][0]
+    register(db, "a", "registry", REGISTRY.replace("PACK_D_REQUIREMENT", "Check exported links and page breaks."))
+    after = compile_pack(db, "a", "resume_writer")["references"][0]
+    assert before["content_hash"] != after["content_hash"]
+    assert "Check exported links and page breaks." in after["guidance"]
+    assert "PACK_C_REQUIREMENT" not in "\n".join(after["guidance"])
+
+
+def test_integrity_source_role_definitions_are_rules_but_nested_examples_stay_excluded():
+    content = """# Integrity rules
+# 9. Source Role
+## Example DB
+Old examples are not current truth.
+### Example
+Someone achieved 777%.
+## Submission Snapshot
+Use only for the submitted version and interview handoff.
+### Snapshot 2020
+Someone achieved 666%.
+# 10. Privacy
+Confirm disclosure scope.
+"""
+    compiled = compile_sections("integrity", content, "writer")
+    text = "\n".join(row["text"] for row in compiled)
+    assert "Old examples are not current truth." in text
+    assert "Use only for the submitted version" in text
+    assert "777%" not in text and "666%" not in text
+    assert overview("integrity", content)["excluded_sections"] == 2
+
+
+def test_similar_snapshot_titles_outside_source_role_chapter_remain_excluded():
+    content = "# 7. Writing\n## Submission Snapshot\nPast personal claim.\n# 9. Roles\n## Example DB for applicant\nOld achievement."
+    assert compile_sections("integrity", content, "writer") == []
+
+
+def test_workflow_uses_revised_registry_pack_without_importing_facts_or_logging_content(db):
+    from career.models import Evidence, Fact, PromptRun
+    from career.schemas import Review
+    from career.workflow import Workflow
+    from sqlalchemy import select
+
+    captured = []
+
+    class Reviewer:
+        def structured(self, stage, context, schema):
+            captured.append(context["supplemental_guidance"])
+            return schema.model_validate({"issues": [], "followups": []})
+
+    service = Workflow(db, "a", Reviewer())
+    service.create("Synthetic", "Analyst", "Prepare reports.")
+    register(db, "a", "registry", REGISTRY)
+    service.ai("recruiter", {"document_domain": "RESUME"}, Review)
+    changed = register(db, "a", "registry", REGISTRY.replace("PACK_D_REQUIREMENT", "Recheck the current resume file."))
+    service.ai("recruiter", {"document_domain": "RESUME"}, Review)
+    assert "PACK_D_REQUIREMENT" in captured[0]["references"][0]["guidance"]
+    assert "Recheck the current resume file." in captured[1]["references"][0]["guidance"]
+    assert all(packet["pack"] == "resume" for packet in captured)
+    assert compile_pack(db, "another-owner", "recruiter", "RESUME")["references"] == []
+    traces = list(db.scalars(select(PromptRun).order_by(PromptRun.created_at)))
+    assert len(traces) == 2
+    assert traces[0].data["input_hash"] != traces[1].data["input_hash"]
+    assert traces[1].data["reference_versions"][0]["content_hash"] == changed.data["content_hash"]
+    assert all("Recheck the current resume file." not in str(trace.data) for trace in traces)
+    assert not list(db.scalars(select(Evidence))) and not list(db.scalars(select(Fact)))

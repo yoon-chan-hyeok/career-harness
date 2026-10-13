@@ -1088,7 +1088,8 @@ class Workflow:
                 "issues": review.data["issues"],
                 "protected_spans": document.data.get("protected_spans", []),
                 "evidence": evidence,
-                "character_limit": 10000 if resume else self.question(ident, qid)["limit"],
+                "character_limit": document.data.get("character_budget", 10000)
+                if resume else self.question(ident, qid)["limit"],
                 "document_domain": "RESUME" if resume else "COVER",
                 "preserve": ["질문에 대한 답", "핵심 판단", "근거", "수행 범위", "회사 근거"],
                 "remove_first": ["기술 스택 나열", "반복", "일반론", "수식어"],

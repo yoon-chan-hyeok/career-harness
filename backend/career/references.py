@@ -246,7 +246,7 @@ def compile_pack(db, user, stage: str, domain=""):
         if record is None or owned(db, Source, user, record.data["source_id"]).status not in GOOD:
             continue
         section, rules = GUIDANCE[key]
-        source_sections = compile_sections(key, record.data["content"], stage)
+        source_sections = compile_sections(key, record.data["content"], stage, pack=pack)
         if pack == "interview" and key == "cover":
             section = "Phase 7 §8-2 Reverse Test / §8-3 Red Team (면접용 일부)"
             rules = [
