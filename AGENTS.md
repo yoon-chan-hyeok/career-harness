@@ -1,6 +1,6 @@
 # AGENTS.md — Career Harness
 
-2026-10-13 검사 운영 보완: 공식 checkout7.0.1/setup-node7.1.0/setup-python7.0.0 실제 SHA·node24 확인 후 CI 고정, ubuntu-24.04·contents:read·인증정보 비보존·npm 자동 캐시 비활성화 적용. 앱 Python3.12/Node22와 검사 조건 유지. Windows 검증 임시 경로 단축·재사용 거부, 전역 설정 없이 privacy14 통과. 최신 CI 설정은 원격 검사 대기이며 docs/CI_REFRESH_2026_10_13.md 및 JSON ci_refresh_2026_10_13 참조. 실제 배포는 수행하지 않았다.
+2026-10-13 검사 운영 보완: 공식 checkout7.0.1/setup-node7.1.0/setup-python7.0.0 실제 SHA·node24 확인 후 CI 고정, ubuntu-24.04·contents:read·인증정보 비보존·npm 자동 캐시 비활성화 적용. 앱 Python3.12/Node22와 검사 조건 유지. Windows 검증 임시 경로 단축·재사용 거부, 전역 설정 없이 privacy14 통과. 최신 코드3c6354d의 CI38353112051 성공(698/PG7·마이그레이션/프런트/audit/privacy·양쪽annotation0)이며 docs/CI_REFRESH_2026_10_13.md 및 JSON ci_refresh_2026_10_13 참조. 실제 배포는 수행하지 않았다.
 
 2026-10-13 추가 구현: 일반 수치·문서 간 사실/수행 범위·문항 반복 검사를 현재 지표/근거/§5-4 원문 기준으로 보완했다. 별도 PortfolioReview 저장·대화/화면·문서/근거/규칙 변경 재검토·보관 체크리스트·최종 보관에 연결했다. 마지막 세 질문과 기존 ㄱㄱ 동작은 유지한다. 새 합성31·전체697/PG7 skipped 후 Windows 경로 문제의 privacy14 재검사 통과(서로 다른 전체698 사례), frontend26/lint/type/build·Ruff/Pyright·실제 합성 충돌→정정→검사2차→보관/390px/오류0 확인. 개인 작업실을 재실행해 기존 인증/프록시/자료 읽기/HTTP200 확인. docs/DOCUMENT_CONSISTENCY_2026_10_13.md 및 JSON document_consistency_2026_10_13 참조. 코드ba8cf5b의 GitHub CI38352487730 성공(698/별도PG7·마이그레이션/프런트/audit)이며, 전체26단계/6종 인수·실제 AI/외부 운영 완료는 아니다.
 

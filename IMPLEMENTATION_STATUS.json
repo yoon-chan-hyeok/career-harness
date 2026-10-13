@@ -1394,7 +1394,7 @@
     "verified_source_commit": "ba8cf5b2c7cd034dcc0da7c1f1f089f569c74793"
   },
   "ci_refresh_2026_10_13": {
-    "status": "implemented_remote_validation_pending",
+    "status": "implemented_and_verified_on_actual_github_ci",
     "guide": "docs/CI_REFRESH_2026_10_13.md",
     "actions": {
       "checkout": {
@@ -1421,6 +1421,18 @@
       "node": "22"
     },
     "local_verification": "privacy14 passed with only shorter temp path, no Git config change; diff reviewed; workflow remote verification pending",
-    "deployments_performed": false
+    "deployments_performed": false,
+    "verified_source_commit": "3c6354dd7a5388a5c5c76a1cf1a092b0cfebc4a7",
+    "remote_ci": {
+      "result": "success",
+      "url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38353112051",
+      "python": "698 passed, 7 skipped",
+      "postgres": "7 actual isolated PG passed",
+      "migrations": "upgrade/check/downgrade/upgrade passed",
+      "frontend": "26 tests/lint/types/build/production dependency audit passed",
+      "privacy": "passed",
+      "backend_annotations": 0,
+      "frontend_annotations": 0
+    }
   }
 }
