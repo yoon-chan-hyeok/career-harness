@@ -15,7 +15,9 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $PythonPath -m pyright --pythonpath $PythonPath
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-& $PythonPath -m pytest -q -p no:cacheprovider --basetemp (Join-Path $env:TEMP ('pytest-' + [guid]::NewGuid().ToString('N')))
+$taskTestPath = Join-Path $env:TEMP ('v-' + [guid]::NewGuid().ToString('N').Substring(0,12))
+if (Test-Path -LiteralPath $taskTestPath) { throw '검사 임시 경로가 이미 있습니다. 다시 실행해 주세요.' }
+& $PythonPath -m pytest -q -p no:cacheprovider --basetemp $taskTestPath
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Push-Location frontend
 $env:NEXT_TELEMETRY_DISABLED = '1'
