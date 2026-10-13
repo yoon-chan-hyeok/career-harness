@@ -186,6 +186,7 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                 "RAG 빼",
                 "이건 내가 한 거 아님",
                 "이 수치 틀림",
+                "전체 문서 검수",
             }:
                 if artifact and service.artifact(workspace, artifact.kind, artifact.slot).id != artifact.id:
                     raise ValueError("이전 버전이 선택되어 있습니다. 현재 버전을 선택해 주세요.")

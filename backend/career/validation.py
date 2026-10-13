@@ -1,6 +1,8 @@
 import re
 from typing import Any
 
+from career.quantities import numeric_token, numeric_tokens
+
 GOOD = {"VERIFIED", "USER_CONFIRMED", "SOURCE_BACKED"}
 
 
@@ -24,7 +26,13 @@ def ledger_coverage(document):
 
 
 def hard_qa(
-    text: str, evidence: list[dict[str, Any]], limit: int = 10000, *, profile=None, company_facts=None
+    text: str,
+    evidence: list[dict[str, Any]],
+    limit: int = 10000,
+    *,
+    profile=None,
+    company_facts=None,
+    document=None,
 ) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
 
@@ -60,23 +68,25 @@ def hard_qa(
             if boundary and boundary in text:
                 issue("CLAIM_BOUNDARY", f"사용 금지 주장: {boundary}")
         ownership = data.get("ownership")
-        implementation = ownership.get("implementation", "UNKNOWN") if isinstance(ownership, dict) else "UNKNOWN"
-        if implementation != "USER":
+        implementation = (
+            ownership.get("implementation", "UNKNOWN") if isinstance(ownership, dict) else "UNKNOWN"
+        )
+        if document is None and implementation != "USER":
             if any(
                 phrase in text
                 for phrase in ["혼자 개발", "전부 직접 구현", "단독 개발", "built entirely myself"]
             ):
                 issue("OWNERSHIP", "선택한 근거가 단독 구현 주장을 뒷받침하지 않습니다.")
+    if document is not None:
+        from career.document_qa import ownership_issues
+
+        issues.extend(ownership_issues(document, evidence))
     # Exact numbers are necessary, but semantic scope is reviewed separately.
-    supported = set(re.findall(r"\d+(?:[.,]\d+)*(?:%|배)?", "\n".join(e["body"] for e in valid)))
+    supported = numeric_tokens("\n".join(e["body"] for e in valid))
     for e in valid:
         for metric in e.get("data", {}).get("metric_ledger", []):
             if metric.get("status") in GOOD:
-                supported.update(
-                    re.findall(
-                        r"\d+(?:[.,]\d+)*(?:%|배)?", str(metric["value"]) + str(metric.get("unit", ""))
-                    )
-                )
+                supported.update(numeric_tokens(str(metric["value"]) + str(metric.get("unit", ""))))
     # A graduation date is valid only in its exact canonical profile quote;
     # the same number elsewhere still needs independent metric evidence.
     metric_text = text
@@ -85,19 +95,25 @@ def hard_qa(
     for fact in company_facts or []:
         if fact.get("freshness") == "CURRENT" and fact.get("source_id") and fact.get("statement"):
             metric_text = metric_text.replace(fact["statement"], "")
-    for number in set(re.findall(r"\d+(?:[.,]\d+)*(?:%|배)?", metric_text)) - supported:
+    for number in numeric_tokens(metric_text) - supported:
         issue("UNSUPPORTED_METRIC", f"근거에 없는 숫자: {number}")
     # An old raw source cannot keep a superseded metric valid after correction.
     for e in valid:
         ledger = e.get("data", {}).get("metric_ledger", [])
-        current_values = {str(m["value"]) for m in ledger if m.get("status") in GOOD}
+        current_values = {numeric_token(str(m["value"])) for m in ledger if m.get("status") in GOOD}
         for metric in ledger:
             value = str(metric.get("value", ""))
+            literal = bool(re.fullmatch(r"\d+(?:[.,]\d+)*(?:%|배)?", value))
+            appears = (
+                (numeric_token(value).rstrip("%배") in {n.rstrip("%배") for n in numeric_tokens(text)})
+                if literal
+                else bool(value and re.search(r"(?<!\d)" + re.escape(value) + r"(?!\d)", text))
+            )
             if (
                 metric.get("status") not in GOOD
                 and value
-                and re.search(r"(?<!\d)" + re.escape(value) + r"(?!\d)", text)
-                and value not in current_values
+                and appears
+                and numeric_token(value) not in current_values
             ):
                 issue("METRIC_CONFLICT", "확인되지 않았거나 정정된 이전 지표입니다: " + value)
             if metric.get("status") in GOOD:

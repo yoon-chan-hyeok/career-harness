@@ -855,6 +855,7 @@ def action(
         "revise": lambda: service.revise(workspace, qid, body.get("resume", False)),
         "final-lock": lambda: service.final_lock(workspace, qid, body.get("resume", False)),
         "resume": lambda: service.resume(workspace, manual, body.get("page_budget", 1)),
+        "portfolio-review": lambda: service.review_portfolio(workspace, manual_verified=body.get("manual_verified") is True),
         "ready": lambda: service.ready(workspace),
         "freeze": lambda: service.freeze(workspace),
         "confirm": lambda: service.confirm_submission(workspace, body.get("confirmed") is True),
@@ -892,6 +893,7 @@ def action(
     manual_action = manual_action or (action == "research" and body.get("live") is not True)
     manual_action = manual_action or (action == "research-extract" and manual is not None)
     manual_action = manual_action or (action == "review-answers" and body.get("manual_verified") is True)
+    manual_action = manual_action or (action == "portfolio-review" and body.get("manual_verified") is True)
     manual_action = manual_action or (action == "postmortem" and body.get("draft_hypotheses") is not True)
     result = run_operation(db, ident, workspace, action, execute, uses_ai=False if manual_action else None)
     result = view(result) if hasattr(result, "__table__") else result

@@ -390,6 +390,11 @@ function Field({
 }
 const ReferenceNames = createContext<Record<string, string>>({});
 const valueLabels: Record<string, string> = {
+  DETERMINISTIC: "현재 근거로 규칙 검사",
+  AI_AND_DETERMINISTIC: "근거 검사와 AI 대조",
+  PASSED: "충돌 없음",
+  WARNINGS: "확인할 권고 있음",
+  NEEDS_REVISION: "수정 필요",
   JD_ONLY: "등록한 공고 기준",
   SOURCE_BACKED_PARTIAL: "등록한 출처 범위",
   HYPOTHESIS: "공개 근거에 따른 가설",
@@ -544,6 +549,8 @@ function DataView({ data }: { data: Json }) {
               "source_documents",
               "extraction_citations",
               "research_id",
+              "context_hash",
+              "repetition_policy",
             ].includes(k),
         )
         .map(([k, v]) => (
@@ -964,7 +971,35 @@ function Card({ a }: { a?: Artifact }) {
               : "키워드 검색"}
         </p>
       )}
-      {a.data.text ? (
+      {a.kind === "PortfolioReview" ? (
+        <>
+          <p>
+            {valueLabels[String(a.data.result)] || "문서 검수 결과"} ·{" "}
+            {valueLabels[String(a.data.mode)] || "저장된 검사"}
+          </p>
+          <p>
+            비교한 문서:{" "}
+            {((a.data.checked_documents || []) as Data[])
+              .map((item) => `${String(item.label)} ${String(item.version)}차`)
+              .join(" · ")}
+          </p>
+          {a.data.complete === false && (
+            <p>아직 작성하지 않은 문서가 있어 전체 비교는 완료되지 않았습니다.</p>
+          )}
+          {((a.data.issues || []) as Data[]).length ? (
+            <ul>
+              {(a.data.issues as Data[]).map((issue, index) => (
+                <li key={index}>
+                  <span className="badge">{String(issue.priority)}</span>{" "}
+                  {String(issue.message)}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>현재 검사에서 문서 간 충돌이나 반복을 발견하지 못했습니다.</p>
+          )}
+        </>
+      ) : a.data.text ? (
         <pre>{String(a.data.text)}</pre>
       ) : (
         <DataView data={a.data} />
@@ -3316,6 +3351,7 @@ export default function Home() {
                             제출본을 보관합니다.
                           </p>
                           {button("전체 잠금·중복 메시지 확인", "ready")}
+                          {button("문서 간 사실·수치·반복 검사", "portfolio-review", {manual_verified: !ai})}
                           {button(
                             "최종본 보관 · 아직 미제출",
                             "freeze",
@@ -3353,7 +3389,7 @@ export default function Home() {
                         {ws.artifacts
                           .filter(
                             (a) =>
-                              ["Review", "ResumeReview"].includes(a.kind) &&
+                              ["Review", "ResumeReview", "PortfolioReview"].includes(a.kind) &&
                               a.status !== "SUPERSEDED",
                           )
                           .map((a) => (

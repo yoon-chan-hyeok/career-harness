@@ -55,12 +55,16 @@ def packet_status(db, user, workspace):
         except (ValueError, LookupError):
             pass
         check("final_questions", "직업 정체성·마지막 세 질문 확인", final_ok, 4)
-        portfolio = current.get(("PortfolioReview", ""))
+        from career.portfolio_review import current as current_portfolio_review
+
+        portfolio = current_portfolio_review(service, workspace)
         portfolio_ok = False
         if portfolio:
             try:
                 fresh(db, user, portfolio)
-                portfolio_ok = not any(i["priority"] in {"P0", "P1"} for i in portfolio.data.get("issues", []))
+                portfolio_ok = portfolio.data.get("complete") is True and not any(
+                    i["priority"] in {"P0", "P1"} for i in portfolio.data.get("issues", [])
+                )
             except (ValueError, LookupError):
                 pass
         check("portfolio", "문서 간 최종 검수", portfolio_ok, 4)

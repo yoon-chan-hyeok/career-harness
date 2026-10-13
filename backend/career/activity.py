@@ -55,6 +55,7 @@ ACTION_STAGE = {
     "ledger": "review",
     "final-lock": "review",
     "ready": "review",
+    "portfolio-review": "review",
     "freeze": "review",
     "confirm": "review",
     "interview-handoff": "review",
@@ -95,6 +96,7 @@ ACTION_LABELS = {
     "patch": "직접 수정 반영",
     "ledger": "주장 근거 갱신",
     "ready": "최종 보관 조건 확인",
+    "portfolio-review": "문서 간 사실·수치·반복 검수",
     "outcome": "전형 결과 기록",
     "postmortem": "지원 결과 회고",
     "close": "지원 추적 종료",
@@ -106,7 +108,7 @@ ACTION_LABELS = {
 AI_ACTIONS = frozenset({
     "conversation", "commands", "research", "research-extract", "analyze", "assess-opportunity", "evidence-map",
     "strategy", "question-portfolio", "question-brief", "claim-test", "generate", "review", "review-answers", "resume",
-    "revise", "ready", "freeze", "interview-handoff", "postmortem",
+    "revise", "ready", "portfolio-review", "freeze", "interview-handoff", "postmortem",
 })
 
 

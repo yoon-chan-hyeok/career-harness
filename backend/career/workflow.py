@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 
 from career.artifacts import fresh, latest, lock, save, stale
 from career.db import Record, now, uid
-from career.document_qa import cross_document_qa, portfolio_qa, skimmability_qa
+from career.document_qa import skimmability_qa
 from career.models import Artifact, Evidence, Fact, PromptRun, Workspace
 from career.prompt_cache import identity_scope
-from career.provider_config import provider_available, provider_settings
+from career.provider_config import provider_settings
 from career.providers import (
     ManualResearchProvider,
     OpenAIProvider,
@@ -825,6 +825,7 @@ class Workflow:
             document.data.get("character_budget", 10000) if resume else self.question(ident, qid)["limit"],
             profile=canonical(self.db, self.user),
             company_facts=self.artifact(ident, "OpportunityBrief").data.get("company_facts", []),
+            document=document.data,
         )
         if resume:
             issues.extend(skimmability_qa(document.data["text"]))
@@ -1262,12 +1263,35 @@ class Workflow:
         ws.state = "REVIEWING"
         return item
 
+    def review_portfolio(self, ident: str, *, manual_verified=False):
+        from career.portfolio_review import run
+
+        return run(self, ident, manual_verified=manual_verified)
+
+    def prepare_after_lock(self, ident: str):
+        from career.final_decision import require_pass as require_final_review
+        from career.portfolio_review import current
+
+        require_final_review(self, ident)
+        whole = current(self, ident)
+        if whole is None:
+            whole = self.review_portfolio(ident)
+            if any(i["priority"] in {"P0", "P1"} for i in whole.data["issues"]):
+                return {
+                    "interpreted_action": "전체 문서 검수",
+                    "patched_artifacts": [whole.id],
+                    "stale_artifacts": [],
+                    "message": "문서 간 검수 결과를 저장했습니다. 충돌·반복 문제를 먼저 수정해 주세요.",
+                }
+        elif any(i["priority"] in {"P0", "P1"} for i in whole.data["issues"]):
+            raise ValueError("전체 문서 검수의 충돌·반복 문제를 먼저 수정해 주세요.")
+        return self.ready(ident)
+
     def ready(self, ident: str):
         ws = self.ws(ident)
         self.editable(ws)
         self.artifact(ident, "ApplicationBrief")
         messages = []
-        briefs = []
         documents = []
         for q in ws.data.get("questions", []):
             brief = self.artifact(ident, "QuestionBrief", q["id"])
@@ -1277,7 +1301,6 @@ class Workflow:
             require_current(self, ident, brief)
             require_pass(self, ident, q["id"], brief)
             messages.append(brief.data["primary_message"].strip())
-            briefs.append(brief.data)
             document = self.artifact(ident, "Draft", q["id"])
             review = self.artifact(ident, "Review", q["id"])
             if document.status != "LOCKED" or review.status != "LOCKED":
@@ -1304,27 +1327,10 @@ class Workflow:
         from career.final_decision import require_pass as require_final_review
 
         require_final_review(self, ident)
-        portfolio = portfolio_qa(briefs, [d.data for d in documents if d.kind == "Draft"])
-        portfolio.extend(cross_document_qa([d.data for d in documents]))
-        if self.provider is not None or provider_available():
-            semantic = self.ai(
-                "cross_document_consistency",
-                {
-                    "task": "Check conflicting metrics/ownership, duplicated messages, portfolio balance, and claim boundaries across cover letter and resume. Flag P0/P1 only for substantiated contradictions.",
-                    "briefs": briefs,
-                    "documents": [d.data for d in documents],
-                },
-                Review,
-            )
-            portfolio.extend(semantic["issues"])
-        save(
-            self.db,
-            self.user,
-            ident,
-            "PortfolioReview",
-            {"issues": portfolio},
-            deps=[d.id for d in documents],
-        )
+        from career.portfolio_review import current
+
+        portfolio_review = current(self, ident) or self.review_portfolio(ident)
+        portfolio = portfolio_review.data["issues"]
         if any(issue["priority"] in {"P0", "P1"} for issue in portfolio):
             raise ValueError(
                 "문서 간 검수에서 충돌이 발견되었습니다: "
@@ -1740,6 +1746,14 @@ class Workflow:
         ws = self.ws(ident)
         patched, changed = [], []
         action = text.strip()
+        if action == "전체 문서 검수":
+            item = self.review_portfolio(ident)
+            return {
+                "interpreted_action": action,
+                "patched_artifacts": [item.id],
+                "stale_artifacts": [],
+                "message": "현재 문서의 사실·수치·수행 범위와 반복 검사 결과를 저장했습니다.",
+            }
         if action == "제출했다":
             return self.confirm_submission(ident, True)
         if action == "ㄱㄱ":
@@ -1753,7 +1767,7 @@ class Workflow:
                 elif any(i["priority"] in {"P0", "P1"} for i in current_review.data["issues"]):
                     raise ValueError("이력서 검수 문제를 먼저 수정해 주세요.")
                 elif document.status == "LOCKED":
-                    return self.ready(ident)
+                    return self.prepare_after_lock(ident)
                 else:
                     item = self.final_lock(ident, resume=True)
             elif ws.state == "CREATED" or (ws.state == "NEED_USER_ACTION" and (
@@ -1816,7 +1830,7 @@ class Workflow:
                     document = self.artifact(ident, "Draft", qid)
                     current_review = latest(self.db, self.user, ident, "Review", qid, required=False)
                     if document.status == "LOCKED":
-                        return self.ready(ident)
+                        return self.prepare_after_lock(ident)
                     if current_review is None or current_review.status not in {"ACTIVE", "LOCKED"}:
                         item = self.review(ident, qid)
                     elif any(i["priority"] in {"P0", "P1"} for i in current_review.data["issues"]):

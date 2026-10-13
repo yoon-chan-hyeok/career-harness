@@ -1342,5 +1342,47 @@
       "real AI, HTTPS/signup/mail/captcha and production recovery"
     ],
     "verified_source_commit": "deda96a6b458f582bac0028f37ab1a6dfa19b257"
+  },
+  "document_consistency_2026_10_13": {
+    "status": "implemented_and_verified_locally_remote_ci_pending",
+    "guide": "docs/DOCUMENT_CONSISTENCY_2026_10_13.md",
+    "implementation": [
+      "current metric/fact/ownership identity checks across cover and resume",
+      "unit-aware conservative numeric comparison and baseline/result separation",
+      "source-enabled exact fact/metric repetition and normalized similar messages",
+      "versioned persistent review via API, chat and final UI",
+      "document/evidence/policy hash invalidation and checklist revalidation",
+      "unchanged final questions/locks and immutable freeze gate"
+    ],
+    "verification": {
+      "new_tests": "31 passed; synthetic facts only",
+      "local_full_python": "697 passed, 7 PG skipped; one Windows Git long-path infrastructure failure",
+      "local_privacy_recheck": "14 passed after process-local core.longpaths and shorter private temp path; privacy rules unchanged",
+      "total_distinct_python_cases_passed": 698,
+      "frontend": "26 tests, lint/typecheck/production build passed",
+      "ruff": "passed",
+      "pyright": "0 errors/warnings",
+      "browser": "actual synthetic blocked review saved, document correction invalidates old result, review2 uses resume2, ready and immutable freeze succeeded; proxy snapshot checked; 390px no overflow; errors/warnings0",
+      "browser_date": "2026-10-12",
+      "personal_runtime": "2026-10-13 restart and health/ready/workspace200; owner/auth/source reads and invalid-token rejection through backend/frontend proxy passed",
+      "ai": {
+        "provider": "none",
+        "configured": false,
+        "live_verified": false,
+        "semantic_context_test": "synthetic provider only"
+      },
+      "remote_ci": "pending"
+    },
+    "personal_data_changed": false,
+    "known_limits": [
+      "bounded literal patterns do not prove all semantic paraphrases",
+      "complex/same-unit multiple metric associations require P2 original-source review",
+      "no live model writing/public service acceptance"
+    ],
+    "remaining": [
+      "full 26-step original pack and six-reference acceptance",
+      "CI action runtime and Windows local build operation improvements",
+      "actual free AI, HTTPS/signup/mail/captcha and production recovery"
+    ]
   }
 }
