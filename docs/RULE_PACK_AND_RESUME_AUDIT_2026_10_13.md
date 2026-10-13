@@ -18,6 +18,8 @@
 - 규칙 수정 직후 전체 Python 검사는 726 passed / 별도 PostgreSQL 7 skipped였다. 뒤이은 압축 변경의 최종 전체 검사와 원격 검사 결과는 `IMPLEMENTATION_STATUS.json`의 `rule_pack_resume_2026_10_13`에 별도로 기록한다.
 - 컴파일러 버전은 `rule-sections-v2`다. 기존 저장 문서·개인 규칙·승인 상태를 소급 변경하지 않는다. 이후 호출부터 새 절 선택이 적용되며, 참고 자료 자체를 수정할 때 기존 재검토 처리는 유지한다.
 
+최종 코드 `a8b1b96334c3dccf4c2ebcbb5f7523887abb4a08`의 [GitHub 검사](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38355437934)는 성공했다. 전체 Python 729개, 별도 실제 PostgreSQL 7개, 마이그레이션 왕복/check, 개인정보 차단, 화면 26개·lint·타입·빌드가 통과했다. 배포용 의존성의 high 이상 차단 기준은 통과했지만 보안 경고가 0이라는 뜻은 아니다. 후속 의존성 대조는 `docs/DEPENDENCY_TRIAGE_2026_10_13.md`에 구분해 기록했다.
+
 ## 작성전략 26단계의 인수 점검표
 
 아래는 현재 코드 연결과 검사 범위를 구분한 점검표다. 파일/필드가 존재한다는 사실만으로 의미 판단 품질이나 실제 AI 사용까지 완료됐다고 판단하지 않는다. **하이브리드 직무·순수 기술직의 전체 여정을 실제 모델로 실행하는 인수는 남아 있다.**

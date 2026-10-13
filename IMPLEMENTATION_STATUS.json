@@ -1437,7 +1437,7 @@
   },
   "rule_pack_resume_2026_10_13": {
     "date": "2026-10-13",
-    "status": "CODE_AND_LOCAL_RUNTIME_VERIFIED_REMOTE_CI_PENDING",
+    "status": "CODE_LOCAL_RUNTIME_AND_GITHUB_CI_VERIFIED",
     "report": "docs/RULE_PACK_AND_RESUME_AUDIT_2026_10_13.md",
     "changes": [
       "Registry PACK A-G source sections selected by the application's resolved domain pack",
@@ -1472,7 +1472,19 @@
         "configured": false,
         "live_verified": false
       },
-      "github_ci": "PENDING"
+      "github_ci": {
+        "status": "SUCCESS",
+        "code_commit": "a8b1b96334c3dccf4c2ebcbb5f7523887abb4a08",
+        "run_id": 38355437934,
+        "url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38355437934",
+        "python_passed": 729,
+        "postgres_passed": 7,
+        "frontend_passed": 26,
+        "migration_roundtrip_and_check": "PASS",
+        "privacy": "PASS",
+        "frontend_lint_typecheck_build": "PASS",
+        "npm_audit_high_production_gate": "PASS_WITH_5_MODERATE_TRANSITIVE_WARNINGS"
+      }
     },
     "scope_limitations": [
       "The 26-step table identifies current wiring and verification limits; full scenario acceptance remains",
@@ -1480,10 +1492,20 @@
       "No production deployment, credential submission, public signup or real AI acceptance was performed"
     ],
     "next": [
-      "Verify this exact code commit in GitHub CI including PostgreSQL and frontend build",
+      "Check exact production bundle reachability and compatible remediation for two dependency advisories",
       "Run complete hybrid and technical application journeys, including cover/resume/correction/review/freeze",
       "After owner input completion, connect free AI and production credentials and perform real acceptance"
     ],
-    "overall_requirement_acceptance_complete": false
+    "overall_requirement_acceptance_complete": false,
+    "dependency_triage": {
+      "report": "docs/DEPENDENCY_TRIAGE_2026_10_13.md",
+      "advisories": [
+        "GHSA-vfj7-8cjw-p6xm",
+        "GHSA-hp3w-g68c-fv3c"
+      ],
+      "direct_patched_version_available": false,
+      "dependency_files_changed": false,
+      "status": "OPEN_RUNTIME_REACHABILITY_AND_COMPATIBLE_UPGRADE_REVIEW"
+    }
   }
 }
