@@ -38,7 +38,7 @@ export async function responseError(response: Response): Promise<Error> {
     detail.code === "POLICY_ACCEPTANCE_REQUIRED"
   )
     return new ApiError(
-      "이용 안내가 변경되었습니다. 로그아웃 후 다시 로그인해 최신 안내를 확인해 주세요. 저장된 자료는 유지됩니다.",
+      "이용 안내가 변경되었습니다. 같은 브라우저 탭을 새로고침하고 저장된 연결을 이어가 최신 안내를 확인해 주세요.",
       403,
     );
   const readable =
