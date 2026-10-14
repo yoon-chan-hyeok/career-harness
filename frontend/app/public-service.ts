@@ -1,5 +1,8 @@
 export type PublicService = {
   access_mode: "invite" | "public";
+  guest_enabled?: boolean;
+  guest_session_seconds?: number | null;
+  support_url?: string;
   registration_open: boolean;
   policy_version: string;
   operator_name: string;

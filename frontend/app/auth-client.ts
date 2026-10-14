@@ -1,5 +1,5 @@
 export type AuthConfiguration = {
-  provider: "local" | "supabase";
+  provider: "local" | "supabase" | "guest";
   supabase_url?: string;
   publishable_key?: string;
 };
@@ -19,7 +19,7 @@ let emailGeneration = 0;
 const storageKey = "career-supabase-session";
 
 export function configureAuth(value: AuthConfiguration) {
-  if (value.provider !== "local" && value.provider !== "supabase")
+  if (!["local", "supabase", "guest"].includes(value.provider))
     throw new Error("로그인 설정을 확인해 주세요.");
   if (value.provider === "supabase") {
     const url = new URL(value.supabase_url || "");
@@ -40,13 +40,14 @@ export function configureAuth(value: AuthConfiguration) {
   )
     clearSession();
   configuration = value;
-  if (value.provider === "supabase" && typeof window !== "undefined") {
+  if (value.provider !== "local" && typeof window !== "undefined") {
     try {
       const saved: AuthSession = JSON.parse(
         sessionStorage.getItem(storageKey) || "null",
       );
       if (
-        saved?.project === value.supabase_url &&
+        saved?.project ===
+          (value.provider === "guest" ? "guest" : value.supabase_url) &&
         typeof saved.access_token === "string" &&
         typeof saved.refresh_token === "string" &&
         Number.isFinite(saved.expires_at)
@@ -121,6 +122,10 @@ export async function signIn(email: string, password: string) {
 export async function accessToken(): Promise<string> {
   if (!session) throw new Error("먼저 로그인해 주세요.");
   if (session.expires_at > Date.now() / 1000 + 30) return session.access_token;
+  if (configuration?.provider === "guest") {
+    clearSession();
+    throw new Error("체험 연결이 만료되었습니다. 새 작업실로 시작해 주세요.");
+  }
   if (!refreshPromise) {
     const generation = sessionGeneration;
     const pending = exchange(
@@ -144,6 +149,44 @@ export function hasSession() {
   return Boolean(session);
 }
 
+export async function startGuest() {
+  if (configuration?.provider !== "guest")
+    throw new Error("현재 게스트 체험을 시작할 수 없습니다.");
+  clearSession();
+  const generation = sessionGeneration;
+  const response = await fetch("/api/auth/guest", {
+    method: "POST",
+    cache: "no-store",
+    credentials: "omit",
+    redirect: "error",
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!response.ok)
+    throw new Error(
+      response.status === 429
+        ? "오늘의 체험 시작 한도에 도달했습니다. 저장된 연결을 사용하거나 내일 다시 방문해 주세요."
+        : "체험 연결을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    );
+  const value = await response.json();
+  if (generation !== sessionGeneration)
+    throw new Error("연결이 종료되었습니다.");
+  if (
+    typeof value.access_token !== "string" ||
+    value.token_type !== "bearer" ||
+    !Number.isFinite(value.expires_in) ||
+    value.expires_in <= 0 ||
+    value.expires_in > 86400
+  )
+    throw new Error("체험 응답을 확인하지 못했습니다.");
+  session = {
+    access_token: value.access_token,
+    refresh_token: "",
+    expires_at: Date.now() / 1000 + value.expires_in,
+    project: "guest",
+  };
+  sessionStorage.setItem(storageKey, JSON.stringify(session));
+}
+
 export function clearSession() {
   sessionGeneration++;
   emailGeneration++;
@@ -156,13 +199,17 @@ export function cancelEmailAuthentication() {
   emailGeneration++;
 }
 
-const emailError = "이메일 인증을 완료하지 못했습니다. 주소와 코드를 확인하거나 잠시 후 다시 시도해 주세요.";
+const emailError =
+  "이메일 인증을 완료하지 못했습니다. 주소와 코드를 확인하거나 잠시 후 다시 시도해 주세요.";
 
 async function emailRequest(path: string, body: object) {
   try {
     const response = await fetch(authEndpoint(path), {
       method: "POST",
-      headers: { "Content-Type": "application/json", apikey: configuration!.publishable_key! },
+      headers: {
+        "Content-Type": "application/json",
+        apikey: configuration!.publishable_key!,
+      },
       body: JSON.stringify(body),
       cache: "no-store",
       credentials: "omit",
@@ -189,7 +236,8 @@ export async function requestEmailCode(
     create_user: options.createUser ?? true,
     gotrue_meta_security: { captcha_token: captchaToken },
   });
-  if (challenge !== emailGeneration) throw new Error("이메일 인증이 취소되었습니다.");
+  if (challenge !== emailGeneration)
+    throw new Error("이메일 인증이 취소되었습니다.");
   return challenge;
 }
 
@@ -199,20 +247,29 @@ export async function verifyEmailCode(
   challenge: number,
   persist = true,
 ) {
-  if (challenge !== emailGeneration) throw new Error("이메일 인증을 다시 시작해 주세요.");
+  if (challenge !== emailGeneration)
+    throw new Error("이메일 인증을 다시 시작해 주세요.");
   const generation = sessionGeneration;
-  const response = await emailRequest("/verify", { email: email.trim(), token: token.trim(), type: "email" });
+  const response = await emailRequest("/verify", {
+    email: email.trim(),
+    token: token.trim(),
+    type: "email",
+  });
   const value = await response.json();
   if (challenge !== emailGeneration || generation !== sessionGeneration)
     throw new Error("이메일 인증이 취소되었습니다.");
   if (
-    typeof value.access_token !== "string" || !value.access_token ||
-    typeof value.refresh_token !== "string" || !value.refresh_token ||
-    !Number.isFinite(value.expires_in) || value.expires_in <= 0 ||
+    typeof value.access_token !== "string" ||
+    !value.access_token ||
+    typeof value.refresh_token !== "string" ||
+    !value.refresh_token ||
+    !Number.isFinite(value.expires_in) ||
+    value.expires_in <= 0 ||
     !(value.user?.email_confirmed_at || value.user?.confirmed_at) ||
     typeof value.user?.email !== "string" ||
     value.user.email.toLowerCase() !== email.trim().toLowerCase()
-  ) throw new Error(emailError);
+  )
+    throw new Error(emailError);
   if (persist) {
     session = {
       access_token: value.access_token,

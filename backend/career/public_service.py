@@ -90,14 +90,22 @@ def validate_public_settings() -> None:
         integer_setting(setting, default, 1, maximum)
     if not is_production():
         return
-    if backup_retention_days() is None:
-        raise ValueError("Public production requires CAREER_BACKUP_RETENTION_DAYS to match the actual backup policy")
     name = os.getenv("CAREER_OPERATOR_NAME", "").strip()
     email = os.getenv("CAREER_SUPPORT_EMAIL", "").strip()
     if not name or len(name) > 200 or any(ord(char) < 32 for char in name):
         raise ValueError("Public production requires CAREER_OPERATOR_NAME")
     if len(email) > 254 or not re.fullmatch(r"[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+", email):
         raise ValueError("Public production requires CAREER_SUPPORT_EMAIL")
+    from career.guest_access import enabled
+
+    if enabled():
+        from career.access_config import source_repository_url
+
+        if source_repository_url() is None:
+            raise ValueError("Guest trial requires a public CAREER_SOURCE_REPOSITORY_URL for support")
+        return
+    if backup_retention_days() is None:
+        raise ValueError("Public production requires CAREER_BACKUP_RETENTION_DAYS to match the actual backup policy")
     if not re.fullmatch(r"[A-Za-z0-9_-]{10,200}", os.getenv("CAREER_CAPTCHA_SITE_KEY", "")):
         raise ValueError("Public production requires CAREER_CAPTCHA_SITE_KEY")
     for name in ("CAREER_CAPTCHA_ENABLED_CONFIRMED", "CAREER_SMTP_CONFIGURED_CONFIRMED",
@@ -112,8 +120,13 @@ def public_service_configuration() -> dict[str, Any]:
     from career.provider_config import provider_settings
 
     mode = access_mode()
+    from career.access_config import source_repository_url
+    from career.guest_access import LIFETIME, enabled
     return {
         "access_mode": mode,
+        "guest_enabled": enabled(),
+        "guest_session_seconds": LIFETIME if enabled() else None,
+        "support_url": (source_repository_url() or "") + "/issues" if enabled() and source_repository_url() else "",
         "registration_open": registration_open(),
         "service_name": os.getenv("CAREER_SERVICE_NAME", "Career Harness").strip()[:100] or "Career Harness",
         "policy_version": policy_version(),
@@ -182,6 +195,12 @@ def ensure_public_member(db: Session, user: str, authorization: str | None) -> N
         return
     if not registration_open():
         raise HTTPException(403, "현재 신규 가입을 받고 있지 않습니다. 기존 계정으로 로그인해 주세요.")
+    from career.guest_access import enabled
+
+    if enabled():
+        # Membership can only originate in the server's bounded guest minting
+        # endpoint. A signed but unregistered visitor cannot self-admit here.
+        raise HTTPException(401, "체험 연결이 종료되었습니다. 새 작업실로 시작해 주세요.")
     verify_confirmed_email(user, authorization)
     from career.usage_limits import _settings
 

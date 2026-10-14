@@ -1,14 +1,13 @@
 """Personal administration: explicit authorization and current-account summaries."""
 
 import os
-import re
-from urllib.parse import urlsplit
 from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 
+from career.access_config import source_repository_url as source_repository_url
 from career.activity import ACTION_LABELS, serialize_run
 from career.authentication import is_production
 from career.models import Artifact, Evidence, ExecutionRun, Source, Workspace
@@ -20,6 +19,10 @@ SAFE_ERROR_CODES = frozenset({"PROVIDER_UNAVAILABLE", "NEEDS_USER_ACTION", "EXEC
 
 
 def is_admin(user: str) -> bool:
+    from career.guest_access import enabled
+
+    if enabled():
+        return False
     configured = [part.strip() for part in os.getenv("CAREER_ADMIN_USER_IDS", "").split(",") if part.strip()]
     if is_production():
         # The ordinary user allowlist grants service access, never admin access.
@@ -35,18 +38,6 @@ def is_admin(user: str) -> bool:
         return True
     except HTTPException:
         return False
-
-
-def source_repository_url() -> str | None:
-    value = os.getenv("CAREER_SOURCE_REPOSITORY_URL", "").strip()
-    try:
-        parsed = urlsplit(value)
-    except ValueError:
-        return None
-    if (parsed.scheme != "https" or parsed.netloc != "github.com" or parsed.query or parsed.fragment
-            or not re.fullmatch(r"/[A-Za-z0-9_-]{1,100}/[A-Za-z0-9_.-]{1,100}/?", parsed.path)):
-        return None
-    return "https://github.com" + parsed.path.rstrip("/")
 
 
 def status(db, user):

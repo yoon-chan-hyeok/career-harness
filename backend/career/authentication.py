@@ -42,8 +42,17 @@ def authentication_configuration() -> AuthConfiguration:
 
     public = access_mode() == "public"
     mode = os.getenv("AUTH_MODE", "local").strip().lower()
-    if mode not in {"local", "supabase"}:
-        raise ValueError("AUTH_MODE must be local or supabase")
+    if mode not in {"local", "supabase", "guest"}:
+        raise ValueError("AUTH_MODE must be local, supabase or guest")
+    if mode == "guest":
+        from career.guest_access import AUDIENCE, ISSUER, signing_key
+
+        if not public or os.getenv("AUTH_TOKENS", "").strip() not in {"", "{}"}:
+            raise ValueError("Guest trial requires public access and forbids local AUTH_TOKENS")
+        if os.getenv("CAREER_ALLOWED_USER_IDS", "").strip() or os.getenv("CAREER_ADMIN_USER_IDS", "").strip():
+            raise ValueError("Guest trial forbids bootstrap or administrator allowlists")
+        signing_key()
+        return AuthConfiguration(mode, ISSUER, AUDIENCE, ("HS256",))
     if is_production() and (mode != "supabase" or os.getenv("AUTH_TOKENS", "").strip() not in {"", "{}"}):
         raise ValueError("Production requires Supabase Auth and forbids local AUTH_TOKENS")
     if public and mode != "supabase":
@@ -177,7 +186,7 @@ def public_auth_configuration() -> dict[str, str]:
     """Only intentionally public project configuration; secret/service-role keys are rejected."""
     config = authentication_configuration()
     result = {"provider": config.mode}
-    if config.mode == "local":
+    if config.mode in {"local", "guest"}:
         return result
     public_key = os.getenv("SUPABASE_PUBLISHABLE_KEY", "") or os.getenv("SUPABASE_ANON_KEY", "")
     if not public_key:
@@ -202,6 +211,10 @@ def authenticate(authorization: str | None) -> str:
     token = authorization[7:]
     if not token or len(token) > 16384 or any(c.isspace() for c in token):
         raise HTTPException(401, AUTH_ERROR)
+    if config.mode == "guest":
+        from career.guest_access import decode
+
+        return str(decode(token)["sub"])
     if config.mode == "supabase":
         from dataclasses import replace
 

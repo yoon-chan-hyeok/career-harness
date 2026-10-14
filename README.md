@@ -6,7 +6,7 @@
 
 공고를 이해하고, 경험을 근거로 연결하고, 자소서와 이력서를 함께 준비하는 커리어 작업실.
 
-[서비스 소개 · 체험 데모](https://career-harness.lilacdegu3.chatgpt.site) · [30초 소개 영상](frontend/public/showcase/career-harness-demo.mp4) · [실행 안내](RUN_LOCAL.md) · [설계 문서](docs/00_PRODUCT_SCOPE.md)
+[작업실](https://career-harness-web.vercel.app/workspace) · [서비스 소개 · 가상 데모](https://career-harness.lilacdegu3.chatgpt.site) · [30초 소개 영상](frontend/public/showcase/career-harness-demo.mp4) · [실행 안내](RUN_LOCAL.md) · [설계 문서](docs/00_PRODUCT_SCOPE.md)
 
 ![Career Harness의 공고 분석부터 최종본 보관까지 6단계 모션 데모](docs/media/workflow.gif)
 
@@ -76,11 +76,12 @@ Next.js / TypeScript · FastAPI / Pydantic · SQLAlchemy / Alembic · PostgreSQL
 
 ## 현재 상태
 
-**개발 프리뷰입니다. 실제 AI가 연결된 공개 가입 서비스는 준비 중입니다.** 소개 페이지는 제품을 설명하는 체험이며 개인 자료를 저장하거나 AI를 호출하지 않습니다.
+**실제 HTTPS 작업실과 Supabase DB·Groq 서버 설정을 연결했습니다.** 이메일 인증은 뒤로 미루고, 가입 없이 사용하는 방문자별 공개 체험의 최종 배포 검증을 진행하고 있습니다. 별도의 소개 데모와 영상은 가상 자료를 사용합니다.
 
 - 구현·로컬 검증: 회사 조사, 경험 연결, 사용자 승인, 자소서·이력서, 검수 답변, 최종 확인, 보관·면접 연결.
-- 최신 백엔드 검증 기준(2026-10-10): Python 642개, 별도 PostgreSQL 6개, 프런트엔드 26개 및 GitHub CI 통과.
-- 남은 범위: 프로젝트별 표현 제한, 반복 검사 보강, 원문 규칙 전체 인수, 실제 AI·인증·메일·운영 배포와 복구 검증.
+- 최근 완료한 CI 기준(2026-10-14): Python735개, 별도 PostgreSQL7개, 프런트엔드26개. 공개 체험은 게스트19개·프런트28개를 포함한 새 검증을 진행합니다.
+- 실제 Groq를 이용한 합성 자소서·레쥬메 생성·저장·한국어 PDF를 확인했습니다. 프로젝트별 표현 제한과 문서 간 충돌·반복 검사를 연결했습니다.
+- 남은 범위: 게스트 공개 배포 인수, 원문 규칙 전체 실제 인수, 이메일 인증·발송, 운영 백업 복구·장기 용량 점검. Jev는 미연결입니다.
 - 비용·성능 개선 수치와 합격 효과는 주장하지 않습니다. 비교 실험은 현재 범위에서 제외했습니다.
 
 [자동 검사](https://github.com/yoon-chan-hyeok/career-harness/actions) · [구현 상태](IMPLEMENTATION_STATUS.json) · [공개 운영 준비](docs/PUBLIC_SERVICE_SETUP.md)
@@ -92,6 +93,7 @@ Next.js / TypeScript · FastAPI / Pydantic · SQLAlchemy / Alembic · PostgreSQL
 - [제출 전 확인과 남은 작업](docs/FINAL_REVIEW_PROGRESS_2026_10_10.md)
 - [서비스 소개·모션 데모 구현](docs/SERVICE_PRESENTATION_2026_10_11.md)
 - [실제 AI·공개 회원가입 연결 순서](docs/OPERATING_CONNECTION_2026_10_11.md)
+- [가입 없는 공개 체험과 운영 범위](docs/GUEST_TRIAL_2026_10_14.md)
 - [원래 구현 팩 안내 — 보관본](docs/IMPLEMENTATION_PACK_README.md)
 
 개인 원문·실제 지원서·DB·API 키는 Git에서 제외합니다. 데모와 영상에는 가상 자료만 사용합니다.

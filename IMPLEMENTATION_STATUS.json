@@ -1650,7 +1650,7 @@
   },
   "production_bootstrap_2026_10_14": {
     "date": "2026-10-14",
-    "status": "SERVER_CREDENTIALS_REGISTERED_DEPLOYMENT_VALIDATION_IN_PROGRESS",
+    "status": "DEPLOYED_HTTPS_CLOSED_LOGIN_BASELINE_VERIFIED",
     "user_approval": "Explicit approval for DB connection/password, Supabase secret key, Groq key, public CA to own backend Production and Hobby API/web deployment",
     "server_settings": {
       "date": "2026-10-14T08:18:32.916083+00:00",
@@ -1717,9 +1717,26 @@
     },
     "backend_ignore_fix": "Directory reinclusion without trailing slashes; actual CLI 4-file missing runtime detected then 113 exact runtime files verified",
     "frontend_layout": "Existing remote root frontend kept; export of committed frontend only avoids frontend/frontend path; 59 upload files",
-    "backend_deployment": "NOT_STARTED",
-    "frontend_deployment": "NOT_STARTED",
+    "backend_deployment": "dpl_FCRS4HNSXJuUwtyd1onroFp56t65",
+    "frontend_deployment": "dpl_5PzBeu3Hzh4e1C8CaH2hbJ4gqvg7",
     "registration_open": false,
-    "overall_requirement_acceptance_complete": false
+    "overall_requirement_acceptance_complete": false,
+    "backend_origin": "https://career-harness-api.vercel.app",
+    "frontend_origin": "https://career-harness-web.vercel.app",
+    "anonymous_readiness": true,
+    "cloud_ai_call_verified": false
+  },
+  "public_guest_trial_2026_10_14": {
+    "status": "IMPLEMENTED_FINAL_CI_AND_DEPLOYMENT_IN_PROGRESS",
+    "guest_tests": 19,
+    "frontend_tests": 28,
+    "email_signup_deferred_by_user": true,
+    "operator_contact_approved": true,
+    "guest_lifetime_seconds": 86400,
+    "guest_creation_global_daily_cap": 100,
+    "guest_creation_network_daily_cap": 20,
+    "other_visitors_isolated": true,
+    "overall_requirement_acceptance_complete": false,
+    "documentation": "docs/GUEST_TRIAL_2026_10_14.md"
   }
 }

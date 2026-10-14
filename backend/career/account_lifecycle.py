@@ -79,6 +79,9 @@ def _deletion_state(receipt: Record | None) -> dict[str, Any]:
 
 
 def account_status(db: Session, user: str) -> dict[str, Any]:
+    from career.guest_access import enabled
+
+    guest = enabled()
     member = db.get(ServiceMember, user, populate_existing=True)
     receipt = _receipt(db, user)
     closed = bool(receipt or member is not None and member.status != "ACTIVE")
@@ -87,7 +90,9 @@ def account_status(db: Session, user: str) -> dict[str, Any]:
         unavailable = "OPERATOR_ACCOUNT"
     else:
         try:
-            if authentication_configuration().mode != "supabase":
+            if guest:
+                pass
+            elif authentication_configuration().mode != "supabase":
                 unavailable = "SUPABASE_REQUIRED"
             else:
                 admin_configuration()
@@ -99,10 +104,11 @@ def account_status(db: Session, user: str) -> dict[str, Any]:
         "can_export": not closed, "export_url": "/api/export",
         "can_delete": unavailable is None and state["status"] != "DELETED",
         "delete_unavailable_reason": unavailable,
-        "deletion": state, "requires_recent_email_otp": True,
+        "deletion": state, "requires_recent_email_otp": not guest,
         "reauthentication_max_age_seconds": OTP_MAX_AGE_SECONDS,
         "retained_data": RETAINED_DATA,
-        "notice": "삭제 시 취업 자료와 로그인 계정을 제거합니다. 접근 차단 기록·사용량 장부·삭제 처리 기록은 보존합니다. 기존 운영 백업의 보관 정책은 개인정보 안내를 확인해 주세요.",
+        "notice": ("삭제 시 현재 체험 자료와 연결 정보를 제거합니다. 접근 차단 기록·사용량 장부·삭제 처리 기록은 보존합니다."
+                   if guest else "삭제 시 취업 자료와 로그인 계정을 제거합니다. 접근 차단 기록·사용량 장부·삭제 처리 기록은 보존합니다. 기존 운영 백업의 보관 정책은 개인정보 안내를 확인해 주세요."),
     }
 
 
@@ -211,6 +217,12 @@ def delete_account(db: Session, user: str, confirmation: str, reauthentication_t
         raise HTTPException(401, "유효한 로그인 계정이 필요합니다.") from None
     if subject != user:
         raise HTTPException(401, "유효한 로그인 계정이 필요합니다.")
+    from career.guest_access import delete_guest, enabled, verify_session
+
+    if enabled():
+        verify_session(db, user, "Bearer " + reauthentication_token)
+        db.rollback()
+        return delete_guest(db, user)
     require_recent_otp("Bearer " + reauthentication_token, user, OTP_MAX_AGE_SECONDS)
     config = admin_configuration()
     _ensure_independent(db)

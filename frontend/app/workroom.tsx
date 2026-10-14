@@ -1088,7 +1088,7 @@ export default function Home() {
       createApiClient(
         async () => {
           try {
-            return authConfiguration?.provider === "supabase"
+            return authConfiguration?.provider !== "local"
               ? await accessToken()
               : token;
           } catch (error) {
@@ -1273,7 +1273,7 @@ export default function Home() {
         const config: AuthConfiguration = await response.json();
         if (!active) return;
         configureAuth(config);
-        if (config.provider === "supabase") {
+        if (config.provider !== "local") {
           sessionStorage.removeItem("career-token");
           setToken("");
         }

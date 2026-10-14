@@ -58,6 +58,69 @@ const response = (access = "access", refresh = "refresh", lifetime = 3600) => ({
   }),
 });
 
+test("guest trial uses its own session, resumes without email calls, and clears on mode change", async () => {
+  const calls = [];
+  const { api } = client(async (url, options) => {
+    calls.push({ url, options });
+    return {
+      ok: true,
+      json: async () => ({
+        access_token: "guest-fixture",
+        expires_in: 86400,
+        token_type: "bearer",
+      }),
+    };
+  });
+  api.configureAuth({ provider: "guest" });
+  await api.startGuest();
+  assert.equal(await api.accessToken(), "guest-fixture");
+  api.configureAuth({ provider: "guest" });
+  assert.equal(await api.accessToken(), "guest-fixture");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "/api/auth/guest");
+  assert.equal(calls[0].options.cache, "no-store");
+  api.configureAuth({
+    provider: "supabase",
+    supabase_url: "https://example.supabase.co",
+    publishable_key: "sb_publishable_fixture",
+  });
+  await assert.rejects(api.accessToken());
+});
+
+test("guest creation cannot restore a session after logout or accept an overlong lifetime", async () => {
+  let finish;
+  const { api } = client(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  api.configureAuth({ provider: "guest" });
+  const pending = api.startGuest();
+  api.clearSession();
+  finish({
+    ok: true,
+    json: async () => ({
+      access_token: "discarded",
+      expires_in: 86400,
+      token_type: "bearer",
+    }),
+  });
+  await assert.rejects(pending);
+  assert.equal(api.hasSession(), false);
+  const second = client(async () => ({
+    ok: true,
+    json: async () => ({
+      access_token: "bad",
+      expires_in: 86401,
+      token_type: "bearer",
+    }),
+  }));
+  second.api.configureAuth({ provider: "guest" });
+  await assert.rejects(second.api.startGuest());
+  assert.equal(second.api.hasSession(), false);
+});
+
 test("password grant sends only public key and token refresh rotates once across concurrent requests", async () => {
   const calls = [];
   const { api } = client(async (url, options) => {
@@ -141,51 +204,113 @@ test("logout revokes local session immediately and late refresh cannot restore i
   assert.equal(values.size, 0);
 });
 
-const otpResponse = (access = "otp-access", email = "fixture@example.test") => ({
+const otpResponse = (
+  access = "otp-access",
+  email = "fixture@example.test",
+) => ({
   ok: true,
-  json: async () => ({access_token: access, refresh_token: "otp-refresh", expires_in: 3600,
-    user: {email, email_confirmed_at: "2026-10-05T00:00:00Z", is_anonymous: false}}),
+  json: async () => ({
+    access_token: access,
+    refresh_token: "otp-refresh",
+    expires_in: 3600,
+    user: {
+      email,
+      email_confirmed_at: "2026-10-05T00:00:00Z",
+      is_anonymous: false,
+    },
+  }),
 });
 
 test("public OTP uses fixed project, captcha, explicit signup and email verification", async () => {
   const calls = [];
-  const {api, values} = client(async (url, options) => {
-    calls.push({url, options}); return url.endsWith('/verify') ? otpResponse() : {ok:true};
+  const { api, values } = client(async (url, options) => {
+    calls.push({ url, options });
+    return url.endsWith("/verify") ? otpResponse() : { ok: true };
   });
-  await assert.rejects(api.requestEmailCode('fixture@example.test',''));
-  assert.equal(calls.length,0);
-  const challenge = await api.requestEmailCode('fixture@example.test','synthetic-captcha',{createUser:true});
-  assert.equal(api.hasSession(),false);
-  assert.equal(calls[0].url,'https://example.supabase.co/auth/v1/otp');
-  assert.deepEqual(JSON.parse(calls[0].options.body),{email:'fixture@example.test',create_user:true,gotrue_meta_security:{captcha_token:'synthetic-captcha'}});
-  assert.equal(calls[0].options.redirect,'error');
-  await api.verifyEmailCode('fixture@example.test','123456',challenge);
-  assert.deepEqual(JSON.parse(calls[1].options.body),{email:'fixture@example.test',token:'123456',type:'email'});
-  assert.equal(await api.accessToken(),'otp-access');
-  assert.equal(values.size,1);
+  await assert.rejects(api.requestEmailCode("fixture@example.test", ""));
+  assert.equal(calls.length, 0);
+  const challenge = await api.requestEmailCode(
+    "fixture@example.test",
+    "synthetic-captcha",
+    { createUser: true },
+  );
+  assert.equal(api.hasSession(), false);
+  assert.equal(calls[0].url, "https://example.supabase.co/auth/v1/otp");
+  assert.deepEqual(JSON.parse(calls[0].options.body), {
+    email: "fixture@example.test",
+    create_user: true,
+    gotrue_meta_security: { captcha_token: "synthetic-captcha" },
+  });
+  assert.equal(calls[0].options.redirect, "error");
+  await api.verifyEmailCode("fixture@example.test", "123456", challenge);
+  assert.deepEqual(JSON.parse(calls[1].options.body), {
+    email: "fixture@example.test",
+    token: "123456",
+    type: "email",
+  });
+  assert.equal(await api.accessToken(), "otp-access");
+  assert.equal(values.size, 1);
 });
 
 test("cancelled or wrong-account OTP cannot install a session", async () => {
   let finish;
-  const {api} = client(async (url) => url.endsWith('/verify') ? new Promise(resolve => {finish=resolve;}) : {ok:true});
-  const challenge = await api.requestEmailCode('fixture@example.test','captcha');
-  const pending = api.verifyEmailCode('fixture@example.test','123456',challenge);
-  api.clearSession(); finish(otpResponse());
+  const { api } = client(async (url) =>
+    url.endsWith("/verify")
+      ? new Promise((resolve) => {
+          finish = resolve;
+        })
+      : { ok: true },
+  );
+  const challenge = await api.requestEmailCode(
+    "fixture@example.test",
+    "captcha",
+  );
+  const pending = api.verifyEmailCode(
+    "fixture@example.test",
+    "123456",
+    challenge,
+  );
+  api.clearSession();
+  finish(otpResponse());
   await assert.rejects(pending);
-  assert.equal(api.hasSession(),false);
-  const second = await api.requestEmailCode('fixture@example.test','captcha');
-  const wrong = api.verifyEmailCode('fixture@example.test','123456',second);
-  finish(otpResponse('wrong','someone-else@example.test'));
+  assert.equal(api.hasSession(), false);
+  const second = await api.requestEmailCode("fixture@example.test", "captcha");
+  const wrong = api.verifyEmailCode("fixture@example.test", "123456", second);
+  finish(otpResponse("wrong", "someone-else@example.test"));
   await assert.rejects(wrong);
-  assert.equal(api.hasSession(),false);
+  assert.equal(api.hasSession(), false);
 });
 
 test("deletion reauthentication does not replace current account and never creates a new user", async () => {
-  const calls=[];
-  const {api} = client(async(url,options)=>{calls.push(JSON.parse(options.body));return url.endsWith('/verify')?otpResponse('fresh-proof'):{ok:true};},
-    {access_token:'existing-owner',refresh_token:'existing-refresh',project:'https://example.supabase.co',expires_at:Date.now()/1000+3600});
-  const challenge=await api.requestEmailCode('fixture@example.test','captcha',{createUser:false,reauthentication:true});
-  assert.equal(calls[0].create_user,false);
-  assert.equal(await api.verifyEmailCode('fixture@example.test','123456',challenge,false),'fresh-proof');
-  assert.equal(await api.accessToken(),'existing-owner');
+  const calls = [];
+  const { api } = client(
+    async (url, options) => {
+      calls.push(JSON.parse(options.body));
+      return url.endsWith("/verify")
+        ? otpResponse("fresh-proof")
+        : { ok: true };
+    },
+    {
+      access_token: "existing-owner",
+      refresh_token: "existing-refresh",
+      project: "https://example.supabase.co",
+      expires_at: Date.now() / 1000 + 3600,
+    },
+  );
+  const challenge = await api.requestEmailCode(
+    "fixture@example.test",
+    "captcha",
+    { createUser: false, reauthentication: true },
+  );
+  assert.equal(calls[0].create_user, false);
+  assert.equal(
+    await api.verifyEmailCode(
+      "fixture@example.test",
+      "123456",
+      challenge,
+      false,
+    ),
+    "fresh-proof",
+  );
+  assert.equal(await api.accessToken(), "existing-owner");
 });

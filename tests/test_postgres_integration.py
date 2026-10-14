@@ -15,6 +15,82 @@ from sqlalchemy.orm import Session
 
 
 @pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
+def test_guest_admission_serializes_and_deletion_works_with_one_connection(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    from career import guest_access
+    from career.models import RequestRateBucket
+    from fastapi import HTTPException
+    from starlette.requests import Request
+
+    url = os.environ["TEST_POSTGRES_URL"]
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.delenv("DATABASE_MIGRATION_URL", raising=False)
+    command.upgrade(Config("alembic.ini"), "head")
+    for name, value in {
+        "AUTH_MODE": "guest", "AUTH_TOKENS": "{}", "CAREER_ACCESS_MODE": "public",
+        "CAREER_REGISTRATION_OPEN": "1", "CAREER_ADMIN_USER_IDS": "",
+        "CAREER_ALLOWED_USER_IDS": "", "CAREER_GUEST_SESSION_SECRET": "synthetic-only-" + "p" * 64,
+    }.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.delenv("VERCEL", raising=False)
+    shared = "__career_test_" + str(uuid4())
+    bucket = "guest-test-" + str(uuid4())
+    monkeypatch.setattr("career.usage_limits.SHARED_BUDGET_USER", shared)
+    monkeypatch.setattr("career.service_access.SHARED_BUDGET_USER", shared)
+    original_admission = guest_access._admission
+
+    def isolated_admission(db, identity, maximum, day):
+        if identity == "__career_guest_global__":
+            identity = bucket
+        return original_admission(db, identity, maximum, day)
+
+    monkeypatch.setattr(guest_access, "_admission", isolated_admission)
+    engine = create_engine(url, pool_size=8, max_overflow=0)
+    with Session(engine) as db:
+        db.add(RequestRateBucket(user_id=bucket, minute=int(guest_access.time.time() // 86400),
+                                 requests=98, mutations=0))
+        db.commit()
+    barrier = Barrier(8)
+
+    def start(index):
+        request = Request({"type": "http", "headers": [], "client": (f"192.0.2.{index + 1}", 1)})
+        barrier.wait(timeout=10)
+        with Session(engine) as db:
+            try:
+                result = guest_access.create_session(db, request)
+                db.commit()
+                return result["access_token"]
+            except HTTPException as error:
+                assert error.status_code == 429
+                db.rollback()
+                return None
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        tokens = [value for value in executor.map(start, range(8)) if value]
+    assert len(tokens) == 2
+    with Session(engine) as db:
+        counter = db.get(RequestRateBucket, bucket)
+        assert counter is not None and counter.requests == 100
+    engine.dispose()
+    single = create_engine(url, pool_size=1, max_overflow=0, pool_timeout=2)
+    a, b = [guest_access.decode(token)["sub"] for token in tokens]
+    with Session(single) as db:
+        guest_access.verify_session(db, a, "Bearer " + tokens[0])
+        db.rollback()
+        assert guest_access.delete_guest(db, a)["status"] == "DELETED"
+        with pytest.raises(HTTPException) as revoked:
+            guest_access.verify_session(db, a, "Bearer " + tokens[0])
+        assert revoked.value.status_code == 401
+        db.rollback()
+        guest_access.verify_session(db, b, "Bearer " + tokens[1])
+        db.rollback()
+        assert guest_access.delete_guest(db, b)["status"] == "DELETED"
+    single.dispose()
+
+
+@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
 def test_project_boundary_binding_serializes_confirmations_in_postgres(monkeypatch):
     from concurrent.futures import ThreadPoolExecutor
     from threading import Barrier

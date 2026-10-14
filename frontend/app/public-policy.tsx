@@ -30,7 +30,10 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
     };
   }, []);
   const ready =
-    service?.operator_name && service?.support_email && service?.policy_version;
+    service?.policy_version &&
+    (service?.guest_enabled
+      ? service.support_url
+      : service?.operator_name && service?.support_email);
   return (
     <main className="public-page">
       <header className="public-header">
@@ -58,14 +61,18 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
         {service && ready && (
           <>
             <p className="muted">
-              운영자: {service.operator_name} · 안내 버전:{" "}
-              {service.policy_version}
+              {service.guest_enabled && !service.operator_name
+                ? "Career Harness 공개 체험"
+                : `운영자: ${service.operator_name}`}{" "}
+              · 안내 버전: {service.policy_version}
             </p>
             {kind === "privacy" ? (
               <>
                 <h2>1. 처리하는 정보와 목적</h2>
                 <p>
-                  이메일과 계정 식별자는 본인 확인과 계정별 접근 제어에
+                  {service.guest_enabled
+                    ? "임의로 발급한 체험 식별자는 작업실별 접근 제어에"
+                    : "이메일과 계정 식별자는 본인 확인과 계정별 접근 제어에"}
                   사용합니다. 사용자가 입력하거나 업로드한 경험, 프로필, 채용
                   공고, 자기소개서, 이력서, 대화와 작성 기록은 근거 정리·문서
                   작성·검수·보관에 사용합니다. 사용량, 실행 상태, 동의·삭제
@@ -73,10 +80,11 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
                 </p>
                 <h2>2. 외부 서비스 처리</h2>
                 <p>
-                  Supabase가 이메일 인증과 데이터베이스 저장을 제공합니다.
-                  Cloudflare Turnstile은 로그인 과정의 봇 방지를 위해
-                  기기·네트워크 정보를 처리합니다. 웹 호스팅 사업자는 접속
-                  요청을 처리하며, 배포 환경의 운영 로그가 남을 수 있습니다.
+                  {service.guest_enabled
+                    ? "현재 체험에서는 이메일을 수집하지 않으며 Supabase에 작업 자료를 저장합니다. 접속 주소에서 만든 비가역 식별자는 체험 생성 한도에 사용합니다."
+                    : "Supabase가 이메일 인증과 데이터베이스 저장을 제공합니다. Cloudflare Turnstile은 로그인 과정의 봇 방지를 위해 기기·네트워크 정보를 처리합니다."}{" "}
+                  웹 호스팅 사업자는 접속 요청을 처리하며, 배포 환경의 운영
+                  로그가 남을 수 있습니다.
                 </p>
                 <p>
                   현재 AI 제공자:{" "}
@@ -93,27 +101,42 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
                 </p>
                 <h2>3. 보관과 삭제</h2>
                 <p>
-                  계정을 유지하는 동안 지원 준비를 위해 저장하며, 사용자가
-                  자료나 계정을 삭제할 때 삭제 절차를 진행합니다. 비활성 계정을
-                  자동 삭제하는 기능은 운영하지 않습니다.{" "}
-                  {service.backup_retention_days === null
-                    ? "백업 보관 기간은 아직 공개 운영 설정에서 확정되지 않았습니다."
-                    : `운영자가 설정한 백업 보관 기간은 ${service.backup_retention_days}일입니다.`}{" "}
-                  백업 보관 기간은 운영자가 적용하는 정책이며 앱이 자동으로
-                  백업을 제거한다는 의미는 아닙니다.
+                  {service.guest_enabled ? (
+                    "체험 연결은 24시간 동안 사용할 수 있고 같은 브라우저 탭에서만 이어집니다. 만료 자료는 이후 방문 시 순차 정리하며 정확한 시각의 삭제를 보장하지 않습니다. 설정에서 직접 삭제할 수도 있습니다. 앱에서 체험 자료의 별도 자동 백업을 만들지 않으며 외부 사업자의 인프라·로그 보관 조건은 각 제공자의 정책에 따릅니다."
+                  ) : (
+                    <>
+                      계정을 유지하는 동안 지원 준비를 위해 저장하며, 사용자가
+                      자료나 계정을 삭제할 때 삭제 절차를 진행합니다. 비활성
+                      계정을 자동 삭제하는 기능은 운영하지 않습니다.{" "}
+                      {service.backup_retention_days === null
+                        ? "백업 보관 기간은 아직 공개 운영 설정에서 확정되지 않았습니다."
+                        : `운영자가 설정한 백업 보관 기간은 ${service.backup_retention_days}일입니다.`}{" "}
+                      백업 보관 기간은 운영자가 적용하는 정책이며 앱이 자동으로
+                      백업을 제거한다는 의미는 아닙니다.
+                    </>
+                  )}
                 </p>
                 <p>
-                  계정 삭제를 요청하면 작업실 접근을 중지하고
-                  경험·문서·대화·제출본과 인증 계정을 삭제합니다. 재접근 차단과
-                  과다 사용 방지를 위한 최소 기록, 사용량 집계와 삭제 처리
-                  기록은 별도로 남습니다. 이미 생성된 백업의 사본은 운영자가
-                  정한 보관 기간에 따라 제거하고, 백업 복구 시 삭제 요청을 다시
-                  적용해야 합니다.
+                  {service.guest_enabled ? (
+                    "체험 자료 삭제를 요청하면 해당 작업실의 자료와 연결 정보를 삭제하고 즉시 접근을 차단합니다. 과다 사용 방지를 위한 최소 집계와 삭제 처리 기록은 남습니다."
+                  ) : (
+                    <>
+                      계정 삭제를 요청하면 작업실 접근을 중지하고
+                      경험·문서·대화·제출본과 인증 계정을 삭제합니다. 재접근
+                      차단과 과다 사용 방지를 위한 최소 기록, 사용량 집계와 삭제
+                      처리 기록은 별도로 남습니다. 이미 생성된 백업의 사본은
+                      운영자가 정한 보관 기간에 따라 제거하고, 백업 복구 시 삭제
+                      요청을 다시 적용해야 합니다.
+                    </>
+                  )}
                 </p>
                 <h2>4. 이용자의 선택과 요청</h2>
                 <p>
                   설정의 ‘내 자료 전체 내려받기’로 자료를 받을 수 있고,
-                  원자료·지원 작업을 개별 삭제하거나 이메일로 본인 확인 후
+                  원자료·지원 작업을 개별 삭제하거나{" "}
+                  {service.guest_enabled
+                    ? "현재 체험 연결에서"
+                    : "이메일로 본인 확인 후"}
                   계정을 삭제할 수 있습니다. 정보 열람·정정·삭제 또는 처리 관련
                   문의는 아래 연락처로 요청해 주세요.
                 </p>
@@ -128,10 +151,15 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
               <>
                 <h2>1. 서비스와 계정</h2>
                 <p>
-                  {service.operator_name}는 Career Harness를 통해 경험 정리,
-                  공고 분석, 자기소개서·이력서 작성과 검수·보관을 지원합니다.
-                  본인이 사용할 수 있는 이메일로 인증해야 하며, 다른 사람의
-                  계정이나 자료에 접근해서는 안 됩니다.
+                  {service.guest_enabled
+                    ? "Career Harness 공개 체험은"
+                    : `${service.operator_name}는 Career Harness를 통해`}{" "}
+                  경험 정리, 공고 분석, 자기소개서·이력서 작성과 검수·보관을
+                  지원합니다.
+                  {service.guest_enabled
+                    ? "작업 공간은 현재 브라우저 탭의 24시간 체험 연결에 묶이며 탭 종료·로그아웃·만료 후 복구할 수 없습니다. 필요한 자료는 직접 내려받아 보관해야 합니다. "
+                    : "본인이 사용할 수 있는 이메일로 인증해야 하며, "}{" "}
+                  다른 사람의 계정이나 자료에 접근해서는 안 됩니다.
                 </p>
                 <h2>2. 이용 조건과 한도</h2>
                 <p>
@@ -170,10 +198,27 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
             )}
             <h2>문의</h2>
             <p>
-              {service.operator_name} ·{" "}
-              <a href={"mailto:" + service.support_email}>
-                {service.support_email}
-              </a>
+              {service.support_email && (
+                <>
+                  {service.operator_name} ·{" "}
+                  <a href={"mailto:" + service.support_email}>
+                    {service.support_email}
+                  </a>
+                </>
+              )}
+              {service.guest_enabled && (
+                <>
+                  {" "}
+                  ·{" "}
+                  <a
+                    href={service.support_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    GitHub 오류 제보
+                  </a>
+                </>
+              )}
             </p>
           </>
         )}

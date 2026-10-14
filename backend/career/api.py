@@ -104,6 +104,13 @@ def identity_only(authorization: Annotated[str | None, Header()] = None,
                   db: Session = Depends(database, scope="function")) -> str:
     ident = authenticate(authorization)
     limit_request(db.get_bind(), ident, db.info.get("career_request_method", "GET"))
+    from career.guest_access import verify_session
+
+    verify_session(db, ident, authorization)
+    # A serverless pool may have only one connection. Guest identity lookups
+    # are read-only and must release it before membership/budget transactions.
+    if os.getenv("AUTH_MODE") == "guest":
+        db.rollback()
     return ident
 
 
@@ -168,6 +175,17 @@ def ready_health():
 @app.get("/api/auth/config")
 def auth_config():
     return public_auth_configuration()
+
+
+@app.post("/api/auth/guest")
+def start_guest(request: Request, db: DB):
+    from career.guest_access import cleanup_expired, create_session, enabled
+
+    if enabled():
+        cleanup_expired(db.get_bind())
+    result = create_session(db, request)
+    # The API security middleware adds no-store to every response.
+    return result
 
 
 @app.get("/api/settings")

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Request } from "./api-client";
-import { clearSession } from "./auth-client";
+import { accessToken, clearSession } from "./auth-client";
 import { EmailCodeForm } from "./email-code-form";
 import type { PublicService } from "./public-service";
 
@@ -150,6 +150,11 @@ export function AccountSettings({
             setExpanded(!expanded);
             setReauthentication("");
             setConfirmation("");
+            if (service.guest_enabled) {
+              void accessToken()
+                .then(setReauthentication)
+                .catch(() => setError("체험 연결이 만료되었습니다."));
+            }
           }}
         >
           계정 삭제 {expanded ? "닫기" : "안내"}
@@ -165,22 +170,31 @@ export function AccountSettings({
             확인할 수 있습니다.
           </p>
           <p>
-            현재 로그인한 이메일로 본인 확인을 다시 진행해 주세요. 인증 후 5분
-            안에 삭제를 확정해야 합니다.
+            {service.guest_enabled
+              ? "현재 체험 연결의 자료만 삭제합니다. 다른 방문자의 자료는 삭제할 수 없습니다."
+              : "현재 로그인한 이메일로 본인 확인을 다시 진행해 주세요. 인증 후 5분 안에 삭제를 확정해야 합니다."}
           </p>
           {!reauthentication ? (
-            <EmailCodeForm
-              siteKey={service.captcha_site_key}
-              createUser={false}
-              reauthenticate
-              onVerified={async (token) => {
-                setReauthentication(token);
-                setError("");
-              }}
-            />
+            service.guest_enabled ? (
+              <p role="status">체험 연결을 확인하는 중입니다…</p>
+            ) : (
+              <EmailCodeForm
+                siteKey={service.captcha_site_key}
+                createUser={false}
+                reauthenticate
+                onVerified={async (token) => {
+                  setReauthentication(token);
+                  setError("");
+                }}
+              />
+            )
           ) : (
             <>
-              <p role="status">이메일 본인 확인을 마쳤습니다.</p>
+              <p role="status">
+                {service.guest_enabled
+                  ? "현재 체험 연결을 확인했습니다."
+                  : "이메일 본인 확인을 마쳤습니다."}
+              </p>
               <label>
                 삭제를 확정하려면 DELETE를 입력하세요.
                 <input
@@ -202,6 +216,10 @@ export function AccountSettings({
                   onClick={() => {
                     setReauthentication("");
                     setConfirmation("");
+                    if (service.guest_enabled)
+                      void accessToken()
+                        .then(setReauthentication)
+                        .catch(() => setError("체험 연결이 만료되었습니다."));
                   }}
                 >
                   본인 확인 다시 하기

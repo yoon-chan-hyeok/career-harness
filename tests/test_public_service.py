@@ -200,7 +200,8 @@ def test_public_configuration_is_explicit_allowlist_without_keys(public_env, mon
     assert config["retention_days"] is None
     assert set(config) == {"access_mode", "registration_open", "service_name", "policy_version", "operator_name",
                            "support_email", "privacy_url", "terms_url", "captcha_site_key", "public_limits",
-                           "retention_days", "backup_retention_days", "ai_provider"}
+                           "retention_days", "backup_retention_days", "ai_provider",
+                           "guest_enabled", "guest_session_seconds", "support_url"}
     assert "sb_secret" not in json.dumps(config)
 
 

@@ -2,19 +2,29 @@
 import Link from "next/link";
 import { useState } from "react";
 import { EmailCodeForm } from "./email-code-form";
-import { hasSession } from "./auth-client";
+import { hasSession, startGuest } from "./auth-client";
 import { providerNames, type PublicService } from "./public-service";
 import type { Request } from "./api-client";
 
 export function PublicFooter({ service }: { service: PublicService }) {
   return (
     <footer className="public-footer">
-      <span>{service.operator_name || "운영 정보 준비 중"}</span>
+      <span>
+        {service.operator_name ||
+          (service.guest_enabled
+            ? "Career Harness 공개 체험"
+            : "운영 정보 준비 중")}
+      </span>
       <nav aria-label="서비스 안내">
         <Link href="/privacy">개인정보 처리방침</Link>
         <Link href="/terms">이용약관</Link>
         {service.support_email && (
           <a href={"mailto:" + service.support_email}>문의</a>
+        )}
+        {service.guest_enabled && service.support_url && (
+          <a href={service.support_url} target="_blank" rel="noreferrer">
+            문의·오류 제보
+          </a>
         )}
       </nav>
     </footer>
@@ -32,6 +42,8 @@ export function PublicEntry({
   message: string;
   busy: boolean;
 }) {
+  const [starting, setStarting] = useState(false);
+  const [guestError, setGuestError] = useState("");
   return (
     <main className="public-page">
       <header className="public-header">
@@ -98,23 +110,67 @@ export function PublicEntry({
           <span className="eyebrow">YOUR PRIVATE WORKSPACE</span>
           <h2 id="start-title">나의 커리어 작업실</h2>
           <p>
-            비밀번호 없이 이메일 인증 코드로 로그인합니다.
+            {service.guest_enabled
+              ? "이메일 가입 없이 별도의 체험 작업실로 시작합니다."
+              : "비밀번호 없이 이메일 인증 코드로 로그인합니다."}
             {service.registration_open
-              ? " 처음 방문하면 계정을 만들 수 있습니다."
+              ? service.guest_enabled
+                ? " 누구나 무료 한도 안에서 사용할 수 있습니다."
+                : " 처음 방문하면 계정을 만들 수 있습니다."
               : "현재 신규 가입은 잠시 중단되어 있습니다. 기존 계정은 로그인할 수 있습니다."}
           </p>
-          <EmailCodeForm
-            siteKey={service.captcha_site_key}
-            createUser={service.registration_open}
-            onVerified={onLogin}
-          />
+          {service.guest_enabled ? (
+            <>
+              <p className="note">
+                연결은 24시간 동안 이 브라우저 탭에서 유지됩니다. 탭을 닫거나
+                로그아웃하면 자료를 다시 찾을 수 없으니 필요한 문서는 내려받아
+                보관하세요. 다른 방문자의 자료와는 분리됩니다.
+              </p>
+              {!hasSession() && (
+                <button
+                  disabled={busy || starting || !service.registration_open}
+                  onClick={async () => {
+                    setStarting(true);
+                    setGuestError("");
+                    try {
+                      await startGuest();
+                      await onLogin();
+                    } catch (error) {
+                      setGuestError(
+                        error instanceof Error
+                          ? error.message
+                          : "체험을 시작하지 못했습니다.",
+                      );
+                    } finally {
+                      setStarting(false);
+                    }
+                  }}
+                >
+                  {starting ? "작업실 준비 중…" : "가입 없이 무료로 시작"}
+                </button>
+              )}
+              {guestError && (
+                <p role="alert" className="error">
+                  {guestError}
+                </p>
+              )}
+            </>
+          ) : (
+            <EmailCodeForm
+              siteKey={service.captcha_site_key}
+              createUser={service.registration_open}
+              onVerified={onLogin}
+            />
+          )}
           {hasSession() && (
             <button
               className="secondary"
               disabled={busy}
               onClick={() => void onLogin()}
             >
-              저장된 로그인으로 연결
+              {service.guest_enabled
+                ? "현재 체험 이어가기"
+                : "저장된 로그인으로 연결"}
             </button>
           )}
           {message && (
@@ -134,7 +190,7 @@ export function PublicEntry({
             </p>
           </div>
           <p className="muted">
-            로그인 후 이용 조건과 자료 처리 안내를 확인합니다. AI 결과는 제출 전
+            연결 후 이용 조건과 자료 처리 안내를 확인합니다. AI 결과는 제출 전
             직접 검토해 주세요.
           </p>
         </section>

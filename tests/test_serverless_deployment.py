@@ -160,9 +160,14 @@ def test_serverless_allows_only_exact_platform_hostname(serverless_environment, 
     assert os.environ["AUTH_MODE"] == "supabase" and os.environ["AUTH_TOKENS"] == "{}"
 
 
-@pytest.mark.parametrize("mode", ["invite", "public"])
+@pytest.mark.parametrize("mode", ["invite", "public", "guest"])
 def test_packaged_entrypoint_imports_without_local_secrets_or_network(serverless_environment, tmp_path, monkeypatch, mode):
-    monkeypatch.setenv("CAREER_ACCESS_MODE", mode)
+    monkeypatch.setenv("CAREER_ACCESS_MODE", "public" if mode == "guest" else mode)
+    if mode == "guest":
+        monkeypatch.setenv("AUTH_MODE", "guest")
+        monkeypatch.setenv("CAREER_GUEST_SESSION_SECRET", "synthetic-only-" + "g" * 64)
+        monkeypatch.setenv("CAREER_ADMIN_USER_IDS", "")
+        monkeypatch.setenv("CAREER_SOURCE_REPOSITORY_URL", "https://github.com/example/synthetic")
     for name, value in {
         "CAREER_OPERATOR_NAME": "Synthetic Operator", "CAREER_SUPPORT_EMAIL": "support@example.test",
         "CAREER_CAPTCHA_SITE_KEY": "synthetic-turnstile-site-key",

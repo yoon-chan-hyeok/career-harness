@@ -1,8 +1,22 @@
 """Access mode validation without importing a database or local settings."""
 
 import os
+import re
+from urllib.parse import urlsplit
 
 import jwt
+
+
+def source_repository_url() -> str | None:
+    value = os.getenv("CAREER_SOURCE_REPOSITORY_URL", "").strip()
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return None
+    if (parsed.scheme != "https" or parsed.netloc != "github.com" or parsed.query or parsed.fragment
+            or not re.fullmatch(r"/[A-Za-z0-9_-]{1,100}/[A-Za-z0-9_.-]{1,100}/?", parsed.path)):
+        return None
+    return "https://github.com" + parsed.path.rstrip("/")
 
 
 def access_mode() -> str:
