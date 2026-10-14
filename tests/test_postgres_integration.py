@@ -91,6 +91,45 @@ def test_guest_admission_serializes_and_deletion_works_with_one_connection(monke
 
 
 @pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
+def test_guest_onboarding_can_read_while_another_request_holds_business_connection(monkeypatch):
+    from career.api import identity_member
+    from career.guest_access import create_session, decode, delete_guest
+    from career.public_service import onboarding_status
+    from starlette.requests import Request
+
+    url = os.environ["TEST_POSTGRES_URL"]
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.delenv("DATABASE_MIGRATION_URL", raising=False)
+    command.upgrade(Config("alembic.ini"), "head")
+    for name, value in {
+        "AUTH_MODE": "guest", "AUTH_TOKENS": "{}", "CAREER_ACCESS_MODE": "public",
+        "CAREER_REGISTRATION_OPEN": "1", "CAREER_ADMIN_USER_IDS": "",
+        "CAREER_ALLOWED_USER_IDS": "", "CAREER_GUEST_SESSION_SECRET": "synthetic-only-" + "q" * 64,
+    }.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.delenv("VERCEL", raising=False)
+    engine = create_engine(url, pool_size=2, max_overflow=0, pool_timeout=2)
+    request = Request({"type": "http", "headers": [], "client": ("192.0.2.100", 1)})
+    with Session(engine) as db:
+        token = create_session(db, request)["access_token"]
+        db.commit()
+    user = decode(token)["sub"]
+    # A workflow retains this business connection during external generation.
+    # The second visitor must complete identity, membership and onboarding
+    # reads before that connection is released, without increasing overflow.
+    with engine.connect() as held:
+        held.execute(text("SELECT 1"))
+        with Session(engine) as db:
+            db.info["career_request_method"] = "GET"
+            assert identity_member("Bearer " + token, db) == user
+            assert onboarding_status(db, user)["required"] is True
+            db.commit()
+    with Session(engine) as db:
+        assert delete_guest(db, user)["status"] == "DELETED"
+    engine.dispose()
+
+
+@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URL"), reason="isolated PostgreSQL not configured")
 def test_project_boundary_binding_serializes_confirmations_in_postgres(monkeypatch):
     from concurrent.futures import ThreadPoolExecutor
     from threading import Barrier

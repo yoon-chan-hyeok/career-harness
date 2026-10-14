@@ -11,6 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import delete, select
+from sqlalchemy.exc import TimeoutError as DatabasePoolTimeout
 from sqlalchemy.orm import Session
 
 from career.authentication import authenticate, public_auth_configuration
@@ -153,6 +154,15 @@ async def value_error(_request: Request, error: ValueError):
 @app.exception_handler(LookupError)
 async def lookup_error(_request: Request, _error: LookupError):
     return JSONResponse(status_code=404, content={"detail": "항목을 찾을 수 없습니다."})
+
+
+@app.exception_handler(DatabasePoolTimeout)
+async def database_busy(_request: Request, _error: DatabasePoolTimeout):
+    # The SQLAlchemy message may contain connection details. Never expose it
+    # or repeat a model operation automatically when concurrency is saturated.
+    return JSONResponse(status_code=503, headers={"Retry-After": "3"}, content={
+        "detail": "작업 요청이 겹쳐 잠시 연결할 수 없습니다. 잠시 후 다시 시도해 주세요. 진행 중인 AI 작업은 자동으로 재실행하지 않습니다."
+    })
 
 
 @app.exception_handler(ProviderUnavailable)

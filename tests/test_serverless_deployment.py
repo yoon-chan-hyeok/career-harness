@@ -87,12 +87,23 @@ def test_serverless_preserves_verified_tls_and_bounds_connections(serverless_env
     engine = make_engine()
     try:
         assert isinstance(engine.pool, QueuePool)
-        assert engine.pool.size() == 1
+        assert engine.pool.size() == 2
         assert engine.pool._max_overflow == 0
         assert engine.url.query["sslrootcert"] == str(path)
         _, connection = engine.dialect.create_connect_args(engine.url)
         assert connection["sslmode"] == "verify-full"
         assert os.environ["DATABASE_POOL_MODE"] == "transaction"
+    finally:
+        engine.dispose()
+
+
+def test_serverless_explicit_single_connection_is_preserved(serverless_environment, monkeypatch):
+    monkeypatch.setenv("DATABASE_POOL_SIZE", "1")
+    prepare_serverless_environment()
+    engine = make_engine()
+    try:
+        assert isinstance(engine.pool, QueuePool)
+        assert engine.pool.size() == 1 and engine.pool._max_overflow == 0
     finally:
         engine.dispose()
 

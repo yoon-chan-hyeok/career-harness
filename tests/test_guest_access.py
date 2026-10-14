@@ -78,6 +78,21 @@ def test_guest_http_workspaces_are_private_consent_required_and_removable(client
     assert client.get("/api/applications", headers=headers(b)).status_code == 200
 
 
+def test_saturated_database_returns_retryable_status_without_connection_details(client, guest_env, monkeypatch):
+    from sqlalchemy.exc import TimeoutError
+
+    token = begin(client)
+
+    def unavailable(*args, **kwargs):
+        raise TimeoutError("postgresql://private-password@private-host.invalid QueuePool")
+
+    monkeypatch.setattr("career.api.limit_request", unavailable)
+    response = client.get("/api/account/onboarding", headers=headers(token))
+    assert response.status_code == 503 and response.headers["Retry-After"] == "3"
+    assert "private-password" not in response.text and "private-host" not in response.text
+    assert "자동으로 재실행하지 않습니다" in response.json()["detail"]
+
+
 @pytest.mark.parametrize("change", ["signature", "expiry", "issuer", "audience", "subject", "lifetime", "guest", "nonce", "unregistered"])
 def test_guest_forgery_or_invalid_claims_never_authenticate(client, guest_env, monkeypatch, change):
     token = begin(client)

@@ -61,13 +61,16 @@ def prepare_serverless_environment() -> None:
     if not pem:
         raise ValueError("CAREER_DATABASE_CA_PEM is required for the serverless database connection")
     os.environ.setdefault("DATABASE_POOL_MODE", "transaction")
-    os.environ.setdefault("DATABASE_POOL_SIZE", "1")
+    # Fluid Compute shares a Python instance across concurrent requests. Keep
+    # one bounded connection available for visitor access while AI work holds
+    # its business transaction; an explicit pool of one remains supported.
+    os.environ.setdefault("DATABASE_POOL_SIZE", "2")
     os.environ.setdefault("DATABASE_MAX_OVERFLOW", "0")
     os.environ.setdefault("CAREER_MAX_REQUEST_BYTES", str(MAX_REQUEST_BYTES))
     os.environ.setdefault("EXECUTION_TIMEOUT_SECONDS", "330")
     if os.environ["DATABASE_POOL_MODE"] not in {"session", "transaction"}:
         raise ValueError("DATABASE_POOL_MODE must be session or transaction")
-    integer_setting("DATABASE_POOL_SIZE", 1, 1, 2)
+    integer_setting("DATABASE_POOL_SIZE", 2, 1, 2)
     integer_setting("DATABASE_MAX_OVERFLOW", 0, 0, 0)
     integer_setting("CAREER_MAX_REQUEST_BYTES", MAX_REQUEST_BYTES, 1024, MAX_REQUEST_BYTES)
     integer_setting("EXECUTION_TIMEOUT_SECONDS", 330, 330, 900)
