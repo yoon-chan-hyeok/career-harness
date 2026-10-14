@@ -40,7 +40,7 @@ export function PublicPolicy({ kind }: { kind: "privacy" | "terms" }) {
         <Link href="/" className="brand">
           Career Harness
         </Link>
-        <Link href="/">작업실로 돌아가기 →</Link>
+        <Link href="/workspace">작업실로 돌아가기 →</Link>
       </header>
       <article className="policy-document">
         <h1>{kind === "privacy" ? "개인정보 처리방침" : "이용약관"}</h1>

@@ -6,7 +6,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const ts = require("typescript");
 
-function client(fetcher, saved) {
+function client(fetcher, saved, clock = Date) {
   const values = new Map(
     saved ? [["career-supabase-session", JSON.stringify(saved)]] : [],
   );
@@ -18,7 +18,7 @@ function client(fetcher, saved) {
   const context = {
     exports: {},
     URL,
-    Date,
+    Date: clock,
     Number,
     JSON,
     Boolean,
@@ -56,6 +56,73 @@ const response = (access = "access", refresh = "refresh", lifetime = 3600) => ({
     refresh_token: refresh,
     expires_in: lifetime,
   }),
+});
+
+test("guest display exposes only expiry metadata and expired sessions cannot resume or refresh", async () => {
+  let instant = 1800000000000;
+  class Clock extends Date {
+    static now() {
+      return instant;
+    }
+  }
+  const calls = [];
+  const { api, values } = client(
+    async (url) => {
+      calls.push(url);
+      return {
+        ok: true,
+        json: async () => ({
+          access_token: "private-guest-fixture",
+          expires_in: 86400,
+          token_type: "bearer",
+        }),
+      };
+    },
+    undefined,
+    Clock,
+  );
+  assert.equal(api.guestSessionInfo(), null);
+  api.configureAuth({ provider: "guest" });
+  await api.startGuest();
+  const info = api.guestSessionInfo();
+  assert.deepEqual(Object.keys(info).sort(), ["expiresAt", "remainingSeconds"]);
+  assert.equal(info.remainingSeconds, 86370);
+  assert.equal(api.hasSession(), true);
+  instant += 86400 * 1000;
+  assert.equal(api.guestSessionInfo().remainingSeconds, 0);
+  assert.equal(api.hasSession(), false);
+  await assert.rejects(api.accessToken(), /체험 연결이 만료/);
+  assert.equal(values.has("career-supabase-session"), false);
+  assert.equal(calls.length, 1);
+});
+
+test("restoring an expired guest clears it instead of offering an unusable connection", async () => {
+  let instant = 1800000000000;
+  class Clock extends Date {
+    static now() {
+      return instant;
+    }
+  }
+  const { api, values } = client(
+    async () => ({
+      ok: true,
+      json: async () => ({
+        access_token: "synthetic-guest",
+        expires_in: 60,
+        token_type: "bearer",
+      }),
+    }),
+    undefined,
+    Clock,
+  );
+  api.configureAuth({ provider: "guest" });
+  await api.startGuest();
+  assert.equal(api.hasSession(), true);
+  instant += 31000;
+  api.configureAuth({ provider: "guest" });
+  assert.equal(api.hasSession(), false);
+  assert.equal(api.guestSessionInfo(), null);
+  assert.equal(values.has("career-supabase-session"), false);
 });
 
 test("guest trial uses its own session, resumes without email calls, and clears on mode change", async () => {

@@ -50,7 +50,9 @@ export function configureAuth(value: AuthConfiguration) {
           (value.provider === "guest" ? "guest" : value.supabase_url) &&
         typeof saved.access_token === "string" &&
         typeof saved.refresh_token === "string" &&
-        Number.isFinite(saved.expires_at)
+        Number.isFinite(saved.expires_at) &&
+        (value.provider !== "guest" ||
+          saved.expires_at > Date.now() / 1000 + 30)
       )
         session = saved;
       else {
@@ -146,7 +148,25 @@ export async function accessToken(): Promise<string> {
 }
 
 export function hasSession() {
-  return Boolean(session);
+  return (
+    Boolean(session) &&
+    (configuration?.provider !== "guest" ||
+      (guestSessionInfo()?.remainingSeconds || 0) > 0)
+  );
+}
+
+export function guestSessionInfo(nowMs = Date.now()) {
+  if (configuration?.provider !== "guest" || session?.project !== "guest")
+    return null;
+  return {
+    expiresAt: session.expires_at * 1000,
+    // Match the accessToken safety margin. This is display information only;
+    // the server's signed expiry and revocation checks remain authoritative.
+    remainingSeconds: Math.max(
+      0,
+      Math.ceil(session.expires_at - nowMs / 1000 - 30),
+    ),
+  };
 }
 
 export async function startGuest() {

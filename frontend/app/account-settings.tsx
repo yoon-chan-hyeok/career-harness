@@ -4,6 +4,7 @@ import type { Request } from "./api-client";
 import { accessToken, clearSession } from "./auth-client";
 import { EmailCodeForm } from "./email-code-form";
 import type { PublicService } from "./public-service";
+import { downloadPrivateExport } from "./private-export";
 
 type Account = {
   status: "ACTIVE" | "CLOSED";
@@ -103,17 +104,7 @@ export function AccountSettings({
             setBusy(true);
             setError("");
             try {
-              const data = await request("/export");
-              const url = URL.createObjectURL(
-                new Blob([JSON.stringify(data, null, 2)], {
-                  type: "application/json",
-                }),
-              );
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "career-private-export.json";
-              link.click();
-              setTimeout(() => URL.revokeObjectURL(url), 1000);
+              await downloadPrivateExport(request);
             } catch (error) {
               setError(
                 error instanceof Error

@@ -23,6 +23,8 @@ import { ProviderSettings } from "./provider-settings";
 import { AdminConsole } from "./admin-console";
 import { PublicEntry, Onboarding, PublicFooter } from "./public-entry";
 import { AccountSettings } from "./account-settings";
+import { GuestSessionNotice } from "./guest-session-notice";
+import { downloadPrivateExport } from "./private-export";
 import { loadPublicService, type PublicService } from "./public-service";
 import { ExperienceOptions } from "./experience-options";
 import { ClaimEvidencePanel } from "./claim-evidence-test";
@@ -984,7 +986,9 @@ function Card({ a }: { a?: Artifact }) {
               .join(" · ")}
           </p>
           {a.data.complete === false && (
-            <p>아직 작성하지 않은 문서가 있어 전체 비교는 완료되지 않았습니다.</p>
+            <p>
+              아직 작성하지 않은 문서가 있어 전체 비교는 완료되지 않았습니다.
+            </p>
           )}
           {((a.data.issues || []) as Data[]).length ? (
             <ul>
@@ -1543,6 +1547,9 @@ export default function Home() {
                 {ai ? "AI 설정됨" : "직접 작성"}
               </span>
             </div>
+            {authenticated && publicService.guest_enabled && (
+              <GuestSessionNotice request={request} disabled={busy} />
+            )}
             <header className="page-header">
               <div>
                 <small className="eyebrow">
@@ -1746,16 +1753,7 @@ export default function Home() {
                     disabled={busy}
                     onClick={() =>
                       void run(async () => {
-                        const data = await request("/export");
-                        const link = document.createElement("a");
-                        link.href = URL.createObjectURL(
-                          new Blob([JSON.stringify(data, null, 2)], {
-                            type: "application/json",
-                          }),
-                        );
-                        link.download = "career-private-export.json";
-                        link.click();
-                        URL.revokeObjectURL(link.href);
+                        await downloadPrivateExport(request);
                       }, "개인 자료 내려받기를 시작했습니다.")
                     }
                   >
@@ -1981,9 +1979,32 @@ export default function Home() {
                             : "관심 있는 채용 공고를 추가하면 준비 과정을 한곳에서 이어갈 수 있어요."}
                         </p>
                         {!list.length && (
-                          <button onClick={() => setShowCreate(true)}>
-                            첫 지원 기회 추가
-                          </button>
+                          <>
+                            <ol className="first-workspace-guide">
+                              <li>
+                                ‘경험 정리’에서 내가 맡은 일과 수행 범위를
+                                등록하세요.
+                              </li>
+                              <li>
+                                회사·직무·채용 공고를 새 지원 기회에 넣으세요.
+                              </li>
+                              <li>
+                                대화로 다음 단계를 진행하고, 오른쪽 보관함에서
+                                문서를 확인하세요.
+                              </li>
+                            </ol>
+                            <div className="public-actions">
+                              <button
+                                className="secondary"
+                                onClick={() => setScreen("경험 정리")}
+                              >
+                                경험부터 정리하기
+                              </button>
+                              <button onClick={() => setShowCreate(true)}>
+                                공고 추가하기
+                              </button>
+                            </div>
+                          </>
                         )}
                       </div>
                     )}
@@ -2002,7 +2023,7 @@ export default function Home() {
                         className="text-button"
                         onClick={() => setScreen("경험 정리")}
                       >
-                        경험 정리 정리하기 <span>→</span>
+                        경험 정리하기 <span>→</span>
                       </button>
                     </section>
                     <div className="workflow-guide">
@@ -2127,7 +2148,11 @@ export default function Home() {
                         </button>
                       )}
                       {e.kind !== "EXPRESSION" && (
-                        <ProjectBoundary evidence={e} request={request} refresh={() => refresh()} />
+                        <ProjectBoundary
+                          evidence={e}
+                          request={request}
+                          refresh={() => refresh()}
+                        />
                       )}
                       {e.kind !== "EXPRESSION" && (
                         <ExperienceStructure
@@ -3351,7 +3376,11 @@ export default function Home() {
                             제출본을 보관합니다.
                           </p>
                           {button("전체 잠금·중복 메시지 확인", "ready")}
-                          {button("문서 간 사실·수치·반복 검사", "portfolio-review", {manual_verified: !ai})}
+                          {button(
+                            "문서 간 사실·수치·반복 검사",
+                            "portfolio-review",
+                            { manual_verified: !ai },
+                          )}
                           {button(
                             "최종본 보관 · 아직 미제출",
                             "freeze",
@@ -3389,8 +3418,11 @@ export default function Home() {
                         {ws.artifacts
                           .filter(
                             (a) =>
-                              ["Review", "ResumeReview", "PortfolioReview"].includes(a.kind) &&
-                              a.status !== "SUPERSEDED",
+                              [
+                                "Review",
+                                "ResumeReview",
+                                "PortfolioReview",
+                              ].includes(a.kind) && a.status !== "SUPERSEDED",
                           )
                           .map((a) => (
                             <Card key={a.id} a={a} />

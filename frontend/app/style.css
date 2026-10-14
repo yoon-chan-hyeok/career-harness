@@ -3550,3 +3550,34 @@ main.public-page { display: block; min-height: 100vh; background: linear-gradien
 .account-delete-panel label input { display: block; margin-top: 10px; width: 100%; }
 @media(max-width: 900px) { .public-hero { grid-template-columns: 1fr; max-width: 630px; padding-top: 42px; gap: 32px; } .public-auth-card { width: 100%; } }
 @media(max-width: 500px) { .public-header { padding: 22px 0; } .public-header .brand small, .public-top-link { display: none; } .public-benefits { gap: 15px; margin: 30px 0; } .public-auth-card { padding: 24px; } .public-preview { grid-template-columns: minmax(0,1fr) 114px; } .preview-chat { padding: 15px; } .preview-storage { padding: 18px 12px; } .public-intro h1 { font-size: 38px; } .public-lead { font-size: 14px; } .desktop-break { display: none; } .onboarding-card, .policy-document { margin: 24px auto; } }
+
+.guest-session-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border: 1px solid #e2def3;
+  border-radius: 12px;
+  background: #f7f5fc;
+  padding: 14px 16px;
+  margin: 12px 0 18px;
+  flex-shrink: 0;
+}
+.guest-session-notice > div { flex: 1 1 250px; min-width: 0; }
+.guest-session-notice strong { color: #595476; font-size: 13px; }
+.guest-session-notice p { margin: 5px 0 0; color: #777188; font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+.guest-session-notice button { flex: 0 0 auto; font-size: 12px; background: white; border-color: #e2def3; }
+.guest-session-ending { border-color: #e5d2b4; background: #fffbf3; }
+.guest-session-ending .guest-session-reminder { color: #94652e; }
+.guest-session-notice .guest-session-error { color: #a74c57; }
+.conversation-page > .guest-session-notice { margin: 0 28px 12px; padding: 10px 12px; }
+.first-workspace-guide { max-width: 470px; margin: 20px auto; padding-left: 20px; text-align: left; font-size: 13px; line-height: 1.8; color: var(--muted); }
+.first-workspace-guide li + li { margin-top: 7px; }
+.empty-state .public-actions { justify-content: center; }
+.public-footer a { overflow-wrap: anywhere; }
+@media(max-width: 500px) {
+  .public-header .public-top-link { display: inline-flex; font-size: 12px; white-space: nowrap; }
+  .conversation-page > .guest-session-notice { margin: 0 14px 10px; }
+  .guest-session-notice button { width: 100%; }
+}

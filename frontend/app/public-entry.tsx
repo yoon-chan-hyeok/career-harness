@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EmailCodeForm } from "./email-code-form";
-import { hasSession, startGuest } from "./auth-client";
+import { guestSessionInfo, hasSession, startGuest } from "./auth-client";
 import { providerNames, type PublicService } from "./public-service";
 import type { Request } from "./api-client";
+import { GuestSessionNotice } from "./guest-session-notice";
 
 export function PublicFooter({ service }: { service: PublicService }) {
   return (
@@ -19,7 +20,9 @@ export function PublicFooter({ service }: { service: PublicService }) {
         <Link href="/privacy">개인정보 처리방침</Link>
         <Link href="/terms">이용약관</Link>
         {service.support_email && (
-          <a href={"mailto:" + service.support_email}>문의</a>
+          <a href={"mailto:" + service.support_email}>
+            {service.support_email}
+          </a>
         )}
         {service.guest_enabled && service.support_url && (
           <a href={service.support_url} target="_blank" rel="noreferrer">
@@ -44,6 +47,20 @@ export function PublicEntry({
 }) {
   const [starting, setStarting] = useState(false);
   const [guestError, setGuestError] = useState("");
+  const [instant, setInstant] = useState(() => Date.now());
+  useEffect(() => {
+    if (!service.guest_enabled) return;
+    const sync = () => setInstant(Date.now());
+    const timer = window.setInterval(sync, 30000);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, [service.guest_enabled]);
+  const reusableSession = service.guest_enabled
+    ? (guestSessionInfo(instant)?.remainingSeconds || 0) > 0
+    : hasSession();
   return (
     <main className="public-page">
       <header className="public-header">
@@ -126,7 +143,7 @@ export function PublicEntry({
                 로그아웃하면 자료를 다시 찾을 수 없으니 필요한 문서는 내려받아
                 보관하세요. 다른 방문자의 자료와는 분리됩니다.
               </p>
-              {!hasSession() && (
+              {!reusableSession && (
                 <button
                   disabled={busy || starting || !service.registration_open}
                   onClick={async () => {
@@ -143,6 +160,7 @@ export function PublicEntry({
                       );
                     } finally {
                       setStarting(false);
+                      setInstant(Date.now());
                     }
                   }}
                 >
@@ -162,7 +180,7 @@ export function PublicEntry({
               onVerified={onLogin}
             />
           )}
-          {hasSession() && (
+          {reusableSession && (
             <button
               className="secondary"
               disabled={busy}
@@ -228,6 +246,9 @@ export function Onboarding({
           내 자료가 어떻게 쓰이는지 확인해 주세요. 동의하지 않으면 자료를
           등록하거나 AI 작업을 시작하지 않습니다.
         </p>
+        {service.guest_enabled && (
+          <GuestSessionNotice request={request} disabled={busy} />
+        )}
         <ul>
           <li>
             경험·공고·자기소개서·이력서를 계정별로 저장해 지원 준비에
