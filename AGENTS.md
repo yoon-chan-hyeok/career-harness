@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-15 체험 사용성 보완 완료: 소스03e43fd/CI38598744328 SUCCESS(Python757/별도PG9/frontend30/lint/types/build/privacy/migration). 남은 체험 시간·전체 자료 내려받기·만료 연결 복원 차단·첫 작업3단계·실제 작업실 복귀·문의 이메일·모바일 시작 링크를 반영했다. 웹dpl_EUL2JPdkKFkBzEVLtcRNgdCDcgFh 공개 반영 후 실제 브라우저449px 시작/시간/다운로드JSON1887바이트/문의/복귀·가로 넘침0·콘솔오류0 확인. 약관 대리 동의 없음, 새 검증 게스트의 사업자료 없음. API/AI/한도 변경·실제 AI 재호출 없음. 전체 작성 모바일 여정·26단계6종 원문 인수·운영복구·큰묶음내보내기 경계·장기운영·Jev·Aside는 남음. docs/GUEST_USABILITY_2026_10_15.md 및 JSON guest_usability_2026_10_15를 우선한다.
+
 2026-10-15 공개 무료 체험 운영 완료: 소스5f560cd/CI38588338674 SUCCESS(Python757/별도 실제PG9/frontend28/types/lint/build/privacy/migration). API/Web 공식 HTTPS에 방문자별24시간 게스트를 연결했고 실제 Groq 공고분석/근거연결/전략/레쥬메 생성·DB저장·한국어PDF·내보내기·두방문자격리·본인삭제/토큰거부·다른방문자보존을 통과했다. AI 요청 중 다른 방문자의 계정/동의 읽기도 통과했다. 초기 연결1개 동시접속500 뒤 풀2/overflow0·포화503을 반영했다. 가상 QA자료만 사용·정리했으며 개인 원문은 업로드하지 않았다. 연락처 윤찬혁/ych1390@gmail.com 직접 승인 반영. 이메일 인증은 사용자가 나중으로 미뤘다. docs/GUEST_TRIAL_2026_10_14.md와 JSON public_guest_trial_2026_10_14를 우선한다. 전체26단계/6종 실제 인수·백업복구/삭제재적용·장기운영·Jev·Aside 브라우저 초기화는 남으며 전체완료로 표시하지 않는다.
 
 2026-10-14 최신 공개 체험 요청: 인증메일을 마지막으로 미루고 누구나 쓰는 방문자별 24시간 게스트 작업실을 구현한다. 운영자/문의 윤찬혁/ych1390@gmail.com은 직접 승인됐다. 기존 API/Web 실제 HTTPS 배포·Supabase 준비·비로그인 차단은 완료됐다. 게스트19/frontend28 통과 후 전체 회귀의 응답 필드 목록·cold import 문제를 수정하고 정확한 커밋 CI 및 새 공개 배포 인수를 진행 중이다. 이메일 모드 SMTP/CAPTCHA 요구는 보존하며 허위 확인 플래그를 설정하지 않는다. docs/USER_DECISIONS.md의 2026-10-14가 과거 초대형/메일 필수 출시 조건보다 우선하며 docs/GUEST_TRIAL_2026_10_14.md와 JSON public_guest_trial_2026_10_14를 우선한다. 전체 원문 인수/복구/장기운영/Jev는 남는다.

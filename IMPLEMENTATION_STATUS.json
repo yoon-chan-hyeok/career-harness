@@ -1816,5 +1816,66 @@
       "aside_browser_setup_unverified"
     ],
     "documentation": "docs/GUEST_TRIAL_2026_10_14.md"
+  },
+  "guest_usability_2026_10_15": {
+    "status": "IMPLEMENTED_DEPLOYED_AND_BROWSER_VERIFIED",
+    "checked_at": "2026-10-15T02:16:45.911381+09:00",
+    "source_commit": "03e43fd7a3893e6a152c3778c233d37f75903af9",
+    "ci": {
+      "run_id": 38598744328,
+      "conclusion": "SUCCESS",
+      "backend": 757,
+      "postgres": 9,
+      "frontend": 30,
+      "lint_types_build_migration_privacy": true
+    },
+    "frontend_deployment": "dpl_EUL2JPdkKFkBzEVLtcRNgdCDcgFh",
+    "workspace_url": "https://career-harness-web.vercel.app/workspace",
+    "backend_changed": false,
+    "ai_calls_repeated": false,
+    "changes": [
+      "guest_expiry_notice_and_download",
+      "expired_restore_rejected",
+      "first_workspace_guidance",
+      "policy_workspace_return",
+      "contact_email_visible",
+      "mobile_start_link"
+    ],
+    "browser": {
+      "origin": "https://career-harness-web.vercel.app/workspace",
+      "noticeVisible": true,
+      "remainingTimeVisible": true,
+      "downloadButtonWorked": true,
+      "downloadBytes": 1887,
+      "termsAcceptedByAgent": false,
+      "policyReturn": "/workspace",
+      "supportEmailVisible": true,
+      "viewportWidth": 449,
+      "contentWidth": 449,
+      "consoleErrors": 0,
+      "fullWorkflowRerun": false,
+      "syntheticGuestNoBusinessData": true
+    },
+    "committed_files_scanned": 373,
+    "secret_literal_matches": 0,
+    "frontend_upload_files": 61,
+    "private_files_uploaded": 0,
+    "overall_requirement_acceptance_complete": false,
+    "dependency_audit": {
+      "production_moderate": 5,
+      "production_high": 0,
+      "full_development_high": 5
+    },
+    "documentation": "docs/GUEST_USABILITY_2026_10_15.md",
+    "remaining": [
+      "full_original_26_step_and_six_rule_acceptance",
+      "backup_restore_and_deletion_replay",
+      "large_export_boundary_validation",
+      "long_term_operations",
+      "email_signup_deferred",
+      "dependency_advisories",
+      "jev_not_connected",
+      "aside_browser_setup_unverified"
+    ]
   }
 }

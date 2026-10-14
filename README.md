@@ -79,9 +79,10 @@ Next.js / TypeScript · FastAPI / Pydantic · SQLAlchemy / Alembic · PostgreSQL
 **가입 없이 사용하는 공개 무료 체험을 운영합니다.** [작업실](https://career-harness-web.vercel.app/workspace)에서 방문자별 연결을 만들고 안내에 동의한 뒤 경험과 공고를 등록할 수 있습니다. Supabase DB와 실제 Groq 작성·저장·한국어 PDF를 연결·검증했습니다. 별도의 소개 데모와 영상은 가상 자료를 사용합니다.
 
 - 구현·로컬 검증: 회사 조사, 경험 연결, 사용자 승인, 자소서·이력서, 검수 답변, 최종 확인, 보관·면접 연결.
-- 최종 CI 기준(2026-10-15): Python757개, 별도 실제 PostgreSQL9개, 프런트엔드28개와 타입·lint·마이그레이션·개인정보·production build 통과.
+- 최종 CI 기준(2026-10-15): Python757개, 별도 실제 PostgreSQL9개, 프런트엔드30개와 타입·lint·마이그레이션·개인정보·production build 통과.
 - 실제 Groq를 이용한 합성 자소서·레쥬메 생성·저장·한국어 PDF를 확인했습니다. 프로젝트별 표현 제한과 문서 간 충돌·반복 검사를 연결했습니다.
 - 체험 연결은24시간·현재 브라우저 탭에서 유지됩니다. 탭 종료·로그아웃·만료 뒤 복구할 수 없으니 필요한 문서는 내려받아 보관하세요. 개인/서비스 전체 무료 한도와 생성·저장량 상한이 적용됩니다.
+- 작업 중 남은 체험 시간과 전체 자료 내려받기 버튼을 제공하며, 첫 작업 안내와 실제 작업실 복귀 경로를 보완했습니다. JSON 내려받기는 자동 복구 기능이 아닙니다.
 - 남은 범위: 원문 규칙 전체 실제 인수, 사용자 요청으로 미룬 이메일 인증·발송, 운영 백업 복구·장기 용량 점검. Jev는 미연결입니다.
 - 비용·성능 개선 수치와 합격 효과는 주장하지 않습니다. 비교 실험은 현재 범위에서 제외했습니다.
 
@@ -95,6 +96,7 @@ Next.js / TypeScript · FastAPI / Pydantic · SQLAlchemy / Alembic · PostgreSQL
 - [서비스 소개·모션 데모 구현](docs/SERVICE_PRESENTATION_2026_10_11.md)
 - [실제 AI·공개 회원가입 연결 순서](docs/OPERATING_CONNECTION_2026_10_11.md)
 - [가입 없는 공개 체험과 운영 범위](docs/GUEST_TRIAL_2026_10_14.md)
+- [체험 시간·자료 보관·첫 사용 안내 보완](docs/GUEST_USABILITY_2026_10_15.md)
 - [원래 구현 팩 안내 — 보관본](docs/IMPLEMENTATION_PACK_README.md)
 
 개인 원문·실제 지원서·DB·API 키는 Git에서 제외합니다. 데모와 영상에는 가상 자료만 사용합니다.
