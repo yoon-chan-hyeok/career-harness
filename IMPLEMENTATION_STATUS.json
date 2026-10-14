@@ -1647,5 +1647,79 @@
       "Outstanding dependency advisories and Jev unverified"
     ],
     "overall_requirement_acceptance_complete": false
+  },
+  "production_bootstrap_2026_10_14": {
+    "date": "2026-10-14",
+    "status": "SERVER_CREDENTIALS_REGISTERED_DEPLOYMENT_VALIDATION_IN_PROGRESS",
+    "user_approval": "Explicit approval for DB connection/password, Supabase secret key, Groq key, public CA to own backend Production and Hobby API/web deployment",
+    "server_settings": {
+      "date": "2026-10-14T08:18:32.916083+00:00",
+      "target": "production",
+      "project": "prj_ijnYCG4SuwPwypW7ObIy57opsdHD",
+      "keys": [
+        {
+          "key": "DATABASE_URL",
+          "type": "encrypted",
+          "saved": true
+        },
+        {
+          "key": "CAREER_DATABASE_CA_PEM",
+          "type": "encrypted",
+          "saved": true
+        },
+        {
+          "key": "SUPABASE_SECRET_KEY",
+          "type": "encrypted",
+          "saved": true
+        },
+        {
+          "key": "GROQ_API_KEY",
+          "type": "encrypted",
+          "saved": true
+        },
+        {
+          "key": "GROQ_MODEL",
+          "type": "plain",
+          "saved": true
+        },
+        {
+          "key": "GROQ_FREE_ONLY_CONFIRMED",
+          "type": "plain",
+          "saved": true
+        },
+        {
+          "key": "CAREER_LLM_PROVIDER",
+          "type": "plain",
+          "saved": true
+        },
+        {
+          "key": "CAREER_REQUIRE_AI",
+          "type": "plain",
+          "saved": true
+        }
+      ],
+      "deployments_created": false,
+      "metadata_verified": true
+    },
+    "upload_manifests": {
+      "backend": {
+        "runtime_files": 113,
+        "exact_allowlist": true,
+        "source_hashes_match": true,
+        "personal_files": 0
+      },
+      "frontend": {
+        "runtime_files": 59,
+        "committed_sources_only": true,
+        "source_hashes_match": true,
+        "personal_files": 0
+      }
+    },
+    "backend_ignore_fix": "Directory reinclusion without trailing slashes; actual CLI 4-file missing runtime detected then 113 exact runtime files verified",
+    "frontend_layout": "Existing remote root frontend kept; export of committed frontend only avoids frontend/frontend path; 59 upload files",
+    "backend_deployment": "NOT_STARTED",
+    "frontend_deployment": "NOT_STARTED",
+    "registration_open": false,
+    "overall_requirement_acceptance_complete": false
   }
 }

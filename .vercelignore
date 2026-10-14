@@ -1,31 +1,32 @@
 # Backend deployment: allow only runtime source, migration metadata and synthetic fixtures.
+# CLI directory matching uses names without trailing slashes for reinclusion.
 /*
 !/app.py
 !/pyproject.toml
 !/vercel.json
-!/backend/
+!/backend
 /backend/*
-!/backend/career/
+!/backend/career
 !/backend/career/*.py
-!/backend/career/assets/
+!/backend/career/assets
 /backend/career/assets/*
-!/backend/career/assets/fonts/
+!/backend/career/assets/fonts
 /backend/career/assets/fonts/*
 !/backend/career/assets/fonts/CareerKR-Regular.ttf
 !/backend/career/assets/fonts/CareerKR-Bold.ttf
 !/backend/career/assets/fonts/OFL.txt
 !/backend/career/assets/fonts/SOURCE.json
-!/backend/career/assets/tokenizer/
+!/backend/career/assets/tokenizer
 !/backend/career/assets/tokenizer/o200k_base.tiktoken
 !/backend/career/assets/tokenizer/LICENSE.txt
 !/alembic.ini
-!/migrations/
+!/migrations
 /migrations/*
 !/migrations/env.py
 !/migrations/script.py.mako
-!/migrations/versions/
+!/migrations/versions
 !/migrations/versions/*.py
-!/evals/
+!/evals
 /evals/*
 !/evals/historical_cases.jsonl
 
