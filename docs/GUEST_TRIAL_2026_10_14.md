@@ -34,3 +34,16 @@
 [Vercel Fluid Compute](https://vercel.com/docs/fluid-compute)는 Python 요청이 같은 인스턴스의 자원을 공유한다고 설명한다. [Supabase 연결 안내](https://supabase.com/docs/guides/database/connecting-to-postgres)의 transaction pooler를 유지하며 TLS나 DB 접근 권한은 바꾸지 않는다. 이 보완은 동시 접속 무제한을 의미하지 않는다. 새 커밋 검사와 동시 작성·접속 인수 후 상태를 갱신한다.
 
 이용 안내 버전이 바뀐 경우에는 같은 탭의 새로고침과 저장된 연결 이어가기를 안내한다. 게스트에게 로그아웃을 권해 기존 자료의 연결을 잃게 하지 않는다.
+
+
+## 2026-10-15 최종 공개 체험 완료
+
+[공개 작업실](https://career-harness-web.vercel.app/workspace)에서 이메일 없이 방문자별 체험을 시작할 수 있다. 운영자·문의 정보, 안내 확인과 자료 처리 동의가 표시된다. 승인·검수·사실 근거 확인 절차는 유지한다.
+
+최종 소스5f560cd의 [CI38588338674](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38588338674)가 Python757개·실제 PostgreSQL9개·화면28개·마이그레이션 왕복/check·개인정보 검사·타입·lint·production build를 통과했다. API/Web의 공식 HTTPS 준비·게스트 인증·익명 문서 차단·웹 보안 헤더·서버 비밀값 비노출도 통과했다.
+
+실제 공개 웹 프록시를 통해 가상 방문자A/B를 만들고 동의 전 차단, 두 작업실의 격리, 관리자 접근403, Groq 공고분석→근거연결→전략→승인→레쥬메 작성과 DB저장을 확인했다. A의 AI 요청이 진행 중일 때 B의 계정·동의 조회도 완료됐다. 내보내기·한국어 PDF 내려받기/본문 추출, 다른 방문자 인증을 이용한 삭제 거부, 자기 자료 삭제와 기존 토큰401, B자료 보존 및 B삭제까지 통과했다. 검사용 가상 작업실은 정리했고 사용량·삭제 집계는 유지했다.
+
+Cold instance의 준비 응답에 보이는 live_verified는 운영자 연결 검사에 대한 프로세스별 표시다. 게스트에게 그 관리자 검사를 허용하거나 값을 강제로 true로 바꾸지 않았다. 실제 클라우드 작성은 별도의 저장된 실행·모델 기록으로 확인했다.
+
+이 결과는 공개 무료 체험의 연결 인수이며, 전체 원문 규칙의 실제 인수·이메일 가입 운영·백업 복원·대규모 운영 또는 Jev 완료를 의미하지 않는다. 의존성 검사에서 runtime moderate5개와 개발 경로의 기존 지적은 남는다. 현재 high 이상 runtime 차단 검사는 통과했으나 취약점이 모두 없다는 뜻은 아니다.

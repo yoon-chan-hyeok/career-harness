@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-15 공개 무료 체험 운영 완료: 소스5f560cd/CI38588338674 SUCCESS(Python757/별도 실제PG9/frontend28/types/lint/build/privacy/migration). API/Web 공식 HTTPS에 방문자별24시간 게스트를 연결했고 실제 Groq 공고분석/근거연결/전략/레쥬메 생성·DB저장·한국어PDF·내보내기·두방문자격리·본인삭제/토큰거부·다른방문자보존을 통과했다. AI 요청 중 다른 방문자의 계정/동의 읽기도 통과했다. 초기 연결1개 동시접속500 뒤 풀2/overflow0·포화503을 반영했다. 가상 QA자료만 사용·정리했으며 개인 원문은 업로드하지 않았다. 연락처 윤찬혁/ych1390@gmail.com 직접 승인 반영. 이메일 인증은 사용자가 나중으로 미뤘다. docs/GUEST_TRIAL_2026_10_14.md와 JSON public_guest_trial_2026_10_14를 우선한다. 전체26단계/6종 실제 인수·백업복구/삭제재적용·장기운영·Jev·Aside 브라우저 초기화는 남으며 전체완료로 표시하지 않는다.
+
 2026-10-14 최신 공개 체험 요청: 인증메일을 마지막으로 미루고 누구나 쓰는 방문자별 24시간 게스트 작업실을 구현한다. 운영자/문의 윤찬혁/ych1390@gmail.com은 직접 승인됐다. 기존 API/Web 실제 HTTPS 배포·Supabase 준비·비로그인 차단은 완료됐다. 게스트19/frontend28 통과 후 전체 회귀의 응답 필드 목록·cold import 문제를 수정하고 정확한 커밋 CI 및 새 공개 배포 인수를 진행 중이다. 이메일 모드 SMTP/CAPTCHA 요구는 보존하며 허위 확인 플래그를 설정하지 않는다. docs/USER_DECISIONS.md의 2026-10-14가 과거 초대형/메일 필수 출시 조건보다 우선하며 docs/GUEST_TRIAL_2026_10_14.md와 JSON public_guest_trial_2026_10_14를 우선한다. 전체 원문 인수/복구/장기운영/Jev는 남는다.
 
 2026-10-14 운영 배포 추가 진행: 사용자가 DB 접속값·Supabase/Groq 키·공개 CA를 본인 Vercel API Production 암호화 서버 설정에 저장하고 Hobby에서 API/Web 배포하도록 명시적으로 승인했다. 설정8개 등록·메타데이터 재확인 완료. 자동 승인 차단은 이 승인을 받아 해소됐다. 실제 CLI dry 검사에서 하위 폴더 재포함의 trailing slash 문제를 발견해 .vercelignore를 수정했고 API 런타임113파일/개인파일0/원본해시 일치를 확인했다. Web은 기존 remote Root Directory frontend를 유지하는 커밋 원본만의 별도 묶음(work/web-deployment-package.json)으로59파일/개인파일0/해시 일치를 확인했다. 현재 배포 전 검사 단계이며 배포 완료로 표시하지 않는다. 이후 결과는 JSON production_bootstrap_2026_10_14와 해당 일자 운영 문서를 우선한다.

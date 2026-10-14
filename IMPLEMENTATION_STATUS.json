@@ -1650,7 +1650,7 @@
   },
   "production_bootstrap_2026_10_14": {
     "date": "2026-10-14",
-    "status": "DEPLOYED_HTTPS_CLOSED_LOGIN_BASELINE_VERIFIED",
+    "status": "DEPLOYED_AND_SUPERSEDED_BY_PUBLIC_GUEST_RELEASE",
     "user_approval": "Explicit approval for DB connection/password, Supabase secret key, Groq key, public CA to own backend Production and Hobby API/web deployment",
     "server_settings": {
       "date": "2026-10-14T08:18:32.916083+00:00",
@@ -1717,26 +1717,104 @@
     },
     "backend_ignore_fix": "Directory reinclusion without trailing slashes; actual CLI 4-file missing runtime detected then 113 exact runtime files verified",
     "frontend_layout": "Existing remote root frontend kept; export of committed frontend only avoids frontend/frontend path; 59 upload files",
-    "backend_deployment": "dpl_FCRS4HNSXJuUwtyd1onroFp56t65",
-    "frontend_deployment": "dpl_5PzBeu3Hzh4e1C8CaH2hbJ4gqvg7",
-    "registration_open": false,
+    "backend_deployment": "dpl_4iHE4LgroxY5hgFvMTB6ebMRYq6q",
+    "frontend_deployment": "dpl_4wqxJhDu8fuu4bgiUj875cX3aQY8",
+    "registration_open": true,
     "overall_requirement_acceptance_complete": false,
     "backend_origin": "https://career-harness-api.vercel.app",
     "frontend_origin": "https://career-harness-web.vercel.app",
     "anonymous_readiness": true,
-    "cloud_ai_call_verified": false
+    "cloud_ai_call_verified": true
   },
   "public_guest_trial_2026_10_14": {
-    "status": "IMPLEMENTED_FINAL_CI_AND_DEPLOYMENT_IN_PROGRESS",
-    "guest_tests": 19,
-    "frontend_tests": 28,
+    "status": "PUBLIC_FREE_GUEST_TRIAL_DEPLOYED_AND_LIVE_VERIFIED",
+    "checked_at": "2026-10-14T15:34:54.674320+00:00",
+    "release_date_kst": "2026-10-15",
+    "source_commit": "5f560cdf60930550c58477dccd69b200d4777450",
+    "source_ci": {
+      "run_id": 38588338674,
+      "conclusion": "SUCCESS",
+      "backend": 757,
+      "postgres": 9,
+      "frontend": 28
+    },
+    "frontend_origin": "https://career-harness-web.vercel.app",
+    "workspace_url": "https://career-harness-web.vercel.app/workspace",
+    "backend_origin": "https://career-harness-api.vercel.app",
+    "backend_deployment": "dpl_4iHE4LgroxY5hgFvMTB6ebMRYq6q",
+    "frontend_deployment": "dpl_4wqxJhDu8fuu4bgiUj875cX3aQY8",
+    "authentication": "isolated_signed_guest_sessions",
+    "guest_lifetime_seconds": 86400,
     "email_signup_deferred_by_user": true,
     "operator_contact_approved": true,
-    "guest_lifetime_seconds": 86400,
+    "operator_name": "윤찬혁",
+    "support_email": "ych1390@gmail.com",
+    "plan": {
+      "vercel": "Hobby",
+      "supabase": "Free",
+      "groq_free_confirmed_by_user": true
+    },
     "guest_creation_global_daily_cap": 100,
     "guest_creation_network_daily_cap": 20,
-    "other_visitors_isolated": true,
+    "database_pool_size": 2,
+    "database_overflow": 0,
+    "pool_saturation": "503_WITH_RETRY_AFTER",
+    "live_flow": {
+      "synthetic_only": true,
+      "other_visitors_isolated": true,
+      "visitor_reads_during_ai": true,
+      "consent_required": true,
+      "ai_stages": [
+        {
+          "step": "analyze",
+          "artifact_kind": "OpportunityBrief",
+          "persisted": true
+        },
+        {
+          "step": "evidence-map",
+          "artifact_kind": "EvidencePack",
+          "persisted": true
+        },
+        {
+          "step": "strategy",
+          "artifact_kind": "ApplicationBrief",
+          "persisted": true
+        },
+        {
+          "step": "resume",
+          "artifact_kind": "ResumeContent",
+          "persisted": true
+        }
+      ],
+      "prompt_runs": 4,
+      "models": [
+        "openai/gpt-oss-120b"
+      ],
+      "korean_pdf": {
+        "downloaded": true,
+        "pages": 1,
+        "korean_extraction": true,
+        "page_budget": 2
+      },
+      "own_export": true,
+      "own_deletion": true,
+      "deleted_tokens_revoked": true,
+      "test_guest_data_cleaned": true
+    },
+    "frontend_secret_names": [],
+    "current_source_secret_matches": 0,
+    "private_files_uploaded": 0,
+    "provider_probe_marker": "Process-local owner check remains unverified on cold cloud instances; actual authenticated writing is separately proven by stored traces",
     "overall_requirement_acceptance_complete": false,
+    "remaining": [
+      "full_original_26_step_and_six_rule_acceptance",
+      "email_otp_smtp_turnstile_deferred",
+      "backup_restore_and_deletion_replay",
+      "long_term_capacity_and_operational_response",
+      "dependency_moderate_and_dev_advisories",
+      "jev_not_connected",
+      "aside_browser_setup_unverified"
+    ],
     "documentation": "docs/GUEST_TRIAL_2026_10_14.md"
   }
 }
