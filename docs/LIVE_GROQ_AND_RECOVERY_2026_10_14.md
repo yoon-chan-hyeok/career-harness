@@ -25,11 +25,13 @@
 - 실제 DB는 Alembic `0014`, 테이블 41개, RLS 41개, 브라우저 역할의 테이블 접근 권한 0개다. Supabase secret key·publishable key와 공개 서명키 조회도 성공했다.
 - 배포 설정을 로컬 메모리에 적용한 읽기 전용 preflight에서 설정·DB·migration·검색·Data API 보호·Supabase 서명키를 통과했다. 이 검사는 클라우드 함수 실행이나 추가 AI 호출을 하지 않는다.
 - 실제 Vercel 팀의 OWNER 권한과 Hobby 플랜, API·Web 두 프로젝트를 다시 확인했다. Production 기본 설정은 있으나 배포는 아직 없다.
-- 자동 승인 검토가 민감한 접속값의 Vercel Production 전송에 명시적 승인 근거가 부족하다고 판단했다. 실제 키 전송은 수행하지 않았다. 다음 대상은 기존 `career-harness-api`의 Production이며, 등록 예정 설정은 `DATABASE_URL`, `CAREER_DATABASE_CA_PEM`, `SUPABASE_SECRET_KEY`, `GROQ_API_KEY`, `GROQ_MODEL`, `GROQ_FREE_ONLY_CONFIRMED`, `CAREER_LLM_PROVIDER`, `CAREER_REQUIRE_AI`다. 비밀값 4개는 서버 전용 암호화 설정으로 준비한다. 회원가입은 닫힌 상태를 유지하며 SMTP·CAPTCHA 확인을 임의로 표시하지 않는다.
+- 자동 승인 검토가 민감한 접속값의 Vercel Production 전송에 명시적 승인 근거가 부족하다고 판단했다. 실제 키 전송은 수행하지 않았다. 다음 대상은 기존 `career-harness-api`의 Production이며, 등록 예정 설정은 `DATABASE_URL`, `CAREER_DATABASE_CA_PEM`, `SUPABASE_SECRET_KEY`, `GROQ_API_KEY`, `GROQ_MODEL`, `GROQ_FREE_ONLY_CONFIRMED`, `CAREER_LLM_PROVIDER`, `CAREER_REQUIRE_AI`다. DB 접속값·서버 키·공개 CA 인증서에 해당하는 4개 설정은 서버 전용 암호화 설정으로 준비한다. 회원가입은 닫힌 상태를 유지하며 SMTP·CAPTCHA 확인을 임의로 표시하지 않는다.
 
 ## 검사 기록과 남은 작업
 
 최종 로컬 전체 검사 735개 통과·PostgreSQL 7개 생략, Ruff 통과, Pyright 오류·경고 0개다. 원격 CI는 `IMPLEMENTATION_STATUS.json`의 `live_groq_and_recovery_2026_10_14`에 기록한다. 첫 전체 검사에서는 734개 통과·PostgreSQL 7개 생략, 배포 묶음 검사 하나가 30초 제한시간을 넘겼다. 별도 단계 진단은 두 모드 모두 정상 종료했다. 이 검사는 cold import·토크나이저·폰트 렌더·HTTP 격리를 함께 검사하므로 유한 제한을 90초로 조정했다. 제품의 요청 제한시간, 네트워크 차단·인증·개인자료 검사 조건은 변경하지 않았다.
+
+코드 `4a23b866caa8dcfac6b46b4f7161b6c4aed12c65`를 공개 main에 반영했고 [GitHub 검사](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38533363177)가 성공했다. 일반 Python 735개, 별도 실제 PostgreSQL 7개, 프런트 26개와 lint·typecheck·build, migration 적용·check·되돌리기·재적용, 개인자료 제외 검사 모두 통과했다. 알려진 중간 위험도 의존성 지적은 남아 있으며 high 등급 production gate 통과를 전체 지적 해소로 표현하지 않는다.
 
 공개 HTTPS 배포, 실제 소유자 로그인, SMTP 코드 발송·수신·만료, 실제 Turnstile, 운영자 정보와 보관 기간, 두 계정의 실제 운영 격리·탈퇴, 백업 복원과 삭제 요청 재적용, 용량·장애 알림은 계속 남는다. Jev는 비활성·미검증이다. 기존 의존성 지적도 `docs/DEPENDENCY_TRIAGE_2026_10_13.md`에 남는다.
 

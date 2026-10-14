@@ -1510,7 +1510,7 @@
   },
   "live_groq_and_recovery_2026_10_14": {
     "date": "2026-10-14",
-    "status": "LIVE_LOCAL_AI_AND_READ_ONLY_PRODUCTION_PREFLIGHT_VERIFIED",
+    "status": "LIVE_LOCAL_AI_AND_GITHUB_CI_VERIFIED; PRODUCTION_TRANSMISSION_APPROVAL_PENDING",
     "report": "docs/LIVE_GROQ_AND_RECOVERY_2026_10_14.md",
     "changes": [
       "Latest stale document recovery after current approvals",
@@ -1617,7 +1617,21 @@
       },
       "ruff": "PASS",
       "pyright": "0 errors, 0 warnings",
-      "github_ci": "PENDING"
+      "github_ci": {
+        "status": "SUCCESS",
+        "code_commit": "4a23b866caa8dcfac6b46b4f7161b6c4aed12c65",
+        "run_id": 38533363177,
+        "url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/38533363177",
+        "python_passed": 735,
+        "skipped_postgres_in_general_suite": 7,
+        "actual_postgres_passed": 7,
+        "frontend_passed": 26,
+        "migration_roundtrip_and_check": "PASS",
+        "privacy": "PASS",
+        "frontend_lint_types_build": "PASS",
+        "production_dependency_high_gate": "PASS; known moderate advisories remain"
+      },
+      "privacy": "PASS"
     },
     "aside": {
       "cli_direct_execution": true,
