@@ -1507,5 +1507,131 @@
       "dependency_files_changed": false,
       "status": "OPEN_RUNTIME_REACHABILITY_AND_COMPATIBLE_UPGRADE_REVIEW"
     }
+  },
+  "live_groq_and_recovery_2026_10_14": {
+    "date": "2026-10-14",
+    "status": "LIVE_LOCAL_AI_AND_READ_ONLY_PRODUCTION_PREFLIGHT_VERIFIED",
+    "report": "docs/LIVE_GROQ_AND_RECOVERY_2026_10_14.md",
+    "changes": [
+      "Latest stale document recovery after current approvals",
+      "Preserve resume page budget unless explicitly changed",
+      "Exact substring/source ID instructions for resume claims",
+      "Sparse-evidence writer instructions; prompt version 2.0.1",
+      "Two synthetic complete HTTP journeys and four recovery boundary cases"
+    ],
+    "local_runtime": {
+      "backend": {
+        "owner_authenticated": true,
+        "sources_readable": true,
+        "invalid_token_rejected": true,
+        "provider": "groq",
+        "configured": true,
+        "live_verified": true
+      },
+      "frontend_proxy": {
+        "owner_authenticated": true,
+        "sources_readable": true,
+        "invalid_token_rejected": true,
+        "provider": "groq",
+        "configured": true,
+        "live_verified": true
+      }
+    },
+    "live_ai": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "free_confirmation": "User confirmed no payment registration or Developer upgrade",
+      "probe_http": 200,
+      "isolated_calls": 7,
+      "one_resume_response_rejected_before_save": true,
+      "cover_saved_version": 3,
+      "resume_saved_version": 2,
+      "resume_page_budget": 2,
+      "physical_pdf_pages": 1,
+      "korean_pdf_browser_verified": true,
+      "browser_console_warnings_errors": 0,
+      "unsupported_first_cover_final_lock": "HTTP_409",
+      "scope": "Synthetic source material, not private corpus or full real application acceptance"
+    },
+    "production_preflight": {
+      "status": "ok",
+      "checks": {
+        "configuration": {
+          "status": "ok"
+        },
+        "database_readiness": {
+          "status": "ok",
+          "report": {
+            "status": "ready",
+            "checks": {
+              "database": "ok",
+              "migrations": "ok",
+              "retrieval": "ok",
+              "data_api_privacy": "ok",
+              "authentication": "configured",
+              "llm": {
+                "status": "configured",
+                "provider": "groq",
+                "live_verified": false,
+                "verified_at": null
+              },
+              "jev": {
+                "status": "disabled",
+                "mode": "shadow_only",
+                "live_verified": false
+              }
+            }
+          }
+        },
+        "supabase_public_keys": {
+          "status": "ok",
+          "live_verified": true
+        }
+      }
+    },
+    "supabase": {
+      "session_and_transaction_connected": true,
+      "client_tls": "verify-full",
+      "head": "0014",
+      "tables": 41,
+      "rls_tables": 41,
+      "browser_granted_tables": 0,
+      "secret_and_publishable_key_accepted": true
+    },
+    "vercel": {
+      "plan": "hobby",
+      "role": "OWNER",
+      "projects_verified": 2,
+      "deployments_created": false,
+      "production_credentials_uploaded": false,
+      "next": "Explicit approval for eight backend Production variables; then deploy and verify",
+      "auto_review": "Sensitive Production transmission rejected for insufficient explicit authorization; no upload attempted"
+    },
+    "validation": {
+      "first_full": "734 passed, 7 PG skipped, 1 packaged probe 30s timeout",
+      "diagnostic_packaged_modes": "Both normal; isolation timeout adjusted to 90s, product controls unchanged",
+      "final_python": {
+        "passed": 735,
+        "skipped_postgres": 7,
+        "junit": "work/full-final-20261014.xml"
+      },
+      "ruff": "PASS",
+      "pyright": "0 errors, 0 warnings",
+      "github_ci": "PENDING"
+    },
+    "aside": {
+      "cli_direct_execution": true,
+      "browser_ready": false,
+      "initial_setup": "UNVERIFIED"
+    },
+    "remaining": [
+      "Explicit authorization for sensitive Vercel Production configuration",
+      "HTTPS deployment and real account login/signup",
+      "SMTP, OTP, CAPTCHA and actual operator information",
+      "Two real accounts, withdrawal, backup restore and deletion replay, operations alerts",
+      "Full real 26-step and six-original semantic acceptance",
+      "Outstanding dependency advisories and Jev unverified"
+    ],
+    "overall_requirement_acceptance_complete": false
   }
 }

@@ -9,10 +9,14 @@ from career.schemas import Claim, Schema
 
 
 class ResumeBullet(Schema):
-    text: str = Field(min_length=1)
-    evidence_ids: list[str] = []
-    profile_fact_ids: list[str] = []
-    claims: list[Claim] = Field(min_length=1)
+    text: str = Field(min_length=1, description="The final Korean bullet exactly as displayed to the user.")
+    evidence_ids: list[str] = Field(default_factory=list, description=(
+        "Selected evidence IDs supporting this bullet. Include every evidence_id used by its claims."))
+    profile_fact_ids: list[str] = Field(default_factory=list, description=(
+        "Confirmed profile fact IDs supporting this bullet. Include every profile_fact_id used by its claims."))
+    claims: list[Claim] = Field(min_length=1, description=(
+        "Atomic claims copied verbatim from this bullet's text, including matching punctuation. "
+        "Do not put source quotations or paraphrases in claim.text. Claim source IDs must also appear on the bullet."))
 
 
 class ResumeSection(Schema):

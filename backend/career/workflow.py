@@ -1140,9 +1140,12 @@ class Workflow:
             self.question_state(ident, qid, "FINAL_LOCKED")
         return document
 
-    def resume(self, ident: str, manual=None, page_budget=1):
+    def resume(self, ident: str, manual=None, page_budget=None):
         ws = self.ws(ident)
         self.editable(ws)
+        old = latest(self.db, self.user, ident, "ResumeContent", required=False)
+        if page_budget is None:
+            page_budget = old.data.get("page_budget", 1) if old else 1
         if page_budget not in (1, 2, "MASTER"):
             raise ValueError("분량은 1페이지, 2페이지, 마스터 중에서 선택해 주세요.")
         strategy = self.artifact(ident, "ApplicationBrief")
@@ -1226,7 +1229,6 @@ class Workflow:
             content = arrange(content, brief_data, preserve_order=bool(manual))
             data = structured_document(content, set(selected), profile=canonical(self.db, self.user))
         self.validate_ledger(data, evidence)
-        old = latest(self.db, self.user, ident, "ResumeContent", required=False)
         protected = old.data.get("protected_spans", []) if old else []
         if old and any(data["text"].count(span) < old.data["text"].count(span) for span in protected):
             raise ValueError("재작성 결과가 보호된 문장을 바꿉니다. 부분 수정으로 진행해 주세요.")
@@ -1824,7 +1826,8 @@ class Workflow:
                     raise ValueError("문항 메시지를 먼저 승인해 주세요.")
                 elif (
                     brief.status == "LOCKED"
-                    and latest(self.db, self.user, ident, "Draft", qid, required=False) is None
+                    and ((prior_draft := latest(self.db, self.user, ident, "Draft", qid, required=False)) is None
+                         or prior_draft.status not in {"ACTIVE", "LOCKED"})
                 ):
                     item = self.draft(ident, qid)
                 else:

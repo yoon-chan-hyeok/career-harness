@@ -854,7 +854,7 @@ def action(
         "ledger": lambda: service.update_ledger(workspace, qid, body["claims"], body.get("resume", False)),
         "revise": lambda: service.revise(workspace, qid, body.get("resume", False)),
         "final-lock": lambda: service.final_lock(workspace, qid, body.get("resume", False)),
-        "resume": lambda: service.resume(workspace, manual, body.get("page_budget", 1)),
+        "resume": lambda: service.resume(workspace, manual, body.get("page_budget")),
         "portfolio-review": lambda: service.review_portfolio(workspace, manual_verified=body.get("manual_verified") is True),
         "ready": lambda: service.ready(workspace),
         "freeze": lambda: service.freeze(workspace),

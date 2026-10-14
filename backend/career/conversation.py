@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import Field
 from sqlalchemy import select
 
+from career.artifacts import latest
 from career.db import Record
 from career.models import Artifact
 from career.provider_config import provider_available
@@ -188,8 +189,13 @@ def converse(service: Workflow, workspace: str, request: ChatRequest):
                 "이 수치 틀림",
                 "전체 문서 검수",
             }:
-                if artifact and service.artifact(workspace, artifact.kind, artifact.slot).id != artifact.id:
-                    raise ValueError("이전 버전이 선택되어 있습니다. 현재 버전을 선택해 주세요.")
+                # A latest STALE document is a valid routing target for recovery.
+                # The selected version must still be current, and each operation
+                # enforces freshness/approval on the artifacts it actually uses.
+                if artifact:
+                    current = latest(service.db, service.user, workspace, artifact.kind, artifact.slot)
+                    if current is None or current.id != artifact.id:
+                        raise ValueError("이전 버전이 선택되어 있습니다. 현재 버전을 선택해 주세요.")
                 if artifact and artifact.kind == "QuestionPortfolio" and text in {"이걸로 가자", "잠가"}:
                     from career.portfolio import approve
 

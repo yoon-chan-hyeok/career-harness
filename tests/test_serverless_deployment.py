@@ -232,7 +232,11 @@ print(json.dumps({"import":"ok", "private_api":"authenticated", "migrations":"me
         env=os.environ.copy(),
         capture_output=True,
         text=True,
-        timeout=30,
+        # This process performs a cold import, tokenizer loading, packaged font
+        # rendering and HTTP checks. It is an isolation check, not a 30-second
+        # product latency assertion; allow slow Windows file scanning while
+        # retaining a finite deadline and every no-network/privacy assertion.
+        timeout=90,
     )
     assert result.returncode == 0, result.stderr
     audit = json.loads(result.stdout)
