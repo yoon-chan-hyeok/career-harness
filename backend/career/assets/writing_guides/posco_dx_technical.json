@@ -1,0 +1,159 @@
+{
+  "selection_metadata": {
+    "source_company": "포스코DX",
+    "source_role_id": "industrial_sw",
+    "source_role_name": "SW 개발",
+    "question_id": "L2304-Q02",
+    "original_prompt": "해당 분야에서 타인과 차별화될 수 있는 전문역량은 무엇인지 구체적으로 설명해 주시길 바랍니다. (600자)",
+    "question_family": "technical",
+    "required_demands": [
+      "다른 지원자와 구분되는 해당 분야의 전문역량",
+      "역량을 설명할 구체적인 수행 근거"
+    ],
+    "length": {
+      "minimum_characters": null,
+      "maximum_characters": 600,
+      "counting_basis": "not_stated",
+      "limit_semantics": "source_reported_character_limit_confirm_current_form",
+      "declared_limit_unit": "characters",
+      "maximum_bytes": null,
+      "guidance_kind": "source_reported_limit"
+    },
+    "source_company_specific_facts_portable": false,
+    "semantic_similarity_selection_performed": false
+  },
+  "guide": {
+    "guide_id": "luxent:L2304-Q02:600:v1",
+    "question": "해당 분야에서 타인과 차별화될 수 있는 전문역량은 무엇인지 구체적으로 설명해 주시길 바랍니다. (600자)",
+    "length": {
+      "minimum_characters": null,
+      "maximum_characters": 600,
+      "counting_basis": "not_stated",
+      "limit_semantics": "source_reported_character_limit_confirm_current_form",
+      "declared_limit_unit": "characters",
+      "maximum_bytes": null,
+      "guidance_kind": "source_reported_limit"
+    },
+    "question_intent": "기술 이름보다 실제 문제에서 본인이 내린 판단·구현·검증으로 전문역량을 설명하는 문항입니다.",
+    "allocation": [
+      {
+        "order": 1,
+        "content": "역량 선언",
+        "approximate_characters": 70,
+        "what_to_write": "기술명 대신 반복할 수 있는 개인의 판단·수행 방식"
+      },
+      {
+        "order": 2,
+        "content": "문제와 역할",
+        "approximate_characters": 120,
+        "what_to_write": "시스템의 문제·본인이 맡은 기능·영향"
+      },
+      {
+        "order": 3,
+        "content": "기술적 행동",
+        "approximate_characters": 280,
+        "what_to_write": "로그/코드/데이터로 원인을 좁히고 설계·구현·재시험한 행동"
+      },
+      {
+        "order": 4,
+        "content": "성과와 직무 연결",
+        "approximate_characters": 130,
+        "what_to_write": "같은 기준의 확인 결과와 관련 산업용SW 과업 활용"
+      }
+    ],
+    "writing_strategy": [
+      {
+        "instruction": "전문역량을 언어·도구 목록 대신 본인의 판단·수행 방식으로 설명한다.",
+        "source_ref": "L2304-Q02:writing_method:P01"
+      },
+      {
+        "instruction": "관련 경험에서 문제·개인 역할 → 확인 근거·가설 → 설계·구현·시험 → 확인 결과를 연결한다.",
+        "source_ref": "L2304-Q02:writing_method:P02"
+      },
+      {
+        "instruction": "산업 근무 경험이 없어도 실제 프로젝트의 데이터 정합성·장애 복구·로그 추적 등 공통 과업을 연결할 수 있다.",
+        "source_ref": "L2304-Q02:writing_method:P03"
+      },
+      {
+        "instruction": "확인한 전문역량을 지원 업무에 적용할 범위를 짧게 연결한다.",
+        "source_ref": "L2304-Q02:writing_method:P04"
+      }
+    ],
+    "reference_example": {
+      "example_id": "E-L2304-Q02",
+      "origin": "archived_publisher_example",
+      "semantic_reviewed": true,
+      "total_characters": 592,
+      "title_characters": 15,
+      "body_characters": 577,
+      "body_paragraph_count": 2,
+      "paragraphs": [
+        {
+          "paragraph_id": "L2304-Q02:top_1_percent_example:P01",
+          "source_order": 1,
+          "display_order": 1,
+          "kind": "title",
+          "body_paragraph_number": null,
+          "function": "제목",
+          "function_reviewed": true,
+          "function_basis": "full_example_reread_in_this_role_export",
+          "text": "[재현해야 재발하지 않는다]",
+          "characters": 15,
+          "share_of_actual_example_percent": 2.53,
+          "source_text_sha256": "e65ce4be7fa902d37658ec82a539d7459c3e8525b18520601aabba3639c53ac9"
+        },
+        {
+          "paragraph_id": "L2304-Q02:top_1_percent_example:P02",
+          "source_order": 2,
+          "display_order": 2,
+          "kind": "body",
+          "body_paragraph_number": 1,
+          "function": "전문역량·문제·원인 재현·분석",
+          "function_reviewed": true,
+          "function_basis": "full_example_reread_in_this_role_export",
+          "text": "저의 전문역량은 장애를 추측으로 넘기지 않고 같은 조건을 만들어 원인을 확인하는 개발 습관입니다. 제조 데이터 수집 플랫폼 프로젝트에서 네트워크가 복구된 뒤 센서 값이 중복 저장되고 일부 순서가 뒤바뀌는 문제가 발생했습니다. 정상 상황에서는 드러나지 않아 패킷 유실률, 지연 시간, 재접속 횟수를 변수로 두고 1만 2천 건의 이벤트를 반복 전송했습니다. 로그를 수집 구간, 메시지 큐, 데이터베이스로 나눠 비교한 결과, 재전송 메시지에 식별 기준이 없고 저장 트랜잭션이 분리된 것이 원인이었습니다.",
+          "characters": 278,
+          "share_of_actual_example_percent": 46.96,
+          "source_text_sha256": "aa937ca6bba971b43f06fccd595ae8b2941e803d3e2ea1adacb72e56b1393514"
+        },
+        {
+          "paragraph_id": "L2304-Q02:top_1_percent_example:P03",
+          "source_order": 3,
+          "display_order": 3,
+          "kind": "body",
+          "body_paragraph_number": 2,
+          "function": "설계 수정·동일 조건 시험·결과·직무 활용",
+          "function_reviewed": true,
+          "function_basis": "full_example_reread_in_this_role_export",
+          "text": "이에 장비번호와 시퀀스 값을 결합한 멱등키를 설계하고, 저장 로직을 하나의 트랜잭션으로 묶었습니다. 지연 300밀리초와 패킷 유실 5% 조건에서도 검증한 결과 중복 저장률을 3.8%에서 0.2%로 낮추고 복구 시간을 14분에서 3분으로 줄였습니다. 동일 조건을 자동 실행하는 회귀 시험도 남겨 이후 변경의 영향을 확인했습니다. 이 경험으로 정상 기능보다 예외 조건을 먼저 설계하는 역량을 길렀습니다. 포스코DX에서도 MES와 설비 제어 시스템의 연계 오류를 재현 가능한 시험으로 좁혀 생산 데이터의 정확성과 무중단 운영을 지키겠습니다.",
+          "characters": 299,
+          "share_of_actual_example_percent": 50.51,
+          "source_text_sha256": "b6013f7202c43f9f9aab5ebc50511e8efe9bd3aae8923fde6ce728a61f14d22a"
+        }
+      ],
+      "completed_answer_segment": null,
+      "observed_allocation_is_recommendation": false,
+      "counting_basis": "공백·제목 포함, 줄바꿈·말미 해시태그 제외, 유니코드 코드포인트; 현행 공식 카운터 미확인",
+      "archived_character_condition_matches": true,
+      "selection_required_before_using": false,
+      "use_as_applicant_fact": false,
+      "review_scope": "full_example_reread_in_this_role_export; prior_v25_review_ledger_unchanged"
+    },
+    "source": {
+      "source_url": "https://www.luxent.co.kr/company_job_analysis/2304/",
+      "source_paragraph_id": "L2304-Q02:writing_method:P04",
+      "source_quote": "600자 기준으로 역량 선언 70자, 문제와 역할 120자, 기술적 행동 280자, 성과와 직무 연결 130자 안팎이 적절합니다.",
+      "source_paragraph_sha256": "45110593114db54a252235052b8619e7961ca50ddfb7027c216d4e996c0c864f"
+    },
+    "fixed_body_paragraph_count": false
+  },
+  "rules": [
+    "실제 문항의 필수 요구에 답하고 원문의 구성·근사 배분을 참고한다.",
+    "사용자 경험에서 확인한 사실만 지원자의 이력·행동·성과로 쓴다.",
+    "참고 예시는 전개와 문단 기능의 자료다. 예시 프로젝트·기관·숫자를 사용자 이력으로 쓰지 않는다.",
+    "페르소나는 표현과 강조 방향이다. 없거나 폐기한 경우에도 사용자 경험과 문항 전략으로 초안을 작성할 수 있다.",
+    "원문의 내용 구간 수를 고정 답안 문단 수로 강제하지 않고 전체 글자 수를 점검한다."
+  ],
+  "provenance": "USER_PROVIDED_ARCHIVED_REFERENCE_NOT_CANDIDATE_FACT",
+  "source_verified_live": false
+}

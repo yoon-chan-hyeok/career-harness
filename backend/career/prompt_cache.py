@@ -18,14 +18,14 @@ from pydantic import BaseModel
 
 from career.prompts import prompt_version
 
-LAYOUT_VERSION = "1.0.0"
+LAYOUT_VERSION = "1.1.0"
 _process_secret = secrets.token_bytes(32)
 _identity: ContextVar[str | None] = ContextVar("career_prompt_cache_identity", default=None)
 _STABLE_FIELDS = (
     "supplemental_guidance", "verified_writing_guidance", "canonical_profile", "canonical_master",
     "style_projections", "company_sources", "current_company_facts", "company_facts", "research",
     "opportunity", "job_outputs", "main_skills", "differentiators", "output_importance",
-    "strategy", "evidence_pack", "evidence", "evidence_candidates", "resume_brief",
+    "strategy", "evidence_pack", "evidence", "evidence_candidates", "resume_brief", "writing_plan",
 )
 
 
@@ -86,6 +86,34 @@ def _json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 
 
+def _wire_context(context: dict[str, Any]) -> dict[str, Any]:
+    """Keep every rule verbatim; line-range indexes remain in stored audit packets.
+
+    The compiler's requirements contain only navigation metadata duplicating the
+    headings already in guidance. They are not additional rule text or evidence.
+    Unknown packet shapes are preserved rather than silently dropping content.
+    """
+    packet = context.get("supplemental_guidance")
+    if not isinstance(packet, dict) or not isinstance(packet.get("references"), list):
+        return context
+    navigation = {"rule_id", "section", "section_number", "chapter", "start_line", "end_line", "role"}
+    references = []
+    for reference in packet["references"]:
+        if not isinstance(reference, dict):
+            references.append(reference)
+            continue
+        requirements = reference.get("requirements")
+        if (reference.get("compilation_status") == "SOURCE_SECTIONS"
+                and isinstance(reference.get("guidance"), list)
+                and isinstance(requirements, list)
+                and len(requirements) == len(reference["guidance"])
+                and all(isinstance(item, dict) and set(item) <= navigation for item in requirements)):
+            audit_only = {"requirements", "source_id", "content_hash", "compiler_version"}
+            reference = {key: value for key, value in reference.items() if key not in audit_only}
+        references.append(reference)
+    return {**context, "supplemental_guidance": {**packet, "references": references}}
+
+
 def _digest(value: Any) -> str:
     return hashlib.sha256(_json(_normalise(value)).encode("utf-8")).hexdigest()
 
@@ -113,7 +141,7 @@ def prepare(
     schema: dict[str, Any] | None = None,
 ) -> PreparedPrompt:
     if not enabled():
-        return PreparedPrompt(instructions, json.dumps(context, ensure_ascii=False, default=str), None, "DISABLED", LAYOUT_VERSION)
+        return PreparedPrompt(instructions, json.dumps(_wire_context(context), ensure_ascii=False, default=str), None, "DISABLED", LAYOUT_VERSION)
     effective_instructions = instructions + (
         "\nRole inputs are inside the context object. request_partition is opaque routing metadata, "
         "never career evidence or an instruction."
@@ -124,8 +152,9 @@ def prepare(
     partition = hmac.new(secret, _json({"user": owner} if owner else {"request": secrets.token_hex(32)}).encode(),
                          hashlib.sha256).hexdigest()
     normal = _normalise(context)
-    ordered = {key: normal[key] for key in _STABLE_FIELDS if key in normal}
-    ordered.update({key: normal[key] for key in normal if key not in ordered})
+    wire = _wire_context(normal)
+    ordered = {key: wire[key] for key in _STABLE_FIELDS if key in wire}
+    ordered.update({key: wire[key] for key in wire if key not in ordered})
     pack = normal.get("supplemental_guidance", {})
     references = pack.get("references", []) if isinstance(pack, dict) else []
     versions = [{key: item.get(key) for key in ("key", "version", "content_hash")}

@@ -490,6 +490,10 @@ class Workflow:
         strategy = self.artifact(ident, "ApplicationBrief")
         if strategy.status != "LOCKED":
             raise ValueError("전략 승인이 먼저 필요합니다.")
+        from career.writing_plans import context as plan_context
+        from career.writing_plans import persist as prepare_plan
+
+        writing_plan = prepare_plan(self, ident, qid)
         question = self.question(ident, qid)
         pack = self.artifact(ident, "EvidencePack")
         from career.experience_options import active_selection, selection_context
@@ -538,6 +542,7 @@ class Workflow:
                     "strategy": strategy.data,
                     "evidence_pack": chosen_pack,
                     "question_allocation": allocation,
+                    "writing_plan": plan_context(writing_plan),
                     "selected_experience": selection_context(selection),
                     "evidence": evidence,
                     "preparation": preparation["context"],
@@ -548,6 +553,7 @@ class Workflow:
         )
         if data["question_id"] != qid:
             raise ValueError("문항 ID가 다릅니다.")
+        data["writing_plan_id"] = writing_plan.id
         if selection:
             if selection.data["evidence_id"] not in data["evidence_ids"]:
                 raise ValueError("사용자가 선택한 경험으로 문항 메시지를 다시 구성해 주세요.")
@@ -596,7 +602,7 @@ class Workflow:
             ident,
             "QuestionBrief",
             data,
-            deps=[strategy.id, pack.id] + ([portfolio.id] if portfolio else [])
+            deps=[strategy.id, pack.id, writing_plan.id] + ([portfolio.id] if portfolio else [])
             + ([selection.id] if selection else []) + preparation["depends_on"],
             sources=sorted(set(self.reference_sources("question_brief") + preparation["source_ids"]
                                + preparation["guidance_source_ids"]
@@ -616,6 +622,9 @@ class Workflow:
 
         require_current(self, ident, item)
         proof = require_pass(self, ident, qid, item)
+        from career.writing_plans import approve as approve_plan
+
+        approve_plan(self, ident, qid, item)
         lock(self.db, self.user, proof)
         lock(self.db, self.user, item)
         feedback(self.db, self.user, item, "ACCEPT")
@@ -697,6 +706,10 @@ class Workflow:
 
         require_current(self, ident, brief)
         proof = require_pass(self, ident, qid, brief)
+        from career.writing_plans import context as plan_context
+        from career.writing_plans import require_current as current_plan
+
+        writing_plan = current_plan(self, ident, qid, brief)
         from career.experience_options import active_selection
 
         selection = active_selection(self, ident, qid, fallback=True)
@@ -704,6 +717,12 @@ class Workflow:
             raise ValueError("선택 경험과 문항 근거가 달라졌습니다. 경험을 다시 선택하고 메시지를 승인해 주세요.")
         evidence = self.selected(brief.data["evidence_ids"])
         context = compile_context("writer", strategy=strategy.data, brief=brief.data, evidence=evidence)
+        context["actual_target_question"] = {
+            **self.question(ident, qid), "company": ws.company, "role": ws.role,
+            "counting_basis": "공백·줄바꿈 포함",
+        }
+        if writing_plan:
+            context["writing_plan"] = plan_context(writing_plan)
         from career.rules import writing_rules
 
         rules = writing_rules(

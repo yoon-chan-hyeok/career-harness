@@ -1644,6 +1644,7 @@ footer {
 @media (max-width: 760px) {
   .conversation-page {
     height: calc(100dvh - 107px);
+    min-height: 680px;
     padding: 0;
   }
   .conversation-page .topbar {
@@ -3580,4 +3581,197 @@ main.public-page { display: block; min-height: 100vh; background: linear-gradien
   .public-header .public-top-link { display: inline-flex; font-size: 12px; white-space: nowrap; }
   .conversation-page > .guest-session-notice { margin: 0 14px 10px; }
   .guest-session-notice button { width: 100%; }
+}
+
+.writing-plan {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  padding: 22px;
+  margin: 18px 0;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.writing-plan-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.writing-plan-heading h3 {
+  margin: 5px 0 12px;
+  font-size: 19px;
+}
+.writing-plan-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.writing-plan-heading > button {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 6px;
+}
+.writing-plan-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.writing-plan-badge {
+  background: #eeefff;
+  color: #454db5;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.writing-plan-question {
+  font-weight: 600;
+  line-height: 1.7;
+}
+.writing-plan-intent {
+  background: var(--surface);
+  padding: 13px 15px;
+  border-radius: 9px;
+  line-height: 1.8;
+}
+.writing-plan-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 18px 0;
+  padding-left: 22px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.writing-plan h4 {
+  margin: 22px 0 8px;
+}
+.writing-plan-allocation {
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.writing-plan-allocation li {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--line);
+}
+.writing-plan-allocation li:last-child {
+  border-bottom: 0;
+}
+.writing-plan-allocation p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.writing-plan-allocation span {
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.writing-plan-details {
+  margin: 15px 0;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.writing-plan-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.writing-plan-details li,
+.writing-plan-evidence li {
+  line-height: 1.9;
+}
+.writing-plan-example {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 18px;
+  margin: 15px 0;
+}
+.writing-plan-example small {
+  display: block;
+  color: var(--muted);
+  margin: 6px 0 14px;
+}
+.writing-plan-example p {
+  white-space: pre-wrap;
+  line-height: 1.9;
+  margin: 5px 0 20px;
+}
+.writing-plan-example-title {
+  font-weight: 700;
+}
+.writing-plan-function {
+  font-size: 11px;
+  color: var(--accent);
+}
+.writing-plan-source {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.writing-plan-source blockquote {
+  margin: 10px 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--line);
+}
+.writing-plan-evidence {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 15px;
+}
+.writing-plan-evidence details {
+  margin: 12px 0 0;
+}
+.writing-plan-form {
+  display: grid;
+  gap: 13px;
+  margin-top: 18px;
+}
+.writing-plan-form label {
+  display: grid;
+  gap: 7px;
+}
+.writing-plan-form textarea,
+.writing-plan-form select {
+  width: 100%;
+  min-width: 0;
+}
+.writing-plan-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.writing-plan-counter {
+  font-size: 11px;
+  margin-top: 16px;
+}
+@media (max-width: 600px) {
+  .writing-plan {
+    padding: 15px;
+    margin: 12px 0;
+    border-radius: 10px;
+  }
+  .writing-plan-allocation li {
+    padding: 12px;
+    gap: 10px;
+  }
+  .writing-plan-allocation span {
+    max-width: 65px;
+  }
+  .writing-plan-form textarea,
+  .writing-plan-form select {
+    font-size: 16px;
+  }
+  .writing-plan-actions button {
+    min-height: 44px;
+    width: 100%;
+  }
 }

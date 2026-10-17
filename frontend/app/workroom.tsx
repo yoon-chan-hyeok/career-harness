@@ -27,6 +27,7 @@ import { GuestSessionNotice } from "./guest-session-notice";
 import { downloadPrivateExport } from "./private-export";
 import { loadPublicService, type PublicService } from "./public-service";
 import { ExperienceOptions } from "./experience-options";
+import { WritingPlanPanel } from "./writing-plan-panel";
 import { ClaimEvidencePanel } from "./claim-evidence-test";
 import { ReviewResponsePanel, responsesComplete } from "./review-responses";
 import { ResearchStatus } from "./research-status";
@@ -112,6 +113,7 @@ const kindLabels: Record<string, string> = {
   EvidencePack: "직무별 근거",
   ApplicationBrief: "지원 전략",
   QuestionBrief: "문항 메시지",
+  WritingPlan: "작성 가이드·구성",
   ClaimEvidenceTest: "메시지 근거 검증",
   QuestionPortfolio: "문항별 역할",
   Draft: "자기소개서",
@@ -553,6 +555,7 @@ function DataView({ data }: { data: Json }) {
               "research_id",
               "context_hash",
               "repetition_policy",
+              "writing_plan_id",
             ].includes(k),
         )
         .map(([k, v]) => (
@@ -1062,6 +1065,7 @@ function Card({ a }: { a?: Artifact }) {
 }
 
 export default function Home() {
+  const writingPlanDirty = useRef(false);
   const [authConfiguration, setAuthConfiguration] =
     useState<AuthConfiguration | null>(null);
   const [authConfigurationError, setAuthConfigurationError] = useState("");
@@ -1209,6 +1213,13 @@ export default function Home() {
   };
   const act = async (action: string, body: object = {}) => {
     if (!ws) return;
+    if (
+      writingPlanDirty.current &&
+      ["question-brief", "approve-question", "generate", "commands"].includes(
+        action,
+      )
+    )
+      throw new Error("변경한 작성 구성을 먼저 저장해 주세요.");
     const options = body as { qid?: string; resume?: boolean };
     const kind =
       action === "approve-strategy"
@@ -2696,6 +2707,27 @@ export default function Home() {
                         </Panel>
                         {qid && (
                           <>
+                            <WritingPlanPanel
+                              dirtyState={writingPlanDirty}
+                              key={`plan:${ws.id}:${qid}`}
+                              workspaceId={ws.id}
+                              questionId={qid}
+                              revisionKey={ws.artifacts
+                                .map((a) => a.id + a.status)
+                                .join(":")}
+                              request={request}
+                              onSaved={() => refresh(ws.id)}
+                              designing={busy}
+                              onDesign={
+                                ai
+                                  ? async () => {
+                                      await run(() =>
+                                        act("question-brief", { qid }),
+                                      );
+                                    }
+                                  : undefined
+                              }
+                            />
                             <ExperienceOptions
                               ready={experienceReady}
                               key={qid}

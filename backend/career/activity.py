@@ -26,7 +26,7 @@ STAGES = (
     ("opportunity", "직무 분석", ("OpportunityBrief", "OpportunityAssessment")),
     ("evidence", "경험·근거 연결", ("EvidencePack",)),
     ("strategy", "지원 전략", ("ApplicationBrief", "QuestionPortfolio")),
-    ("writing", "문항·이력서 작성", ("QuestionBrief", "ClaimEvidenceTest", "Draft", "ResumeBrief", "ResumeContent")),
+    ("writing", "문항·이력서 작성", ("WritingPlan", "QuestionBrief", "ClaimEvidenceTest", "Draft", "ResumeBrief", "ResumeContent")),
     ("review", "근거·채용 관점 검수", ("Review", "ResumeReview", "PortfolioReview", "ReviewResponses", "ResumeReviewResponses", "FinalSubmissionReview")),
 )
 ACTION_STAGE = {
@@ -43,6 +43,7 @@ ACTION_STAGE = {
     "strategy": "strategy",
     "approve-strategy": "strategy",
     "add-question": "writing",
+    "writing-plan": "writing",
     "question-brief": "writing",
     "claim-test": "writing",
     "approve-question": "writing",
@@ -88,6 +89,7 @@ ACTION_LABELS = {
     "approve-strategy": "지원 전략 승인",
     "approve-question": "문항 메시지 승인",
     "add-question": "문항 추가",
+    "writing-plan": "문항 작성 설계 저장",
     "assess-opportunity": "지원 가치·우선순위 평가",
     "decide-opportunity": "지원 결정 기록",
     "question-brief": "문항 메시지 구성",

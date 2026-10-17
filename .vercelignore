@@ -19,6 +19,8 @@
 !/backend/career/assets/tokenizer
 !/backend/career/assets/tokenizer/o200k_base.tiktoken
 !/backend/career/assets/tokenizer/LICENSE.txt
+!/backend/career/assets/writing_guides
+!/backend/career/assets/writing_guides/*.json
 !/alembic.ini
 !/migrations
 /migrations/*

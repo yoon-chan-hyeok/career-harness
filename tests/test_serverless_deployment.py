@@ -201,6 +201,7 @@ def test_packaged_entrypoint_imports_without_local_secrets_or_network(serverless
     shutil.copy2(PROJECT / "evals/historical_cases.jsonl", stage / "evals/historical_cases.jsonl")
     fonts = stage / "backend/career/assets/fonts"
     shutil.copytree(PROJECT / "backend/career/assets/tokenizer", stage / "backend/career/assets/tokenizer")
+    shutil.copytree(PROJECT / "backend/career/assets/writing_guides", stage / "backend/career/assets/writing_guides")
     fonts.mkdir(parents=True)
     for name in FONT_ASSETS:
         shutil.copy2(PROJECT / "backend/career/assets/fonts" / name, fonts / name)
@@ -276,6 +277,7 @@ def test_deployment_ignore_blocks_nested_private_files_but_keeps_runtime(tmp_pat
         *["backend/career/assets/fonts/" + name for name in FONT_ASSETS],
         "backend/career/assets/tokenizer/o200k_base.tiktoken",
         "backend/career/assets/tokenizer/LICENSE.txt",
+        "backend/career/assets/writing_guides/posco_dx_technical.json",
     ]
     denied = [
         ".provider-settings.json",
@@ -299,6 +301,8 @@ def test_deployment_ignore_blocks_nested_private_files_but_keeps_runtime(tmp_pat
         "backend/career/assets/fonts/private_input/resume.txt",
         "backend/career/assets/fonts/.provider-settings.json",
         "backend/career/assets/fonts/work/model.onnx",
+        "backend/career/assets/writing_guides/private_input/notes.json",
+        "backend/career/assets/writing_guides/.provider-settings.json",
     ]
     for relative in [*allowed, *denied]:
         path = tmp_path / relative
@@ -345,6 +349,8 @@ def test_backend_wheel_contains_korean_fonts_and_license_without_private_files(t
             relative = "career/assets/tokenizer/" + name
             assert relative in names
             assert bundle.read(relative) == (PROJECT / "backend/career/assets/tokenizer" / name).read_bytes()
+        guide = "career/assets/writing_guides/posco_dx_technical.json"
+        assert bundle.read(guide) == (PROJECT / "backend" / guide).read_bytes()
         assert not any(
             name.endswith((".db", ".key", ".pem"))
             or ".provider-settings" in name

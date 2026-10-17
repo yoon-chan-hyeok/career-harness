@@ -1,5 +1,9 @@
 # AGENTS.md — Career Harness
 
+2026-10-17 문항별 작성 설계 구현: 대화/직접 편집에 의도·권장 배분·예시·출처·경험·강조·메모를 연결하고 QuestionBrief/Writer에 동일 가이드를 전달한다. 원문1개 정확 조건/제안7종·근거변경 재확인·폐기 제거·소유권 경계를 검증했다. 서로 다른 Python785/PG9 skipped, 배포묶음28, frontend30/lint/types, Ruff/Pyright 통과. 공개 CI/API/Web 배포 인수 진행 중이며 docs/WRITING_PLAN_2026_10_17.md와 JSON writing_plan_2026_10_17을 우선한다. 실제 개인 자소서 전체 생성 인수는 미통과이며 유료모델/Jev/메일은 변경하지 않았다.
+
+2026-10-15 실제자료 인수 진행 중: 사용자가 승인한 범위의 무료 Groq 전송으로 회사자료 추출 1회 성공(입력5,069/출력639/합계5,708), 신규 자소서/최종잠금0. 원본 지원서 답변은 비교 전용이며 전송 제외. Why Now 과잉추론은 채택하지 않는다. 감사메타데이터 전송제외·무료 출력예약 가변화는 로컬 부분 수정이며 규칙본문은 보존한다. 전략/초안 등은 여전히 무료 입력한도를 넘어 전체 인수 미통과다. 전체Python765/PG9 skipped+추가캐시경계1/신규파일9·Ruff/Pyright통과. 3문항·각1회 수정 비용 계획은 37호출/입력50만/출력4만, 전체 실측 아님. docs/REAL_INPUT_ACCEPTANCE_2026_10_15.md와 docs/APPLICATION_COST_ESTIMATE_2026_10_15.md 및 JSON 해당 항목 우선. 유료전환/새제공자/공개배포/CI/커밋 없음. 개인원문·DB·로그는 ignored work에만 보관한다.
+
 2026-10-15 체험 사용성 보완 완료: 소스03e43fd/CI38598744328 SUCCESS(Python757/별도PG9/frontend30/lint/types/build/privacy/migration). 남은 체험 시간·전체 자료 내려받기·만료 연결 복원 차단·첫 작업3단계·실제 작업실 복귀·문의 이메일·모바일 시작 링크를 반영했다. 웹dpl_EUL2JPdkKFkBzEVLtcRNgdCDcgFh 공개 반영 후 실제 브라우저449px 시작/시간/다운로드JSON1887바이트/문의/복귀·가로 넘침0·콘솔오류0 확인. 약관 대리 동의 없음, 새 검증 게스트의 사업자료 없음. API/AI/한도 변경·실제 AI 재호출 없음. 전체 작성 모바일 여정·26단계6종 원문 인수·운영복구·큰묶음내보내기 경계·장기운영·Jev·Aside는 남음. docs/GUEST_USABILITY_2026_10_15.md 및 JSON guest_usability_2026_10_15를 우선한다.
 
 2026-10-15 공개 무료 체험 운영 완료: 소스5f560cd/CI38588338674 SUCCESS(Python757/별도 실제PG9/frontend28/types/lint/build/privacy/migration). API/Web 공식 HTTPS에 방문자별24시간 게스트를 연결했고 실제 Groq 공고분석/근거연결/전략/레쥬메 생성·DB저장·한국어PDF·내보내기·두방문자격리·본인삭제/토큰거부·다른방문자보존을 통과했다. AI 요청 중 다른 방문자의 계정/동의 읽기도 통과했다. 초기 연결1개 동시접속500 뒤 풀2/overflow0·포화503을 반영했다. 가상 QA자료만 사용·정리했으며 개인 원문은 업로드하지 않았다. 연락처 윤찬혁/ych1390@gmail.com 직접 승인 반영. 이메일 인증은 사용자가 나중으로 미뤘다. docs/GUEST_TRIAL_2026_10_14.md와 JSON public_guest_trial_2026_10_14를 우선한다. 전체26단계/6종 실제 인수·백업복구/삭제재적용·장기운영·Jev·Aside 브라우저 초기화는 남으며 전체완료로 표시하지 않는다.

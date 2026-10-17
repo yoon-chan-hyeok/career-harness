@@ -66,6 +66,7 @@ from career.truth import (
 from career.upgrade_models import EditorDraft
 from career.usage_limits import request_budget_scope
 from career.workflow import Workflow
+from career.writing_plans import PlanRequest
 
 
 @asynccontextmanager
@@ -804,6 +805,22 @@ def final_review_context(workspace: str, db: DB, ident: User):
     from career.final_decision import context
 
     return context(Workflow(db, ident), workspace)
+
+
+@app.get("/api/applications/{workspace}/questions/{qid}/writing-plan")
+def writing_plan_preview(workspace: str, qid: str, db: DB, ident: User):
+    from career.writing_plans import public_preview
+
+    return public_preview(Workflow(db, ident), workspace, qid)
+
+
+@app.post("/api/applications/{workspace}/questions/{qid}/writing-plan")
+def writing_plan_save(workspace: str, qid: str, body: PlanRequest, db: DB, ident: User):
+    from career.activity import run_operation
+    from career.writing_plans import persist
+
+    return view(run_operation(db, ident, workspace, "writing-plan",
+                              lambda: persist(Workflow(db, ident), workspace, qid, body), uses_ai=False))
 
 
 @app.post("/api/applications/{workspace}/actions/{action}")

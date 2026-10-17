@@ -7,7 +7,7 @@ from career.workflow import Workflow
 from final_review_fixture import confirm_final, final_payload
 from sqlalchemy import func, select
 from test_api import client  # noqa: F401
-from test_workflow import doc, finish, flow  # noqa: F401
+from test_workflow import doc, finish, flow, verify_claim  # noqa: F401
 
 
 def test_final_questions_block_ready_and_chat_then_preserve_user_answers_in_bundle(flow):  # noqa: F811
@@ -74,6 +74,12 @@ def test_new_document_evidence_change_and_new_question_require_reconfirmation(fl
     with pytest.raises(ValueError, match="바뀌"):
         require_pass(f, w.id)
     confirm_final(f, w.id)
+    with pytest.raises(ValueError, match="작성 설계가 바뀌"):
+        f.draft(w.id, q["id"], doc(e))
+    brief = f.artifact(w.id, "QuestionBrief", q["id"])
+    f.question_brief(w.id, q["id"], brief.data)
+    verify_claim(f, w, q["id"])
+    f.approve_question(w.id, q["id"])
     f.draft(w.id, q["id"], doc(e))
     assert confirmation.status == "SUPERSEDED"
     with pytest.raises(ValueError):

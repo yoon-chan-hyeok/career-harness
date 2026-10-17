@@ -112,6 +112,7 @@ class ApplicationBrief(Schema):
 
 
 class QuestionBrief(Schema):
+    writing_plan_id: str = ""
     selected_experience_id: str | None = None
     experience_selection_artifact_id: str | None = None
     question_id: str

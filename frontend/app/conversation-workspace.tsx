@@ -15,6 +15,7 @@ import { CorrectionInbox } from "./correction-controls";
 import { ExperienceOptions } from "./experience-options";
 import { ApplicationPacket } from "./application-packet";
 import { ResearchStatus } from "./research-status";
+import { WritingPlanPanel } from "./writing-plan-panel";
 
 type Turn = {
   id: string;
@@ -41,6 +42,7 @@ const names: Record<string, string> = {
   ApplicationBrief: "지원 전략",
   QuestionPortfolio: "문항별 역할",
   QuestionBrief: "문항 설계",
+  WritingPlan: "작성 가이드·구성",
   ClaimEvidenceTest: "메시지 근거 검증",
   Draft: "자기소개서",
   ResumeBrief: "이력서 구성",
@@ -99,6 +101,7 @@ export function ConversationWorkspace({
     [storageOpen, setStorageOpen] = useState(false),
     [view, setView] = useState<"conversation" | "agents">("conversation");
   const pending = useRef<{ signature: string; id: string } | null>(null);
+  const writingPlanDirty = useRef(false);
   const end = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const load = useCallback(
@@ -159,6 +162,10 @@ export function ConversationWorkspace({
   };
   const send = async (message = text) => {
     if (!message.trim() || sending) return;
+    if (writingPlanDirty.current) {
+      setError("변경한 작성 구성을 먼저 저장해 주세요.");
+      return;
+    }
     const body = {
       text: message.trim(),
       evidence_id: evidenceId,
@@ -386,6 +393,35 @@ export function ConversationWorkspace({
                 </div>
               </div>
             ))}
+            {questionId && (
+              <WritingPlanPanel
+                dirtyState={writingPlanDirty}
+                key={`plan:${w.id}:${questionId}`}
+                workspaceId={w.id}
+                questionId={questionId}
+                revisionKey={w.artifacts.map((a) => a.id + a.status).join(":")}
+                request={request}
+                onSaved={() => refresh(w.id)}
+                designing={sending}
+                onExperience={() => onEdit(2, questionId)}
+                onDesign={
+                  ai
+                    ? async () => {
+                        setSending(true);
+                        try {
+                          await request(
+                            `/applications/${w.id}/actions/question-brief`,
+                            { qid: questionId },
+                          );
+                          await refresh(w.id);
+                        } finally {
+                          setSending(false);
+                        }
+                      }
+                    : undefined
+                }
+              />
+            )}
             {sending && (
               <div className="assistant-message processing" role="status">
                 <span className="assistant-avatar">h</span>자료와 현재 작업을

@@ -1877,5 +1877,96 @@
       "jev_not_connected",
       "aside_browser_setup_unverified"
     ]
+  },
+  "real_input_acceptance_2026_10_15": {
+    "status": "not_accepted",
+    "report": "docs/REAL_INPUT_ACCEPTANCE_2026_10_15.md",
+    "production_changed": false,
+    "private_data_committed": false,
+    "successful_model_responses": 1,
+    "generated_documents": 0,
+    "upstream_preflight_error": "INPUT_TOKEN_BUDGET_EXCEEDED",
+    "private_payload_approval": "explicitly_approved_scoped_groq",
+    "rule_text_preserved": true,
+    "local_fixes": [
+      "audit_metadata_wire_projection",
+      "adaptive_free_output_reservation"
+    ],
+    "remaining": [
+      "stage_context_splitting_without_rule_loss",
+      "detailed_historical_jd",
+      "personal_example_semantic_reuse",
+      "real_three_question_generation_and_comparison",
+      "v5_2_drift"
+    ],
+    "validation": {
+      "python_full_passed": 765,
+      "postgres_skipped": 9,
+      "additional_cache_boundary_passed": 1,
+      "new_test_file_passed": 9,
+      "ruff": "passed",
+      "pyright_errors": 0
+    },
+    "remote_ci": "not_run",
+    "deployment": "not_run",
+    "actual_usage": {
+      "stage": "research_source_extract",
+      "input_tokens": 5069,
+      "output_tokens": 639,
+      "total_tokens": 5708
+    },
+    "cost_report": "docs/APPLICATION_COST_ESTIMATE_2026_10_15.md"
+  },
+  "application_cost_estimate_2026_10_15": {
+    "status": "planning_estimate_not_full_run_measurement",
+    "report": "docs/APPLICATION_COST_ESTIMATE_2026_10_15.md",
+    "standard_sequence": {
+      "calls": 37,
+      "input_tokens": 500000,
+      "output_tokens": 40000
+    },
+    "usd_krw_assumption": 1400,
+    "paid_activation": false,
+    "provider_changed": false
+  },
+  "mini_kit_review_2026_10_17": {
+    "status": "APPLICABLE_WITH_ADAPTATION_REVIEW_ONLY",
+    "report": "docs/MINI_KIT_APPLICABILITY_2026_10_17.md",
+    "files": 3,
+    "question_records": 1,
+    "preview_logic_checks_passed": 11,
+    "guide_snapshot_and_paragraph_hashes_verified": true,
+    "source_paragraph_hash_scope_unverified": true,
+    "full_877_question_database_included": false,
+    "actual_browser_render_tested": false,
+    "application_code_changed": false,
+    "model_calls": 0,
+    "deployment": "not_run"
+  },
+  "writing_plan_2026_10_17": {
+    "status": "implemented_locally_release_in_progress",
+    "report": "docs/WRITING_PLAN_2026_10_17.md",
+    "scope": "per-question pre-draft guidance in chat and manual editor, shared guide snapshot for QuestionBrief and Writer",
+    "archived_guides": 1,
+    "suggested_question_families": 7,
+    "database_migration": false,
+    "verification": {
+      "python_unique": 785,
+      "postgres_skipped_locally": 9,
+      "privacy_retry": "14 passed after process-local repository ownership configuration",
+      "packaging": "28 passed; runtime allowlist and wheel include the guide",
+      "frontend_tests": 30,
+      "ruff": "pass",
+      "pyright": "0 errors, 0 warnings",
+      "browser": "synthetic only / AI off; save, reload, discard, unsaved guard, two question guides, manual editor",
+      "api_upload_dry": {
+        "files": 116,
+        "private_files": 0,
+        "guide_included": true
+      }
+    },
+    "live_ai_recalled": false,
+    "personal_full_application_acceptance_complete": false,
+    "public_release": "pending"
   }
 }

@@ -100,6 +100,22 @@ class CompatibleProvider(OpenAIProvider):
         # Never forward reasoning, raw errors or additional provider fields to telemetry.
         return SimpleNamespace(raw=raw, usage=usage)
 
+    def _fit_policy(self, stage: str, policy: StagePolicy, request_data: dict) -> StagePolicy:
+        """Share the fixed free request allowance without removing input facts.
+
+        Large rule packets previously failed just because 4096 output tokens were
+        reserved. Keep a minimum output allowance; excessive input still fails in
+        the observed preflight, and explicit user input/output ceilings still win.
+        """
+        if self.provider_id != "groq":
+            return policy
+        estimate = self._validate_input(replace(policy, max_input_tokens=None), request_data)
+        minimum = min(1024, policy.max_output_tokens)
+        output = max(minimum, min(policy.max_output_tokens, 8000 - 256 - estimate))
+        input_cap = 8000 - 256 - output
+        explicit = stage_policy(stage, self.model).max_input_tokens
+        return replace(policy, max_output_tokens=output, max_input_tokens=min(explicit or input_cap, input_cap))
+
     @staticmethod
     def _content(response: Any) -> str:
         choices = getattr(response.raw, "choices", [])
@@ -135,6 +151,8 @@ class CompatibleProvider(OpenAIProvider):
         prompt = prepare(prompt_id, context, instructions_for(prompt_id), policy.model, self.provider_id, response_format)
         messages = [{"role": "system", "content": prompt.instructions},
                     {"role": "user", "content": prompt.content}]
+        request_data = {"messages": messages, "response_format": response_format, "model": policy.model}
+        policy = self._fit_policy(prompt_id, policy, request_data)
 
         def parsed(response) -> T:
             result = schema.model_validate_json(self._content(response))
@@ -145,7 +163,7 @@ class CompatibleProvider(OpenAIProvider):
             prompt_id,
             operation,
             policy.model,
-            {"messages": messages, "response_format": response_format, "model": policy.model},
+            request_data,
             lambda: self._call(policy, messages, response_format),
             parsed,
             policy=policy,
@@ -158,11 +176,13 @@ class CompatibleProvider(OpenAIProvider):
         prompt = prepare(prompt_id, context, instructions_for(prompt_id), policy.model, self.provider_id)
         messages = [{"role": "system", "content": prompt.instructions},
                     {"role": "user", "content": prompt.content}]
+        request_data = {"messages": messages, "model": policy.model}
+        policy = self._fit_policy(prompt_id, policy, request_data)
         return self._observe(
             prompt_id,
             "generate",
             policy.model,
-            {"messages": messages, "model": policy.model},
+            request_data,
             lambda: self._call(policy, messages, None),
             self._content,
             policy=policy,
