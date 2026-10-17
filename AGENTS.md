@@ -1,6 +1,6 @@
 # AGENTS.md — Career Harness
 
-2026-10-17 문항별 작성 설계 구현: 대화/직접 편집에 의도·권장 배분·예시·출처·경험·강조·메모를 연결하고 QuestionBrief/Writer에 동일 가이드를 전달한다. 원문1개 정확 조건/제안7종·근거변경 재확인·폐기 제거·소유권 경계를 검증했다. 서로 다른 Python785/PG9 skipped, 배포묶음28, frontend30/lint/types, Ruff/Pyright 통과. 공개 CI/API/Web 배포 인수 진행 중이며 docs/WRITING_PLAN_2026_10_17.md와 JSON writing_plan_2026_10_17을 우선한다. 실제 개인 자소서 전체 생성 인수는 미통과이며 유료모델/Jev/메일은 변경하지 않았다.
+2026-10-17 문항별 작성 설계 공개 반영 완료: 소스d7d8bdf/CI39030552155 SUCCESS(Python785/실제PG9/frontend30/lint/types/build/privacy/migration). 대화/직접 편집에 의도·권장 배분·예시·출처·경험·강조·메모를 연결하고 QuestionBrief/Writer에 동일 가이드를 전달한다. 원문1개 정확 조건/제안7종·근거변경 재확인·폐기 제거·소유권 경계를 검증했다. API dpl_3LkJKcNUt1QX7pAfXN5qB6uFHsV8/Web dpl_7GXwHMNGtpfghv9btPKdSyrfrqxz 공개 주소 반영 후 실제 HTTPS에서 합성 게스트 두 명의 격리, 가이드 저장/재조회·버전·주입 차단→수동 메시지→Evidence Test→승인→수동 초안→검수→문항 잠금, 별도 협업 문항·내보내기·검사용 계정 삭제/토큰 거부를 통과했다. 새 AI호출0·개인자료 업로드0이며 사람의 약관 대리동의0. docs/WRITING_PLAN_2026_10_17.md와 JSON writing_plan_2026_10_17을 우선한다. 개인 자소서 실제 AI 전체 생성 인수는 미통과이며 유료모델/Jev/메일은 변경하지 않았다.
 
 2026-10-15 실제자료 인수 진행 중: 사용자가 승인한 범위의 무료 Groq 전송으로 회사자료 추출 1회 성공(입력5,069/출력639/합계5,708), 신규 자소서/최종잠금0. 원본 지원서 답변은 비교 전용이며 전송 제외. Why Now 과잉추론은 채택하지 않는다. 감사메타데이터 전송제외·무료 출력예약 가변화는 로컬 부분 수정이며 규칙본문은 보존한다. 전략/초안 등은 여전히 무료 입력한도를 넘어 전체 인수 미통과다. 전체Python765/PG9 skipped+추가캐시경계1/신규파일9·Ruff/Pyright통과. 3문항·각1회 수정 비용 계획은 37호출/입력50만/출력4만, 전체 실측 아님. docs/REAL_INPUT_ACCEPTANCE_2026_10_15.md와 docs/APPLICATION_COST_ESTIMATE_2026_10_15.md 및 JSON 해당 항목 우선. 유료전환/새제공자/공개배포/CI/커밋 없음. 개인원문·DB·로그는 ignored work에만 보관한다.
 

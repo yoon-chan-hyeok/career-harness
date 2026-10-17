@@ -19,16 +19,16 @@
     "M13": "in_progress",
     "M14": "in_progress"
   },
-  "last_verified_commit": "deda96a6b458f582bac0028f37ab1a6dfa19b257",
-  "last_verified_at": "2026-10-12T20:34:45.857066+09:00",
+  "last_verified_commit": "d7d8bdf978cf1c54c16ea88b9624387f34792d5e",
+  "last_verified_at": "2026-10-17T12:09:50.591207+00:00",
   "verification": {
-    "backend_tests": "667 passed, 7 PG skipped; 7 actual isolated PG tests passed separately in CI",
-    "backend_lint": "pass: current full Ruff",
-    "backend_typecheck": "pass: current Pyright with workspace venv, 0 errors/warnings",
-    "frontend_lint": "pass: current production upgrade TSX",
-    "frontend_typecheck": "pass: current source and optimized build",
-    "frontend_auth_tests": "7 passed",
-    "frontend_build": "pass: final Windows Next15 standalone build including public landing/privacy/terms",
+    "backend_tests": "CI39030552155: 785 passed, 9 PG skipped; actual isolated PostgreSQL 9 passed separately",
+    "backend_lint": "CI39030552155: pass",
+    "backend_typecheck": "CI39030552155: 0 errors, 0 warnings",
+    "frontend_lint": "CI39030552155: pass",
+    "frontend_typecheck": "CI39030552155: pass",
+    "frontend_auth_tests": "11 passed",
+    "frontend_build": "CI39030552155 production build pass; frontend total tests 30",
     "migrations": "SQLite private backup/integrity/head0013/check; isolated PG check/downgrade base/upgrade head/check passed",
     "e2e": "pass: actual isolated HTTP 19 runs through failure/recovery/freeze/handoff/submission confirmation/outcome/CLOSED; workflow/fixture/MCP regressions pass",
     "browser": "public synthetic desktop/mobile/consent/account flow checked; no live SMTP/CAPTCHA verification; browser JSON download capture timed out",
@@ -40,7 +40,7 @@
     "free_provider_ui": "pass: authenticated settings, HF permission link, masked key entry, truthful configured/live status, no console warnings/errors",
     "role_prompts": "pass: 25 role-specific stage contracts, independent reviewer boundaries and version metadata",
     "jev_confidence": "pass: numeric confidence from mock HTTP to durable PromptRun; invalid values fail isolated shadow",
-    "frontend_deployment_tests": "4 passed again after deployment exclusion hardening",
+    "frontend_deployment_tests": "4 passed",
     "serverless_backend": "pass: 24 added checks; minimal runtime package imports/health/auth/migration metadata without dotenv/network/migration; verified TLS, CA and upload exclusions",
     "vercel_cli": "62.2.0 local install, version/login/deploy/link help pass; exact cwd and workspace-only global config; actual CLI --dry source inspection requires authentication and is not completed",
     "frontend_upgrade_tests": "14 passed: upgrade9/cache5",
@@ -52,7 +52,8 @@
     "frontend_tests": "25 passed: auth7/deploy4/upgrades9/cache5",
     "expanded_browser": "pass: actual 3 choices -> stored selection -> stale old writing -> new brief chosen context -> reapproval gate; pixel office/admin/#admin/403/mobile390; owner console/page/request errors0",
     "production_fullstack_container": "historical pre-upgrade container acceptance only; current acceptance uses Windows backend/frontend and separate actual PG16",
-    "prompt_cache": "pass: stable scoped prefixes, SDK raw usage types, durable invalid metrics, UTC periods and conservative quota/cost accounting; no live cache-hit or speed/cost claim"
+    "prompt_cache": "pass: stable scoped prefixes, SDK raw usage types, durable invalid metrics, UTC periods and conservative quota/cost accounting; no live cache-hit or speed/cost claim",
+    "writing_plan": "public API/Web deployed; synthetic HTTPS guide -> manual drafting -> final lock pass, no AI calls"
   },
   "notes": [
     "v2.2 FINAL: implementation plan reordered; M0 is repository bootstrap.",
@@ -1944,7 +1945,7 @@
     "deployment": "not_run"
   },
   "writing_plan_2026_10_17": {
-    "status": "implemented_locally_release_in_progress",
+    "status": "PUBLICLY_DEPLOYED_AND_SYNTHETIC_HTTPS_VERIFIED",
     "report": "docs/WRITING_PLAN_2026_10_17.md",
     "scope": "per-question pre-draft guidance in chat and manual editor, shared guide snapshot for QuestionBrief and Writer",
     "archived_guides": 1,
@@ -1967,6 +1968,41 @@
     },
     "live_ai_recalled": false,
     "personal_full_application_acceptance_complete": false,
-    "public_release": "pending"
+    "public_release": "verified",
+    "checked_at": "2026-10-17T12:09:50.591207+00:00",
+    "source_commit": "d7d8bdf978cf1c54c16ea88b9624387f34792d5e",
+    "ci": {
+      "id": 39030552155,
+      "conclusion": "SUCCESS",
+      "python": 785,
+      "actual_postgres": 9,
+      "frontend": 30
+    },
+    "api_deployment": "dpl_3LkJKcNUt1QX7pAfXN5qB6uFHsV8",
+    "web_deployment": "dpl_7GXwHMNGtpfghv9btPKdSyrfrqxz",
+    "workspace_url": "https://career-harness-web.vercel.app/workspace",
+    "public_synthetic_flow": {
+      "manual_writing": true,
+      "new_plan_save_reload": true,
+      "same_guide_snapshot": true,
+      "message_evidence_test_approval_draft_review_lock": true,
+      "two_questions_isolated": true,
+      "two_guest_ownership_isolated": true,
+      "stale_revision_rejected": true,
+      "client_guide_injection_rejected": true,
+      "own_export": true,
+      "ai_prompt_runs": 0,
+      "test_data_cleaned": true
+    },
+    "private_files_uploaded": 0,
+    "serial_public_probe_wall_seconds": 400.7,
+    "latency_limit": "Aggregate serial QA including creation/cleanup; per-request timings and production optimization remain unmeasured",
+    "browser": {
+      "desktop_1365": "pass",
+      "mobile_390": "pass",
+      "short_height_514": "readable 235px chat viewport",
+      "horizontal_overflow": false,
+      "console_errors_on_final_views": 0
+    }
   }
 }
