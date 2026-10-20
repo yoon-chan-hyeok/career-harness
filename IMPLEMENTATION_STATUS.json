@@ -1,5 +1,15 @@
 {
   "pack_version": "2.2 FINAL",
+  "readme_phases_2026_10_20": {
+    "status": "documented_verified",
+    "scope": "Career Harness README appendix only, with AGENTS/status bookkeeping; no other repository changes",
+    "section": "README.md#career-phases",
+    "content": "26 writing phases individually explained; resume/interview/outcome connections; separate M0-M14 development table; six subsequent implementation refinements",
+    "sources": "current rule-pack acceptance table, canonical workflow and implementation plan, dated research/review/writing-plan/guest/real-input records",
+    "limits": "full personal AI writing acceptance false; input budgets and operating restore pending; email delayed; Jev not connected; comparison experiments excluded",
+    "runtime_changes": "none",
+    "verification": "26 ordered writing headings, 15 ordered M0-M14 rows and all 29 README local links valid; balanced details tags; JSON parse, source privacy and git diff checks pass; documentation-only change, app checks not rerun"
+  },
   "founder_case_film_2026_10_20": {
     "status": "published_verified",
     "scope": "Career Harness service README and founder-case motion film; other project and profile READMEs unchanged",
