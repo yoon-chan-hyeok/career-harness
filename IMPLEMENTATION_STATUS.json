@@ -1,5 +1,23 @@
 {
   "pack_version": "2.2 FINAL",
+  "readme_reel_2026_10_20": {
+    "scope": "README/code-path comparison, tacit-knowledge cases, user flowchart, improvement priorities and public synthetic motion reel",
+    "status": "assets_complete_verification_in_progress",
+    "report": "docs/README_AND_REEL_2026_10_20.md",
+    "video": "frontend/public/showcase/career-harness-reel.mp4",
+    "video_spec": "40 seconds; 1080x1920; 30fps; H.264/AAC; faststart; original synthesized beat",
+    "video_bytes": 2277600,
+    "video_sha256": "f49b4151af99856bb3601e32d568af49347339804f5414a389ad8daf570614d1",
+    "privacy": "synthetic examples derived from public rules; no private application text, credentials or database uploaded; new AI calls 0",
+    "media_verification": "all 1200 frames decoded; 10 scenes visually checked; 10 subtitle cues; 56 preview GIF frames; local README links valid",
+    "code_checks": "privacy/Ruff/Pyright pass; frontend 30 tests/lint/types pass; isolated SQLite migration roundtrip/check pass",
+    "local_build": "compile/prerender pass in isolated public-source copy; existing CSS warning and Windows standalone symlink warning; clean Linux build pending",
+    "backend_full": "running; cosmetic pytest current-directory aliases disabled in local QA launcher only",
+    "github_publication": "pending",
+    "runtime_changes": "none; provider, database schema, quotas, authentication and app workflow unchanged",
+    "full_personal_ai_acceptance": false,
+    "next_priority": ["full-stage input budgets", "personal application end-to-end acceptance", "per-request latency", "operating database restore", "guide coverage", "current status versus history"]
+  },
   "current_milestone": "M14",
   "last_completed_milestone": "M12",
   "milestones": {
