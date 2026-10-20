@@ -71,3 +71,9 @@ GitHub README는 짧은 GIF를 보여 주고 전체 MP4로 연결한다. GitHub�
 
 이 문서의 기능 상태는 마지막 운영 인수인 2026-10-17 기준이다. 영상 1,200프레임 전체 디코딩, 40초·1080×1920·30fps·AAC 음원, 모든 장면의 한글·가독성·잘림, 10개 자막 구간, README의 로컬 링크, 공개 파일의 개인정보 경계를 확인했다. 짧은 미리보기는 56프레임이며 전체 MP4는 약 2.28MB다. 구체적인 코드 검사와 공개 반영 결과는 IMPLEMENTATION_STATUS.json의 readme_reel_2026_10_20 항목을 확인한다.
 
+- 공개 소스: 1a65205a32320e665fb53491570e1e149e5c5d4f. 공개 README HTML에 영상·사례·두 흐름도가 반영됐고, 공개 MP4의 SHA256이 제작 파일과 일치했다.
+- [CI39363278459](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39363278459) backend·frontend 성공: Python 785개, 별도 실제 PostgreSQL 9개, 프런트 30개, lint·타입·의존성 보안 검사·production build·개인정보 검사·마이그레이션 왕복/check.
+- 로컬 Python 785 passed / PostgreSQL 9 skipped. Windows에서 pytest의 임시 폴더 별칭 링크 생성이 지연돼 QA 실행기에서 이 별칭만 생략했다. 실제 검사 내용과 제품 코드는 유지했다.
+- 로컬 웹 lint·타입·30개 검사 통과. 기존 빌드 폴더 권한 문제로 공개 소스만 격리 복사해 compile/prerender를 확인했다. Windows standalone 패키징의 symlink 경고와 기존 CSS 경고는 남았으며, Linux CI에서 production build를 통과했다.
+- 새 AI 호출 0, 개인 원문 업로드 0. 운영 설정·공개 웹 배포는 변경하지 않았다. 이번 공개 반영 대상은 GitHub README와 영상 자산이다.
+
