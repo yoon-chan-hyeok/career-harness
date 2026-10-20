@@ -1,5 +1,20 @@
 {
   "pack_version": "2.2 FINAL",
+  "founder_case_film_2026_10_20": {
+    "status": "assets_verified_publication_pending",
+    "scope": "Career Harness service README and founder-case motion film; other project and profile READMEs unchanged",
+    "report": "docs/FOUNDER_CASE_FILM_2026_10_20.md",
+    "readme_review": "docs/README_SERVICE_REVIEW_2026_10_20.md",
+    "video": "frontend/public/showcase/career-harness-founder-film.mp4",
+    "spec": "38 seconds; 1080x1920; 60fps; 2280 frames; H.264/AAC stereo 48kHz; faststart; original 144BPM sound design",
+    "sha256": "da63373682c0b0448cbd3a73ff86849b70d7c97b1e365038860ab2b0658949c1",
+    "bytes": 4880608,
+    "verified": "12 reconstructed scenes; 12 subtitle cues; 70 GIF frames; full decode; safe source provenance; README links; service home/workspace HTTP200",
+    "privacy": "no private document text or original model response published; actual app screenshot uses synthetic QA data; new AI calls 0",
+    "runtime_changes": "none",
+    "full_personal_ai_acceptance": false,
+    "github_publication": "pending"
+  },
   "readme_reel_2026_10_20": {
     "scope": "README/code-path comparison, tacit-knowledge cases, user flowchart, improvement priorities and public synthetic motion reel",
     "status": "published_verified",

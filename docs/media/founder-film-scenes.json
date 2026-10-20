@@ -1,0 +1,74 @@
+[
+  {
+    "start": 0,
+    "end": 2,
+    "section": "문제 발견",
+    "caption": "AI가 수치와 기여 범위를 바꿨다."
+  },
+  {
+    "start": 2,
+    "end": 4,
+    "section": "실제 사례 01",
+    "caption": "같은 키워드가 같은 직무를 뜻하진 않았다."
+  },
+  {
+    "start": 4,
+    "end": 7,
+    "section": "판단 기준 변경",
+    "caption": "본업 · 직접 근거 · 공백부터 확인."
+  },
+  {
+    "start": 7,
+    "end": 9.5,
+    "section": "실제 사례 02",
+    "caption": "경험의 범위도, 본인 기여도 바뀌었다."
+  },
+  {
+    "start": 9.5,
+    "end": 12,
+    "section": "사실과 표현 분리",
+    "caption": "사실은 근거에서. 표현은 별도로."
+  },
+  {
+    "start": 12,
+    "end": 15,
+    "section": "역할별 검수",
+    "caption": "작성 · 사실 검수 · 채용 관점 검수."
+  },
+  {
+    "start": 15,
+    "end": 18,
+    "section": "사용자 승인",
+    "caption": "중요한 메시지는 내가 확인한다."
+  },
+  {
+    "start": 18,
+    "end": 23,
+    "section": "실제 구현",
+    "caption": "문항 의도 · 권장 배분 · 경험을 먼저."
+  },
+  {
+    "start": 23,
+    "end": 27,
+    "section": "실제 경험 · 도전 문항",
+    "caption": "도구 이름보다, 가설을 바꾼 이유."
+  },
+  {
+    "start": 27,
+    "end": 30.5,
+    "section": "문항별 설계",
+    "caption": "600자 구성 예시. 권장 배분을 내 경험에 맞게."
+  },
+  {
+    "start": 30.5,
+    "end": 34,
+    "section": "암묵지의 구조화",
+    "caption": "반복하던 판단을 Skill과 Rule로."
+  },
+  {
+    "start": 34,
+    "end": 38,
+    "section": "Career Harness",
+    "caption": "해낸 일은 정확하게. 지원서는 설득력 있게."
+  }
+]
