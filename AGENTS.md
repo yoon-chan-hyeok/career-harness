@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-20 후속 공개 완료: eee5b0f/CI39376670858 backend·frontend SUCCESS. Career Harness README를 서비스 대상·기능·사용 순서·실제 홈페이지/작업실·실제 화면/38초 영상 중심으로 공개하고 About 홈페이지도 실제 홈으로 연결했다. 공개 MP4 SHA256 일치. 별도 포트폴리오 GitHub Pages 3235bfc/배포39377130333 SUCCESS, HTTP200·공개 브라우저·데스크톱/모바일 넘침0·로컬 영상38초/한국어 자막 확인. 다른 프로젝트 README와 프로필 README는 변경하지 않았으며 프로필 로컬 초안도 원복했다. 상세 JSON founder_case_film_2026_10_20 및 docs/README_SERVICE_REVIEW_2026_10_20.md. 개인 전체 작성 품질·운영 복구 미통과와 비교실험 제외 유지.
+
 2026-10-20 서비스 README·실제 사례 영상 후속: 사용자 정정에 따라 다른 프로젝트/프로필 README는 읽기만 하며 Career Harness README를 홈페이지·체험 링크/실제 화면/대상/기능/사용 순서 중심으로 개선한다. 비교·표현 검증은 docs/README_SERVICE_REVIEW_2026_10_20.md 참조. 실제 제작 문제2개와 공개 연구의 판단 전환을 재구성한 38초1080×1920/60fps/AAC 영상·12장면/자막·2280프레임·합성 실제 앱 화면 검증 완료. 개인 원문·원래 모델응답·성과 수치 복사0, 신규 AI호출0. 공개 반영/CI는 JSON founder_case_film_2026_10_20에서 확인한다. 포트폴리오 웹페이지는 별도 GitHub Pages 원본에서 후속 개선하며 다른 프로젝트 README는 변경하지 않는다.
 
 2026-10-20 README·숏폼 공개 완료: 소스1a65205/CI39363278459 backend·frontend SUCCESS(Python785/실제PG9/frontend30/lint/types/build/privacy/migration). docs/README_AND_REEL_2026_10_20.md와 JSON readme_reel_2026_10_20 참조. 공개 규칙의 암묵지 6종, 승인·Evidence Test·재검토 흐름도, 확인된 범위/미통과/개선 순서를 README에 연결했다. 가상 사례의 40초1080×1920 H.264/AAC 모션 영상·자막·GIF·재생성 소스, 1200프레임 디코딩·10장면/자막·링크 확인. 공개 README HTML와 영상 SHA256 일치. 로컬 Python785/PG9 skipped도 통과했고 Windows 임시 별칭 링크만 QA에서 생략했다. Windows 격리 compile/prerender의 standalone symlink 경고는 Linux CI build 성공으로 구분한다. 개인 지원서 원문 공개0·신규 AI호출0·운영 설정 변경0. 개인 전체 작성 인수 미통과·이메일/Jev 보류·비교 실험 제외 유지.

@@ -35,3 +35,5 @@
 
 코드·영상·공개 반영 결과는 IMPLEMENTATION_STATUS.json의 founder_case_film_2026_10_20 항목으로 기록한다.
 
+Career Harness 공개 소스 eee5b0f와 CI39376670858 backend·frontend 성공을 확인했다. 별도 포트폴리오 페이지는 3235bfc, GitHub Pages 배포39377130333 성공이며 서비스 홈페이지·영상·한국어 자막을 연결했다. 다른 프로젝트 README와 프로필 README는 원격 변경이 없다.
+

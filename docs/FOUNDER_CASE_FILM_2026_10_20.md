@@ -48,3 +48,5 @@ python scripts/render-founder-film.py --ffmpeg "C:/path/to/ffmpeg.exe"
 
 이번 작업은 영상과 GitHub 소개 자산의 개선이다. 실제 개인 자료 전체 AI 작성은 여전히 인수 미통과이며 무료 입력 한도 해결이 남아 있다. 새로운 AI 검증·운영 웹 배포·메일·Jev 연결·합격 효과 검증을 완료했다는 의미는 아니다. 검증과 공개 반영 결과는 IMPLEMENTATION_STATUS.json의 founder_case_film_2026_10_20 항목에 남긴다.
 
+공개 소스 eee5b0f의 [CI39376670858](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39376670858) backend·frontend를 통과했다. 공개 영상 해시와 모든 2,280프레임 디코딩·12개 장면/자막·70프레임 GIF를 확인했다. [포트폴리오](https://yoon-chan-hyeok.github.io/#career-harness)에도 같은 영상을 연결했다.
+

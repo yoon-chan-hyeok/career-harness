@@ -1,7 +1,7 @@
 {
   "pack_version": "2.2 FINAL",
   "founder_case_film_2026_10_20": {
-    "status": "assets_verified_publication_pending",
+    "status": "published_verified",
     "scope": "Career Harness service README and founder-case motion film; other project and profile READMEs unchanged",
     "report": "docs/FOUNDER_CASE_FILM_2026_10_20.md",
     "readme_review": "docs/README_SERVICE_REVIEW_2026_10_20.md",
@@ -13,7 +13,13 @@
     "privacy": "no private document text or original model response published; actual app screenshot uses synthetic QA data; new AI calls 0",
     "runtime_changes": "none",
     "full_personal_ai_acceptance": false,
-    "github_publication": "pending"
+    "github_publication": "public source eee5b0f5d8b82225d6fd606044d44ace410439c2; CI39376670858 backend/frontend success; README HTML, homepage link and public film SHA256 verified",
+    "source_commit": "eee5b0f5d8b82225d6fd606044d44ace410439c2",
+    "ci_url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39376670858",
+    "portfolio_page": "https://yoon-chan-hyeok.github.io/#career-harness",
+    "portfolio_commit": "3235bfc03f8d4e53d815109aa94ed386220db408",
+    "portfolio_deployment": "GitHub Pages39377130333 success; public browser playback reached 38s without media errors; local Korean captions visible; desktop/mobile no overflow",
+    "other_readmes": "all unchanged, including profile README; comparison reads only"
   },
   "readme_reel_2026_10_20": {
     "scope": "README/code-path comparison, tacit-knowledge cases, user flowchart, improvement priorities and public synthetic motion reel",
@@ -33,7 +39,14 @@
     "ci_url": "https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39363278459",
     "runtime_changes": "none; provider, database schema, quotas, authentication and app workflow unchanged",
     "full_personal_ai_acceptance": false,
-    "next_priority": ["full-stage input budgets", "personal application end-to-end acceptance", "per-request latency", "operating database restore", "guide coverage", "current status versus history"]
+    "next_priority": [
+      "full-stage input budgets",
+      "personal application end-to-end acceptance",
+      "per-request latency",
+      "operating database restore",
+      "guide coverage",
+      "current status versus history"
+    ]
   },
   "current_milestone": "M14",
   "last_completed_milestone": "M12",
@@ -54,17 +67,17 @@
     "M13": "in_progress",
     "M14": "in_progress"
   },
-  "last_verified_commit": "1a65205a32320e665fb53491570e1e149e5c5d4f",
-  "last_verified_at": "2026-10-20T03:18:25+00:00",
+  "last_verified_commit": "eee5b0f5d8b82225d6fd606044d44ace410439c2",
+  "last_verified_at": "2026-10-20T05:52:26+00:00",
   "verification": {
-    "backend_tests": "CI39363278459: 785 passed, 9 PG skipped; actual isolated PostgreSQL 9 passed separately",
-    "backend_lint": "CI39363278459: pass",
-    "backend_typecheck": "CI39363278459: 0 errors, 0 warnings",
-    "frontend_lint": "CI39363278459: pass",
-    "frontend_typecheck": "CI39363278459: pass",
+    "backend_tests": "CI39376670858: 785 passed, 9 PG skipped; actual isolated PostgreSQL 9 passed separately",
+    "backend_lint": "CI39376670858: pass",
+    "backend_typecheck": "CI39376670858: 0 errors, 0 warnings",
+    "frontend_lint": "CI39376670858: pass",
+    "frontend_typecheck": "CI39376670858: pass",
     "frontend_auth_tests": "11 passed",
-    "frontend_build": "CI39363278459 Linux production build pass; frontend total tests 30; Windows isolated compile/prerender pass with standalone symlink warning",
-    "migrations": "CI39363278459 isolated PostgreSQL upgrade/check/downgrade base/upgrade pass; local isolated SQLite roundtrip/check pass; operating Supabase restore remains pending",
+    "frontend_build": "CI39376670858 Linux production build pass; frontend total tests 30; Windows isolated compile/prerender pass with standalone symlink warning",
+    "migrations": "CI39376670858 isolated PostgreSQL upgrade/check/downgrade base/upgrade pass; local isolated SQLite roundtrip/check pass; operating Supabase restore remains pending",
     "e2e": "pass: actual isolated HTTP 19 runs through failure/recovery/freeze/handoff/submission confirmation/outcome/CLOSED; workflow/fixture/MCP regressions pass",
     "browser": "public synthetic desktop/mobile/consent/account flow checked; no live SMTP/CAPTCHA verification; browser JSON download capture timed out",
     "running_state": "pass: separate session observes actual RUNNING, concurrent guard and recovered execution fencing; no live long-running model UI claim",
@@ -81,10 +94,10 @@
     "frontend_upgrade_tests": "14 passed: upgrade9/cache5",
     "document_export": "actual PDF pages/body verified; DOCX body preserved and unmeasured overflow truthfully unknown, no page count; bundled Word renderer absent",
     "source_privacy_tests": "14 new functional privacy checks; focused 74 passed; work/source-privacy-tests.xml",
-    "postgres_integration": "CI39363278459: 9 passed on actual isolated PostgreSQL16/pgvector",
-    "source_control": "public main source 1a65205 pushed; CI39363278459 passed; public README/video content verified; follow-up metadata records that source revision",
+    "postgres_integration": "CI39376670858: 9 passed on actual isolated PostgreSQL16/pgvector",
+    "source_control": "public main source eee5b0f pushed; CI39376670858 success; service homepage, README HTML and film hash verified",
     "backend_container": "prior container acceptance predates this upgrade; current serverless package offline import/tokenizer checks pass; no new full backend container build claimed",
-    "frontend_tests": "CI39363278459: 30 passed: auth11/deploy4/upgrades10/cache5",
+    "frontend_tests": "CI39376670858: 30 passed: auth11/deploy4/upgrades10/cache5",
     "expanded_browser": "pass: actual 3 choices -> stored selection -> stale old writing -> new brief chosen context -> reapproval gate; pixel office/admin/#admin/403/mobile390; owner console/page/request errors0",
     "production_fullstack_container": "historical pre-upgrade container acceptance only; current acceptance uses Windows backend/frontend and separate actual PG16",
     "prompt_cache": "pass: stable scoped prefixes, SDK raw usage types, durable invalid metrics, UTC periods and conservative quota/cost accounting; no live cache-hit or speed/cost claim",
