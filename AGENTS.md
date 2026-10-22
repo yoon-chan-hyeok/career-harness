@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-22 v4.1 후속: 사용자 제공 Question Guide RAG 명세의 G0/G1 첫 증분을 codex/v41-guide-retrieval에서 구현한다. 기반 v3 PR #1의 CI39773797332는 전체 회귀·실제 PG·마이그레이션·프런트 빌드까지 통과했다. 가이드 원형 1건, 수입/출처/버전/권리 경계·BM25·선택형 벡터 어댑터·구조 적합성·fallback·로컬 CLI를 추가한다. 877건 코퍼스·실제 임베딩/재판정·이중 RAG/다문항 합류·API/화면/Writer/Trace 연결은 미완이다. docs/V41_GUIDE_RETRIEVAL_2026_10_22.md와 JSON 항목을 확인하고 실제 외부 원문을 자동 승인하거나 전체 출시 완료로 표시하지 않는다.
+
 2026-10-22 v3 증분 개발 시작: 사용자 요청에 따라 main 기준4202b86에서 codex/v3-experience-shadow 브랜치로 분리하고 작은 커밋·PR로 협업한다. v3_contracts/v3_preview의 경험 읽기 모델·직무 해석/문단 Trace 계약·실행 없는 계획 조회를 추가한다. CAREER_V3_PREVIEW_ENABLED 기본0, 기존 실행/운영 배포/DB 구조/9권 규칙 활성화는 변경하지 않는다. 사용자 후속 변경 자료를 받아 다음 증분에 반영하며 공개 main 자동 병합은 하지 않는다. docs/V3_INCREMENT_01_2026_10_22.md와 JSON 해당 항목 참조.
 
 2026-10-20 README 페이즈 설명 후속 정정: 사용자 요청에 따라 README #career-phases 하단은 자기소개서 작성 26단계 설명만 남긴다. 개발 M0–M14·후속 보완 이력·레쥬메/면접/회고 별도 설명은 삭제했다. 기존 서비스 소개와 실제 검증 범위는 보존하며 앱 코드/설정/개인자료와 다른 저장소는 변경하지 않는다. 문서 검증은 JSON readme_phases_2026_10_20에 기록한다.
