@@ -32,6 +32,7 @@ class ExperienceCard(Contract):
     body: str
     evidence: RevisionRef
     source: RevisionRef
+    related_sources: tuple[RevisionRef, ...] = ()
     records: tuple[RevisionRef, ...] = ()
     warnings: tuple[str, ...] = ()
     mode: Literal["READ_ONLY_PROJECTION"] = "READ_ONLY_PROJECTION"

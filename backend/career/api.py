@@ -147,6 +147,26 @@ User = Annotated[str, Depends(user)]
 MemberUser = Annotated[str, Depends(identity_member)]
 
 
+def require_v3_preview():
+    if os.getenv("CAREER_V3_PREVIEW_ENABLED", "0") != "1":
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+
+
+@app.get("/api/v3/experience-cards/{evidence_id}", dependencies=[Depends(require_v3_preview)])
+def v3_experience_card(evidence_id: str, db: DB, ident: User):
+    from career.v3_preview import experience_card
+
+    return experience_card(db, ident, evidence_id)
+
+
+@app.get("/api/v3/applications/{workspace_id}/plan-preview", dependencies=[Depends(require_v3_preview)])
+def v3_plan_preview(workspace_id: str, db: DB, ident: User,
+                    intent: Literal["APPLICATION", "RESUME_ONLY", "INTERVIEW_ONLY"] = "APPLICATION"):
+    from career.v3_preview import application_plan
+
+    return application_plan(db, ident, workspace_id, intent)
+
+
 @app.exception_handler(ValueError)
 async def value_error(_request: Request, error: ValueError):
     return JSONResponse(status_code=409, content={"detail": str(error)})
