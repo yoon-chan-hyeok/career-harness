@@ -1,7 +1,28 @@
 {
   "pack_version": "2.2 FINAL",
+  "v41_guide_retrieval_2026_10_22": {
+    "status": "implemented_local_verified_unmerged",
+    "branch": "codex/v41-guide-retrieval",
+    "base_branch": "codex/v3-experience-shadow",
+    "base_commit": "9941043316e80db74c69026193b576fa9a916957",
+    "report": "docs/V41_GUIDE_RETRIEVAL_2026_10_22.md",
+    "scope": "G0 inventory and first G1 offline import/retrieval increment; no product API/UI or writer integration",
+    "corpus": "one existing mini-kit guide; no 877-record corpus; imported locally with REVIEW_REQUIRED; no new global release",
+    "retrieval": "BM25 plus injectable vector-score adapter and reciprocal rank fusion; conservative structural filters; no live embedding/reranker or calibrated threshold",
+    "approval": "separate curator release ledger bound to ID/version/hash; search never approves a user claim or persona; examples excluded",
+    "runtime_changes": "none in existing execution, UI, database schema or production settings",
+    "verification": "full Python: 852 passed, 9 PostgreSQL-only skipped locally; includes 38 new guide tests and 17 legacy WritingPlan tests; Ruff/full Pyright/privacy/diff checks pass; real mini-kit local import/inventory/fallback checked; remote CI is recorded on the PR",
+    "remaining": [
+      "authenticated selection API and HITL screens",
+      "QuestionContract extraction and semantic demand assessment",
+      "real guide vector index and reranking after corpus/rights review",
+      "joint personal Evidence RAG and multi-question portfolio allocation",
+      "selected guide snapshot in Brief/Writer, stale propagation and SectionTrace UI",
+      "actual request context budget and real-model acceptance"
+    ]
+  },
   "v3_increment_01_2026_10_22": {
-    "status": "implemented_local_backend_verified",
+    "status": "implemented_ci_verified_unmerged",
     "branch": "codex/v3-experience-shadow",
     "baseline_commit": "4202b86c079df28642e24e01d420664600bad316",
     "report": "docs/V3_INCREMENT_01_2026_10_22.md",
@@ -10,9 +31,8 @@
     "feature_flag": "CAREER_V3_PREVIEW_ENABLED=1",
     "runtime_changes": "new opt-in GET endpoints only; no legacy workflow execution changes, database migrations, live provider calls or production deployment",
     "rulebook_activation": "none; the supplied archive has audit summaries, not the complete nine books/246-rule source corpus",
-    "verification": "full Python regression: 814 passed, 9 PostgreSQL-only skipped; focused contracts/preview/HTTP/legacy workflow/SQLite migration: 40 passed; Ruff/Pyright/privacy pass; remote PostgreSQL and frontend build pending",
+    "verification": "Python 814 passed, 9 PostgreSQL-only skipped locally; focused 40 passed; frontend 30 passed; Ruff/Pyright/privacy pass; PR #1 CI39773797332 passed full regression, real PostgreSQL tests, migration roundtrip/check, frontend lint/typecheck/tests/build and dependency audit",
     "remaining": [
-      "remote PostgreSQL and frontend CI",
       "real request context compilation and input budgets",
       "Persona selection and role interpretation generation",
       "section trace persistence and local document revision UI",
