@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-22 v3 증분 개발 시작: 사용자 요청에 따라 main 기준4202b86에서 codex/v3-experience-shadow 브랜치로 분리하고 작은 커밋·PR로 협업한다. v3_contracts/v3_preview의 경험 읽기 모델·직무 해석/문단 Trace 계약·실행 없는 계획 조회를 추가한다. CAREER_V3_PREVIEW_ENABLED 기본0, 기존 실행/운영 배포/DB 구조/9권 규칙 활성화는 변경하지 않는다. 사용자 후속 변경 자료를 받아 다음 증분에 반영하며 공개 main 자동 병합은 하지 않는다. docs/V3_INCREMENT_01_2026_10_22.md와 JSON 해당 항목 참조.
+
 2026-10-20 README 페이즈 설명 후속 정정: 사용자 요청에 따라 README #career-phases 하단은 자기소개서 작성 26단계 설명만 남긴다. 개발 M0–M14·후속 보완 이력·레쥬메/면접/회고 별도 설명은 삭제했다. 기존 서비스 소개와 실제 검증 범위는 보존하며 앱 코드/설정/개인자료와 다른 저장소는 변경하지 않는다. 문서 검증은 JSON readme_phases_2026_10_20에 기록한다.
 
 2026-10-20 후속 공개 완료: eee5b0f/CI39376670858 backend·frontend SUCCESS. Career Harness README를 서비스 대상·기능·사용 순서·실제 홈페이지/작업실·실제 화면/38초 영상 중심으로 공개하고 About 홈페이지도 실제 홈으로 연결했다. 공개 MP4 SHA256 일치. 별도 포트폴리오 GitHub Pages 3235bfc/배포39377130333 SUCCESS, HTTP200·공개 브라우저·데스크톱/모바일 넘침0·로컬 영상38초/한국어 자막 확인. 다른 프로젝트 README와 프로필 README는 변경하지 않았으며 프로필 로컬 초안도 원복했다. 상세 JSON founder_case_film_2026_10_20 및 docs/README_SERVICE_REVIEW_2026_10_20.md. 개인 전체 작성 품질·운영 복구 미통과와 비교실험 제외 유지.

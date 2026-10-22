@@ -1,5 +1,25 @@
 {
   "pack_version": "2.2 FINAL",
+  "v3_increment_01_2026_10_22": {
+    "status": "implemented_local_backend_verified",
+    "branch": "codex/v3-experience-shadow",
+    "baseline_commit": "4202b86c079df28642e24e01d420664600bad316",
+    "report": "docs/V3_INCREMENT_01_2026_10_22.md",
+    "scope": "read-only experience projection; role interpretation/section trace/static budget contracts; authenticated owner-scoped shadow plan API",
+    "enabled_by_default": false,
+    "feature_flag": "CAREER_V3_PREVIEW_ENABLED=1",
+    "runtime_changes": "new opt-in GET endpoints only; no legacy workflow execution changes, database migrations, live provider calls or production deployment",
+    "rulebook_activation": "none; the supplied archive has audit summaries, not the complete nine books/246-rule source corpus",
+    "verification": "full Python regression: 814 passed, 9 PostgreSQL-only skipped; focused contracts/preview/HTTP/legacy workflow/SQLite migration: 40 passed; Ruff/Pyright/privacy pass; remote PostgreSQL and frontend build pending",
+    "remaining": [
+      "remote PostgreSQL and frontend CI",
+      "real request context compilation and input budgets",
+      "Persona selection and role interpretation generation",
+      "section trace persistence and local document revision UI",
+      "legacy next-action shadow comparison and executor adapters",
+      "full personal AI writing acceptance"
+    ]
+  },
   "readme_phases_2026_10_20": {
     "status": "documented_verified",
     "scope": "Career Harness README appendix only, with AGENTS/status bookkeeping; no other repository changes",
