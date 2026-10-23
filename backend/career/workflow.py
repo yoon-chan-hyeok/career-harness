@@ -450,6 +450,9 @@ class Workflow:
         if ws.state != "WAITING_STRATEGY_APPROVAL":
             raise ValueError("승인할 전략 제안이 없습니다.")
         item = self.artifact(ident, "ApplicationBrief")
+        from career.joint_portfolio import approve_persona
+
+        approve_persona(self, ident)
         lock(self.db, self.user, item)
         feedback(self.db, self.user, item, "ACCEPT")
         ws.state = "STRATEGY_LOCKED"
@@ -490,6 +493,10 @@ class Workflow:
         strategy = self.artifact(ident, "ApplicationBrief")
         if strategy.status != "LOCKED":
             raise ValueError("전략 승인이 먼저 필요합니다.")
+        from career.joint_portfolio import require_decision
+
+        material_decision = require_decision(self, ident, portfolio=True)
+        material = next((i for i in material_decision.data["items"] if i["question_id"] == qid), None) if material_decision else None
         from career.writing_plans import context as plan_context
         from career.writing_plans import persist as prepare_plan
 
@@ -514,9 +521,11 @@ class Workflow:
             if allocation is None:
                 raise ValueError("새로 추가한 문항의 역할을 다시 배분해 주세요.")
         chosen_pack = pack.data
+        if material:
+            chosen_pack = {**pack.data, "items": [i for i in pack.data["items"] if i["evidence_id"] in material["evidence_ids"]]}
         if selection:
             chosen_id = selection.data["evidence_id"]
-            chosen_pack = {**pack.data, "items": sorted(pack.data["items"], key=lambda i: i["evidence_id"] != chosen_id)}
+            chosen_pack = {**chosen_pack, "items": sorted(chosen_pack["items"], key=lambda i: i["evidence_id"] != chosen_id)}
             if allocation:
                 allocation = {**allocation, "evidence_candidate_ids": list(dict.fromkeys(
                     [chosen_id, *allocation["evidence_candidate_ids"]])),
@@ -545,6 +554,7 @@ class Workflow:
                     "strategy": strategy.data,
                     "evidence_pack": chosen_pack,
                     "question_allocation": allocation,
+                    "selected_material": material,
                     "writing_plan": plan_context(writing_plan),
                     "selected_experience": selection_context(selection),
                     "evidence": evidence,
@@ -556,6 +566,9 @@ class Workflow:
         )
         if data["question_id"] != qid:
             raise ValueError("문항 ID가 다릅니다.")
+        if material and (set(data["evidence_ids"]) != set(material["evidence_ids"])
+                         or data["primary_message"].strip() != material["primary_message"].strip()):
+            raise ValueError("사용자가 고른 소재·메시지를 그대로 반영해 주세요. 변경은 소재 선택 화면에서 확인해야 합니다.")
         data["writing_plan_id"] = writing_plan.id
         if selection:
             if selection.data["evidence_id"] not in data["evidence_ids"]:
@@ -1144,6 +1157,9 @@ class Workflow:
         if not resume:
             brief = latest(self.db, self.user, ident, "QuestionBrief", qid, required=False)
             if brief:
+                from career.portfolio import require_current as current_portfolio
+
+                current_portfolio(self, ident, brief)
                 from career.writing_plans import require_current as current_plan
 
                 writing_plan = current_plan(self, ident, qid, brief)

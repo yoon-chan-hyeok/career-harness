@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-23 I04: 사용자 후속 요청으로 codex/i04-joint-portfolio, 기반460150b/I03 PR#7에서 현재 Guide+본인 Evidence 문항 배분·Persona/소재 HITL을 구현한다. CAREER_JOINT_PORTFOLIO_ENABLED=0. 기존 portfolio/전략 승인 재사용, 선택→전략+Persona 승인→모든 문항 배분 승인 별도, Claim/Review/Lock/Freeze 불변. 구체 파일·검사·한계는 docs/I04_JOINT_PORTFOLIO.md와 status 우선. 로컬 관련131/최종새30·추가선택분기1/frontend38·lint/types/build·Ruff/Pyright 통과. 전체 CI 고정 SHA는 완료 후 기록. 실제 AI/브라우저 시각 검수·완전 의미 중복 판정 미통과, I05+·main 병합·운영 배포 제외.
+
 2026-10-23 I03 검증 완료: 코드·검사93f58c0 / CI39897932162 backend957·PG전용9 skipped와 별도실제PG9·MCP·migration·privacy·Ruff/Pyright·frontend34/lint/types/build/production audit0 모두 성공. PR#7 draft/unmerged, 기능 기본 OFF. 이 후속 커밋은 문서만 갱신하며 검증한 코드 SHA와 구분한다. 브라우저 시각 인수 NOT_RUN·계수기 지원 제한·실제 가이드 권리 등록과 모델 품질 인수는 docs/I03_GUIDE_WRITING_PLAN.md를 따른다. 다음 I04는 이 계약/선택 snapshot/WritingPlan·기존 QuestionPortfolio를 재사용하며 별도 요청/PR에서 진행한다.
 
 2026-10-23 I03: 사용자 후속 진행 요청에 따라 codex/i03-guide-writing-plan에서 현재 QuestionContract·가이드 선택·WritingPlan/API/UI를 연결했다. 기반9838362/I02 검증코드2e1df61은 보존한다. CAREER_GUIDE_SELECTION_ENABLED=0 기본 OFF, 현재 문항·권리·버전 우선, 화면/Brief/Writer 동일 snapshot, stale409·재요청·관련 하위 무효화·Frozen 불변·기존 Gate 유지. 로컬 관련Python86/frontend34·lint/types/build·Ruff/Pyright 통과. 실제 브라우저 시각 인수는 Work local browser 비활성화로 NOT_RUN. 전체 CI의 고정 SHA/결과는 docs/I03_GUIDE_WRITING_PLAN.md와 status를 확인한다. I00~I03 AC25 PASS·I04+28 NOT_RUN. I04 이상·main 병합·운영 배포는 이번에 하지 않는다.

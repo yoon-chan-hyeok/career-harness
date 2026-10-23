@@ -28,6 +28,7 @@ import { downloadPrivateExport } from "./private-export";
 import { loadPublicService, type PublicService } from "./public-service";
 import { ExperienceOptions } from "./experience-options";
 import { WritingPlanPanel } from "./writing-plan-panel";
+import { JointPortfolioPanel } from "./joint-portfolio-panel";
 import { ClaimEvidencePanel } from "./claim-evidence-test";
 import { ReviewResponsePanel, responsesComplete } from "./review-responses";
 import { ResearchStatus } from "./research-status";
@@ -1066,6 +1067,7 @@ function Card({ a }: { a?: Artifact }) {
 
 export default function Home() {
   const writingPlanDirty = useRef(false);
+  const jointPortfolioDirty = useRef(false);
   const [authConfiguration, setAuthConfiguration] =
     useState<AuthConfiguration | null>(null);
   const [authConfigurationError, setAuthConfigurationError] = useState("");
@@ -1214,7 +1216,7 @@ export default function Home() {
   const act = async (action: string, body: object = {}) => {
     if (!ws) return;
     if (
-      writingPlanDirty.current &&
+      (writingPlanDirty.current || jointPortfolioDirty.current) &&
       ["question-brief", "approve-question", "generate", "commands"].includes(
         action,
       )
@@ -2705,6 +2707,20 @@ export default function Home() {
                             </select>
                           </label>
                         </Panel>
+                        {questions.length > 0 && (
+                          <JointPortfolioPanel
+                            key={`joint:${ws.id}`}
+                            workspaceId={ws.id}
+                            revisionKey={ws.artifacts
+                              .map((a) => a.id + a.status)
+                              .join(":")}
+                            request={request}
+                            onSaved={() => refresh(ws.id)}
+                            ai={ai}
+                            disabled={busy}
+                            dirtyState={jointPortfolioDirty}
+                          />
+                        )}
                         {qid && (
                           <>
                             <WritingPlanPanel

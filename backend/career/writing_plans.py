@@ -161,6 +161,10 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
     from career.guide_choices import enabled, resolve
 
     guide, choice, guide_deps = resolve(service, workspace, qid, guide)
+    from career.joint_portfolio import hint
+
+    material, material_deps = hint(service, workspace, qid)
+    guide_deps.extend(material_deps)
     hold_notice = choice.get("notice") if choice else None
     try:
         execution_ready_guide(guide)
@@ -193,6 +197,8 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
     selected = [item for item in usable if item["id"] == chosen]
     if not selected and brief and brief.status in {"ACTIVE", "LOCKED"}:
         selected = [item for item in usable if item["id"] in brief.data["evidence_ids"]]
+    if material.get("current"):
+        selected = [item for item in usable if item["id"] in material["material"]["evidence_ids"]]
     revision = digest({"question": question, "company": ws.company, "role": ws.role,
                        "guide_hash": guide_hash, "evidence": states,
                        "strategy": [strategy.id, strategy.version, strategy.status] if strategy else None,
@@ -200,6 +206,8 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
                        "selection": [selection.id, selection.status] if selection else None})
     if choice:
         revision = digest([revision, choice])
+    if material:
+        revision = digest([revision, material])
     stored = latest(service.db, service.user, workspace, "WritingPlan", qid, required=False)
     is_current = bool(stored and stored.status in {"ACTIVE", "LOCKED"}
                       and stored.data["input_revision"] == revision)
@@ -233,7 +241,9 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
         "missing_information": missing, "phase": phase,
         "review_current": bool(review and review.status in {"ACTIVE", "LOCKED"}),
         "counting_notice": "현재 서비스는 공백·줄바꿈을 포함한 글자 수로 검사합니다. 지원처가 바이트 등 다른 기준이면 별도 확인하세요.",
-        "can_design": bool(strategy and strategy.status == "LOCKED" and usable and not hold_notice),
+        "can_design": bool(strategy and strategy.status == "LOCKED" and usable and not hold_notice
+                           and (not material or material.get("approvals_ready"))),
+        "material_selection": material,
         "writing_hold_notice": hold_notice,
         "guide_selection_enabled": enabled(), "guide_choice": choice,
         "_guide_deps": guide_deps,
@@ -251,6 +261,8 @@ def persist(service: "Workflow", workspace: str, qid: str, request: PlanRequest 
     state = preview(service, workspace, qid)
     if state["guide_choice"] and not state["guide_choice"]["current"]:
         raise ValueError(state["guide_choice"]["notice"])
+    if state["material_selection"] and not state["material_selection"]["current"]:
+        raise ValueError(state["material_selection"]["notice"])
     if request and request.expected_revision != state["state_revision"]:
         raise ValueError("문항·가이드 또는 경험이 바뀌었습니다. 현재 작성 설계를 다시 확인해 주세요.")
     emphasis = state["emphasis"]
@@ -289,6 +301,7 @@ def persist(service: "Workflow", workspace: str, qid: str, request: PlanRequest 
         "input_revision": state["state_revision"], "emphasis": emphasis,
         "working_notes": notes, "notes_are_verified_facts": False,
         "guide_choice": state["guide_choice"],
+        "material_selection": state["material_selection"],
         "evidence_ids": state["_evidence_ids"], "version": VERSION,
     }
     item, _ = save(service.db, service.user, workspace, "WritingPlan", data, deps=deps,
@@ -306,6 +319,7 @@ def context(plan) -> dict:
         "emphasis": (plan.data["emphasis"]["text"] if plan.data["emphasis"]["state"] == "active" else None),
         "working_notes": plan.data["working_notes"], "notes_are_verified_facts": False,
         "reference_examples_are_applicant_facts": False,
+        "material_selection": plan.data.get("material_selection", {}),
     }
 
 

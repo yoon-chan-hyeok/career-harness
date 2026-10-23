@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test:auth": "node --test tests/auth-client.test.cjs",
     "test:deploy": "node --test tests/deploy-config.test.cjs",
-    "test:upgrades": "node --test tests/upgrade-client.test.cjs tests/cache-usage.test.cjs tests/guide-choice-dom.test.cjs"
+    "test:upgrades": "node --test tests/upgrade-client.test.cjs tests/cache-usage.test.cjs tests/guide-choice-dom.test.cjs tests/joint-portfolio-dom.test.cjs"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

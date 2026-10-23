@@ -20,6 +20,8 @@ from career.db import Record, SessionLocal, engine
 from career.entities import ENTITY_MODELS
 from career.extraction import ExtractionDecision, ExtractionRequest
 from career.guide_choices import GuideChoiceRequest, QuestionConfirmation
+from career.joint_portfolio import DecisionRequest as JointDecisionRequest
+from career.joint_portfolio import ProposalRequest as JointProposalRequest
 from career.models import (
     AIUsageBucket,
     AIUsageReservation,
@@ -174,6 +176,40 @@ def context_preview(body: ContextRequest, db: DB, ident: User):
     from career.scoped_context import compile_task_context
 
     return compile_task_context(db, ident, body)
+
+
+def require_joint_portfolio():
+    from career.joint_portfolio import enabled
+
+    if not enabled():
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+
+
+@app.get("/api/v4/applications/{workspace}/portfolio", dependencies=[Depends(require_joint_portfolio)])
+def joint_portfolio_preview(workspace: str, db: DB, ident: User):
+    from career.joint_portfolio import preview
+
+    return preview(Workflow(db, ident), workspace)
+
+
+@app.post("/api/v4/applications/{workspace}/portfolio/propose", dependencies=[Depends(require_joint_portfolio)])
+def joint_portfolio_propose(workspace: str, body: JointProposalRequest, db: DB, ident: User,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]):
+    from career.activity import run_operation
+    from career.joint_portfolio import propose
+
+    return view(run_operation(db, ident, workspace, "portfolio-propose",
+        lambda: propose(Workflow(db, ident), workspace, body, idempotency_key), uses_ai=body.use_ai))
+
+
+@app.post("/api/v4/applications/{workspace}/portfolio/decide", dependencies=[Depends(require_joint_portfolio)])
+def joint_portfolio_decide(workspace: str, body: JointDecisionRequest, db: DB, ident: User,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]):
+    from career.activity import run_operation
+    from career.joint_portfolio import decide
+
+    return view(run_operation(db, ident, workspace, "portfolio-decide",
+        lambda: decide(Workflow(db, ident), workspace, body, idempotency_key), uses_ai=False))
 
 
 def require_guide_selection():

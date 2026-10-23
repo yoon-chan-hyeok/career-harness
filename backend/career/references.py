@@ -137,6 +137,7 @@ STAGES = {
     "evidence_mapper": "opportunity",
     "strategy": "strategy",
     "question_portfolio": "strategy",
+    "joint_portfolio": "strategy",
     "question_brief": "cover",
     "claim_evidence_test": "cover",
     "submission_readiness": "cover",

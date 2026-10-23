@@ -21,6 +21,9 @@ class QuestionPortfolio(Schema):
 
 
 def require_current(service, workspace, brief):
+    from career.joint_portfolio import require_decision
+
+    require_decision(service, workspace, portfolio=True)
     ws = service.ws(workspace)
     if len(ws.data.get("questions", [])) < 2:
         return
@@ -32,9 +35,11 @@ def require_current(service, workspace, brief):
         raise ValueError("현재 문항별 역할 배분을 반영해 메시지를 다시 설계해 주세요.")
 
 
-def plan(service, workspace, manual=None):
+def plan(service, workspace, manual=None, *, _joint_decision=None):
     ws = service.ws(workspace)
     service.editable(ws)
+    if _joint_decision is None and latest(service.db, service.user, workspace, "MaterialDecision", required=False):
+        raise ValueError("현재 소재 선택 화면에서 문항 배분을 수정해 주세요.")
     strategy = service.artifact(workspace, "ApplicationBrief")
     pack = service.artifact(workspace, "EvidencePack")
     questions = ws.data.get("questions", [])
@@ -79,7 +84,7 @@ def plan(service, workspace, manual=None):
         workspace,
         "QuestionPortfolio",
         value,
-        deps=[strategy.id, pack.id],
+        deps=[strategy.id, pack.id] + ([_joint_decision.id] if _joint_decision else []),
         sources=service.reference_sources("question_portfolio"),
         model="manual" if manual else service.current_model,
     )
@@ -87,8 +92,13 @@ def plan(service, workspace, manual=None):
 
 
 def approve(service, workspace):
+    from career.joint_portfolio import require_decision
+
     service.editable(service.ws(workspace))
+    decision = require_decision(service, workspace)
     result = service.artifact(workspace, "QuestionPortfolio")
+    if decision and decision.id not in result.depends_on:
+        raise ValueError("현재 소재 선택을 반영해 문항 배분을 다시 구성해 주세요.")
     lock(service.db, service.user, result)
     feedback(service.db, service.user, result, "ACCEPT")
     return result
