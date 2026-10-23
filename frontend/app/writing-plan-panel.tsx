@@ -16,11 +16,12 @@ type Guide = {
   writing_strategy: { instruction: string }[];
   reference_example: {
     origin: string;
+    notice?: string;
     total_characters?: number;
     body_paragraph_count?: number;
     paragraphs: { kind: string; function: string; text: string }[];
   };
-  source: { source_url: string; source_quote: string } | null;
+  source: { source_url: string; source_quote?: string } | null;
   skill_rules: string[];
 };
 type Plan = {
@@ -48,7 +49,9 @@ const phases: Record<string, string> = {
   COMPLETED: "문항 완성",
 };
 const exampleLabel = (guide: Guide) =>
-  guide.origin === "ARCHIVED_REFERENCE"
+  guide.reference_example.origin === "WITHHELD_RIGHTS_PENDING"
+    ? "예시 공개 범위 안내"
+    : guide.origin === "ARCHIVED_REFERENCE"
     ? "출처에 수록된 참고 예시"
     : "내용을 채우는 구조 예시";
 
@@ -262,6 +265,9 @@ export function WritingPlanPanel({
             </ul>
             <div className="writing-plan-example">
               <strong>{exampleLabel(data.guide)}</strong>
+              {data.guide.reference_example.notice && (
+                <p>{data.guide.reference_example.notice}</p>
+              )}
               {data.guide.reference_example.total_characters && (
                 <small>
                   원문 실측 {data.guide.reference_example.total_characters}자 ·
@@ -298,7 +304,7 @@ export function WritingPlanPanel({
                     가이드 원문 출처 ↗
                   </a>
                 )}
-                <blockquote>{source.source_quote}</blockquote>
+                {source.source_quote && <blockquote>{source.source_quote}</blockquote>}
                 <small>
                   보관된 참고 자료이며 현재 채용 조건을 증명하지 않습니다.
                 </small>

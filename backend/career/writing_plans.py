@@ -13,6 +13,7 @@ from sqlalchemy import select
 
 from career.artifacts import fresh, latest, lock, save
 from career.experience_options import evidence_fingerprint
+from career.guide_publication import publishable_guide
 from career.models import Artifact, Evidence
 from career.truth import owned, register_source, view
 
@@ -156,7 +157,7 @@ def guide_for(company: str, role: str, question: dict) -> dict:
 def preview(service: "Workflow", workspace: str, qid: str) -> dict:
     ws = service.ws(workspace)
     question = service.question(workspace, qid)
-    guide = guide_for(ws.company, ws.role, question)
+    guide = publishable_guide(guide_for(ws.company, ws.role, question))
     guide_hash = digest(guide)
     strategy = latest(service.db, service.user, workspace, "ApplicationBrief", required=False)
     pack = latest(service.db, service.user, workspace, "EvidencePack", required=False)
@@ -281,10 +282,11 @@ def persist(service: "Workflow", workspace: str, qid: str, request: PlanRequest 
 
 def context(plan) -> dict:
     """Same guide used by the screen; examples and working notes have no fact authority."""
+    guide = publishable_guide(plan.data["guide"])
     return {
         "plan_id": plan.id, "plan_version": plan.version,
-        "guide_snapshot_sha256": plan.data["guide_snapshot_sha256"],
-        "guide": deepcopy(plan.data["guide"]),
+        "guide_snapshot_sha256": digest(guide),
+        "guide": guide,
         "emphasis": (plan.data["emphasis"]["text"] if plan.data["emphasis"]["state"] == "active" else None),
         "working_notes": plan.data["working_notes"], "notes_are_verified_facts": False,
         "reference_examples_are_applicant_facts": False,
