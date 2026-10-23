@@ -3,16 +3,16 @@ AC-001,I00,CRITICAL,inventory,Pin actual branch and HEAD,Actual SHA logged; no a
 AC-002,I00,HIGH,inventory,Count actual guide JSON corpus,Existing one guide not mistaken for 877 different records,automated,PASS,docs/INVENTORY_AND_BASELINE.md; source manifest and pinned SHA checked; AC-004: 106 tests passed before edits
 AC-003,I00,HIGH,inventory,Identify source rights/permissions,Unknown redistribution rights not silently marked approved,automated,PASS,docs/INVENTORY_AND_BASELINE.md; source manifest and pinned SHA checked; AC-004: 106 tests passed before edits
 AC-004,I00,CRITICAL,regression,Run baseline rulebook/writing/portfolio tests,Actual command/results logged before modifications,automated,PASS,docs/INVENTORY_AND_BASELINE.md; source manifest and pinned SHA checked; AC-004: 106 tests passed before edits
-AC-005,I01,CRITICAL,exact,POSCO DX same company role question 600 chars,ARCHIVED_REFERENCE and 70/120/280/130 preserved,automated,NOT_RUN,
-AC-006,I01,CRITICAL,exact,Same words other company or role,Not EXACT; advisory or fallback,automated,NOT_RUN,
-AC-007,I01,HIGH,exact,Same company question but 800 chars,Not EXACT; recompute advisory length,automated,NOT_RUN,
-AC-008,I01,HIGH,semantic,Challenge question vs competency question,"Contradictory family filtered, not accepted by keyword similarity",automated,NOT_RUN,
-AC-009,I01,HIGH,semantic,Missing mandatory requirement in retrieved guide,Missing_demands reported; no silent advice transfer,automated,NOT_RUN,
-AC-010,I01,HIGH,fallback,No matching guide,7 known template families still work,automated,NOT_RUN,
-AC-011,I01,HIGH,fallback,Vector/index unavailable,"LEXICAL_ONLY or fallback reported, no fake semantic_used",automated,NOT_RUN,
-AC-012,I01,CRITICAL,rights,Unknown rights for archived full example,"Only allowed summary and provenance, no unapproved full public text",automated,NOT_RUN,
-AC-013,I01,HIGH,dedupe,Duplicate imported guide ID/hash,Idempotent import; conflict visible,automated,NOT_RUN,
-AC-014,I01,CRITICAL,data,Attempt put user Evidence into global Guide index,Reject mixed namespaces,automated,NOT_RUN,
+AC-005,I01,CRITICAL,exact,POSCO DX same company role question 600 chars,ARCHIVED_REFERENCE and 70/120/280/130 preserved,automated,PASS,test_legacy_exact_preserves_counts_and_original_hash_without_approving_unknown_policy
+AC-006,I01,CRITICAL,exact,Same words other company or role,Not EXACT; advisory or fallback,automated,PASS,test_legacy_exact_requires_company_role_and_current_limit_independently
+AC-007,I01,HIGH,exact,Same company question but 800 chars,Not EXACT; recompute advisory length,automated,PASS,test_legacy_exact_requires_company_role_and_current_limit_independently
+AC-008,I01,HIGH,semantic,Challenge question vs competency question,"Contradictory family filtered, not accepted by keyword similarity",automated,PASS,test_shared_technical_keywords_do_not_override_current_question_intent; test_negative_requirements_are_not_positive_collaboration_advice
+AC-009,I01,HIGH,semantic,Missing mandatory requirement in retrieved guide,Missing_demands reported; no silent advice transfer,automated,PASS,test_explicit_demands_and_negative_topics_override_rank
+AC-010,I01,HIGH,fallback,No matching guide,7 known template families still work,automated,PASS,test_seven_fallback_families_without_guides
+AC-011,I01,HIGH,fallback,Vector/index unavailable,"LEXICAL_ONLY or fallback reported, no fake semantic_used",automated,PASS,test_stale_or_foreign_precomputed_index_falls_back_to_lexical; test_callback_cannot_execute_or_leak_provider_messages_in_offline_search
+AC-012,I01,CRITICAL,rights,Unknown rights for archived full example,"Only allowed summary and provenance, no unapproved full public text",automated,PARTIAL,I01 offline DTO: PASS test_publication_permission_is_separate_from_structural_execution; legacy public_preview fulltext rights unresolved; I03 release blocker
+AC-013,I01,HIGH,dedupe,Duplicate imported guide ID/hash,Idempotent import; conflict visible,automated,PASS,test_import_idempotent_version_immutable_and_new_version_requires_new_release
+AC-014,I01,CRITICAL,data,Attempt put user Evidence into global Guide index,Reject mixed namespaces,automated,PASS,test_personal_truth_rejected_in_legacy_at_every_depth; test_actual_personal_models_cannot_enter_global_catalog
 AC-015,I02,CRITICAL,privacy,A actor requests B source/vector/context,Cross-user outputs zero; denied,automated,NOT_RUN,
 AC-016,I02,HIGH,experience,Start experience registration without JD,"Allowed, extract not auto VERIFIED",automated,NOT_RUN,
 AC-017,I02,HIGH,context,Task-specific ContextPack,"Only appropriate user, task scope and approved prefs",automated,NOT_RUN,
