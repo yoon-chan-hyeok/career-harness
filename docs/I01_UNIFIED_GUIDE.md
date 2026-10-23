@@ -57,7 +57,7 @@ python -m career.question_guide_cli search private_input/question.json --catalog
 - 전체 로컬 실행: Windows MCP stdio 대기로 첫 시도를 중단했다. 해당 테스트 제외 후 재시도는 호스트 환경 전환 때 85%에서 종료돼 완료 결과가 없다. 둘 다 전체 통과로 계산하지 않는다. 저장소 테스트와 CI에 skip을 추가하지 않았다.
 - I00 exact head d4e1689의 [CI 39888623254](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39888623254): 백엔드 전체 pytest(MCP 포함), 실제 PostgreSQL, 마이그레이션 왕복/check, Ruff/Pyright/privacy 성공.
 - 같은 CI의 프런트엔드는 기존 Next.js 15.5.27에 대한 production npm audit에서 실패했다. 이후 frontend lint/type/tests/build는 SKIPPED다. 아래 보안 blocker가 해결되기 전 전체 CI 성공으로 표시하지 않는다.
-- I01 원격 CI: PR의 실제 HEAD 결과를 후속 기록한다. 로컬·원격·과거 SHA 결과는 구분한다.
+- I01 최종 코드·검사 SHA `f8ef7ff429d4a410dccd26d3e815dea17bd94786`, [CI39890434876](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39890434876): **backend SUCCESS, 868 passed / PG 전용9 skipped**, 별도 실제 PG **9 passed**, MCP 포함, migration 왕복/check·Ruff/Pyright/privacy 성공. **frontend FAILURE**는 위 기존 의존성 audit이며 후속 frontend 검사 SKIPPED. 이 결과를 기록하는 후속 커밋은 문서만 변경하고 코드·검사는 동일하다. 전체 CI PASS는 아니다.
 
 ## 미완료와 다음 단계 의존성
 

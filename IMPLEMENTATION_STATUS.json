@@ -2081,13 +2081,13 @@
     "ci": "39888623254: backend success; frontend production dependency audit failure; subsequent frontend checks skipped"
   },
   "unified_i01_2026_10_23": {
-    "status": "implemented_local_tests_passed_draft_ci_pending",
+    "status": "implemented_backend_ci_verified_frontend_security_blocked",
     "branch": "codex/i01-unified-guide",
     "base_branch": "codex/i00-unified-inventory",
     "base_commit": "d4e1689e7ed48ea13a5bbcf029c3d66e8c3cea24",
     "reused_commit": "26d89a92f92d7c464928afd058ab84aeea09ccda",
     "report": "docs/I01_UNIFIED_GUIDE.md",
-    "verification": "83 offline guide tests passed (final 2.01s); Ruff/Pyright/privacy/diff checks passed; baseline106 passed; core/API/UI/models/migrations byte-identical to main4202b86. Full local attempts interrupted; I01 remote CI pending.",
+    "verification": "Final code/tests SHA f8ef7ff: backend CI 868 passed, 9 PG-only skipped; separate real PG9 passed; MCP included; migrations roundtrip/check, Ruff/Pyright/privacy passed. Local guide83 and baseline106 passed. Frontend audit failed on inherited Next.js dependency; subsequent frontend checks SKIPPED. Full CI not passed.",
     "default": "QUESTION_GUIDE_RAG_ENABLED=0; explicit local CLI opt-in; no product route integration",
     "compatibility": "Existing Fact/Evidence/Claim Test/WritingPlan/QuestionPortfolio/Review/Lock/Freeze/Submission modules unchanged",
     "remaining": [
@@ -2097,6 +2097,10 @@
     ],
     "migrations": false,
     "live_model_calls": false,
-    "production_deployment": false
+    "production_deployment": false,
+    "pr": "https://github.com/yoon-chan-hyeok/career-harness/pull/4",
+    "tested_commit": "f8ef7ff429d4a410dccd26d3e815dea17bd94786",
+    "ci_run": 39890434876,
+    "report_followup": "This later commit updates verification documentation only; tested code and tests remain at f8ef7ff."
   }
 }
