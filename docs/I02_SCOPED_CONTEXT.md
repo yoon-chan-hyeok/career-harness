@@ -73,3 +73,9 @@ python scripts/check_privacy.py
 AC-015~019는 실행 증거에 맞춰 기록한다. I03+ 항목은 NOT_RUN을 유지한다. I03은 이 scope/version 인터페이스를 사용해 현재 QuestionContract·Guide 선택·WritingPlan snapshot/API/UI를 연결해야 한다. 이후 다문항 배분/Persona 결정·실제 Rule/Trace·Writer 실행·외부 전송 동의·운영 인수는 통합 PR 순서로 진행한다. 새로운 전용 VoiceProfile 저장/편집, 의미적 Context 선택, 실제 모델 입력 품질·운영 성능은 이번 완료 범위가 아니다.
 
 main 자동 병합·운영 자동 배포는 하지 않는다. PR 보고는 변경 파일·실행 검사·기존 호환성·미완료와 다음 의존성을 유지한다.
+
+## 고정 코드·검사 SHA의 최종 CI 결과
+
+검증한 SHA `2e1df61265da962414cf3fb09fa2ecd747785433`, [CI39893880397](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39893880397)는 backend/frontend 모두 SUCCESS다. 전체 Python **928 passed / PG 전용9 skipped**, 별도 실제 PostgreSQL **9 passed**, MCP·migration upgrade/check/downgrade/upgrade·Ruff/Pyright/privacy와 frontend30/lint/types/build·production audit0를 통과했다. 로컬87개 인수도 통과했다. 이 결과를 기록한 후속 커밋은 문서만 변경하며 코드·검사는 위 SHA와 동일하다. 문서 HEAD의 자동 CI와 위 고정 검증 결과는 구분한다.
+
+현재 인수표는 I00~I02의19개 PASS, I03 이후34개 NOT_RUN이다. PR은 draft/unmerged, 기능은 기본 OFF다. main4202b86·원래 v3 9941043·v4.1 26d89a9 보존을 확인했다. 실제 모델·개인 데이터·운영 배포 수행은 없다.

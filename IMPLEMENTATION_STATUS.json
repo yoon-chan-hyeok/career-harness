@@ -2116,7 +2116,7 @@
     "ci": "39892050961: backend873, PG-only9 skipped; separate realPG9/MCP/migration/privacy/static and frontend30/lint/types/build/audit0 SUCCESS"
   },
   "i02_context_2026_10_23": {
-    "status": "implemented_local_acceptance_ci_pending",
+    "status": "full_ci_passed_unmerged_feature_off",
     "branch": "codex/i02-scoped-context",
     "base_branch": "codex/i01-readiness-fixes",
     "base_commit": "75073193f9ac47f1c5b451b389baf6d971d406bd",
@@ -2124,7 +2124,7 @@
     "report": "docs/I02_SCOPED_CONTEXT.md",
     "scope": "Read-only ExperienceCardProjection, task ScopedContextManifest/ContextPack and DynamicPlanPreview; no second Truth store or executor",
     "feature_flag": "CAREER_CONTEXT_PREVIEW_ENABLED=0",
-    "verification": "87 targeted context/prototype/legacy writing/Claim/portfolio passed (26.67s); Ruff/Pyright/privacy/diff passed; remote full CI pending",
+    "verification": "Code/tests SHA2e1df61: full CI SUCCESS; pytest928 passed/9 PG-only skipped; separate realPG9 passed; MCP/migration roundtrip/check/Ruff/Pyright/privacy and frontend30/lint/types/build/production audit0 passed. Local target87 passed.",
     "compatibility": "Existing Fact/Evidence/Claim/Plan/Portfolio/Review/Lock/Freeze/Submission core, models, migrations and frontend unchanged from7507319",
     "remaining": [
       "I03 Guide selection/QuestionContract/WritingPlan API+UI",
@@ -2133,6 +2133,10 @@
     ],
     "production_deployment": false,
     "live_model_calls": false,
-    "migrations": false
+    "migrations": false,
+    "tested_commit": "2e1df61265da962414cf3fb09fa2ecd747785433",
+    "ci_run": 39893880397,
+    "pr": "https://github.com/yoon-chan-hyeok/career-harness/pull/6",
+    "documentation_followup": "This later commit records verification only; product code and tests remain identical to tested2e1df61."
   }
 }
