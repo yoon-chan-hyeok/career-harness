@@ -7,6 +7,7 @@ from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from career.db import Record
+from career.guide_publication import publication_projection
 from career.models import Evidence, Fact, Source
 from career.validation import GOOD
 
@@ -26,7 +27,7 @@ def owned(db: Session, model, user: str, ident: str):
 
 
 def view(row) -> dict[str, Any]:
-    return {column.name: getattr(row, column.name) for column in row.__table__.columns}
+    return publication_projection({column.name: getattr(row, column.name) for column in row.__table__.columns})
 
 
 def register_source(db: Session, user: str, path: str, content: str, authority: str, data=None):

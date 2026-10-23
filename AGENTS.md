@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-23 次 단계 요청: I01 차단 보완은 docs/I01_READINESS_FIXES.md. Next15.5.28·production audit0, 가이드 전문/인용을 preview/Writer/과거 view·export에서 투영하고 저장본 불변. Python24/frontend30·lint/types/build 통과. 전체 CI 확인 후 I02 Context/Experience/Shadow를 별도 PR로 진행하며 I03 이상·main 병합·운영 배포는 제외한다.
+
 2026-10-23 I01: docs/I01_UNIFIED_GUIDE.md가 새 가이드 계약의 현재 기록이다. codex/i01-unified-guide는 I00 PR #3 위에서26d89a9의 가이드 코드만 재사용한다. 새 기능 기본 OFF·순수 오프라인, 기존 서비스 경로 불변. 가이드83검사 통과. 코드·검사 SHA f8ef7ff의 CI39890434876 backend868/별도PG9·MCP·migration·정적·privacy 성공, frontend는 기존 Next.js 보안 감사 실패로 후속검사 SKIPPED. 전체 CI 통과 아님. 후속 문서 커밋과 tested SHA를 구분한다. AC-012는 기존 public_preview 원문 권리 때문에 PARTIAL, I02 이후 NOT_RUN. 이 상태를 전체 구현/운영 완료로 표시하지 않는다.
 
 2026-10-23 통합 기준: C/v4는 상위 설계, v4.1은 Question Guide RAG 하위 기능이다. 사용자 지정 MASTER_HANDOFF_20261022를 기준으로 초기 I00·I01만 진행한다. docs/UNIFIED_IMPLEMENTATION_PLAN.md와 docs/INVENTORY_AND_BASELINE.md, docs/UNIFIED_ACCEPTANCE_TEST_MATRIX.csv를 우선한다. 기존 v3/v4.1 브랜치는 보존하고 I00→I01→I02 순서로 재사용한다. Fact/Evidence/Claim Test/WritingPlan/QuestionPortfolio/Review/Lock/Freeze/Submission을 약화하지 않는다. main 직접 수정·자동 병합·운영 배포 금지. 매 PR은 실제 변경 파일·실행 검사·호환성·미완료·다음 의존성을 보고한다.

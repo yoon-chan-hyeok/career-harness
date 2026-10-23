@@ -2102,5 +2102,15 @@
     "tested_commit": "f8ef7ff429d4a410dccd26d3e815dea17bd94786",
     "ci_run": 39890434876,
     "report_followup": "This later commit updates verification documentation only; tested code and tests remain at f8ef7ff."
+  },
+  "i01_readiness_2026_10_23": {
+    "status": "local_verified_ci_pending",
+    "branch": "codex/i01-readiness-fixes",
+    "base_commit": "737b335f01a4dec371ef54b49932dd2b1c41af9e",
+    "report": "docs/I01_READINESS_FIXES.md",
+    "checks": "Python24 passed; frontend30/lint/types/build passed; Ruff/Pyright passed; production npm audit0; dev-only high5 remain",
+    "rights": "AC-012 runtime projection PASS; no redistribution grant; historical snapshots immutable",
+    "next": "I02 only after baseline CI; no I03+ execution",
+    "production_deployment": false
   }
 }
