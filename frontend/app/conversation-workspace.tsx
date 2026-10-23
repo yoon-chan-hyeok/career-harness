@@ -17,6 +17,7 @@ import { ApplicationPacket } from "./application-packet";
 import { ResearchStatus } from "./research-status";
 import { WritingPlanPanel } from "./writing-plan-panel";
 import { JointPortfolioPanel } from "./joint-portfolio-panel";
+import { RulePilotPanel } from "./rule-pilot-panel";
 
 type Turn = {
   id: string;
@@ -395,6 +396,14 @@ export function ConversationWorkspace({
                 </div>
               </div>
             ))}
+            <RulePilotPanel
+              key={`rules:${w.id}`}
+              workspaceId={w.id}
+              revisionKey={w.artifacts.map((a) => a.id + a.status).join(":")}
+              request={request}
+              onSaved={() => refresh(w.id)}
+              disabled={sending}
+            />
             {w.data.questions.length > 0 && (
               <JointPortfolioPanel
                 key={`joint:${w.id}`}

@@ -2190,5 +2190,30 @@
     "ci_run": 39902127614,
     "pr": "https://github.com/yoon-chan-hyeok/career-harness/pull/8",
     "documentation_followup": "This later commit updates verification documentation only; product code/tests remain identical to tested079a49f."
+  },
+  "i05_rule_pilot_2026_10_23": {
+    "status": "local_verified_full_ci_pending_real_rule_activation_pending",
+    "branch": "codex/i05-rule-trace-foundation",
+    "base_branch": "codex/i04-joint-portfolio",
+    "base_commit": "76d40977672db153a5a563e86f8ebb5e4f0e127b",
+    "report": "docs/I05_RULE_TRACE_FOUNDATION.md",
+    "feature_flag": "CAREER_RULE_PILOT_ENABLED=0; owner unset",
+    "scope": "Private read-only rule index; source/line attestation, bounded real code evaluation, explicit scoped activation/retirement, actual RuleExecution bound to existing Review/Lock/ready",
+    "actual_index": {"sha256": "66ac8e94c72f50d63a5f6ede5e6ac5be43869b0052a4f0512ea9d53fc0cab85d", "rows": 246, "candidate_52": 52, "unrefined_65": 65, "active": 0, "attested_source_maps": 0},
+    "verification": "Local baseline66; final related Python173 including new22; frontend43 incl actual React DOM5/lint/types/build; Ruff/Pyright0. Full CI pending.",
+    "acceptance": "I00-I05 37 PASS in observed import/synthetic automation; I06+16 NOT_RUN; actual real-rule activation remains pending",
+    "compatibility": "Legacy six references/rulebook/writing_rules/promotion and Fact/Evidence/Claim/Review/Lock/Freeze/Submission retained; no models/migrations; adopted rules cannot bypass proof by disabling pilot",
+    "remaining": [
+      "Pinned full Linux CI",
+      "Original nine-book source files/source maps and human attestation; original ZIP path asynchronously requested; real rule activations0",
+      "Actual browser visual QA/LLM rule quality/staging/rollback acceptance NOT_RUN",
+      "Specified 25 gates and static linked20 regressions remain NOT_RUN; bounded code cases are separate",
+      "I06 text-unit why/local edits; I07 dynamic runtime; I08 actual acceptance in dependency order"
+    ],
+    "production_deployment": false,
+    "main_modified": false,
+    "live_model_calls": false,
+    "migrations": false,
+    "overall_goal_complete": false
   }
 }

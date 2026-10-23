@@ -31,11 +31,11 @@ AC-029,I04,HIGH,HITL,Reject/modify/combine Persona/material,User decision persis
 AC-030,I04,CRITICAL,HITL,No user approval of Persona,Not user-selected or locked automatically,automated,PASS,test_get_is_read_only_and_proposal_never_selects_persona_or_locks_strategy; test_three_questions_need_complete_allocation_persona_strategy_and_portfolio_approvals
 AC-031,I04,HIGH,HITL,Application A Persona chosen,Does not bind separate Application B,automated,PASS,test_private_evidence_only_and_other_application_persona_never_leaks; test_choice_does_not_invalidate_another_application_and_feature_off_does_not_bypass; test_auth_scope_flag_schema_injection_and_disabled_flag_cannot_bypass_saved_hold
 AC-032,I04,CRITICAL,ownership,User selected Evidence lacks Ownership,HOLD/VERIFY; no upgrade to DIRECT via preference,automated,PASS,test_missing_ownership_is_hold_and_cannot_be_upgraded_by_preference; test_explicit_experience_selection_cannot_be_silently_replaced; test_changed_sources_and_guide_hold_every_final_gate
-AC-033,I05,CRITICAL,rule,Import 246 read-only index,No active unapproved rule,automated,NOT_RUN,
-AC-034,I05,CRITICAL,rule,52 candidate rules and 65 unrefined rules,Do not use in ACTIVE resolver,automated,NOT_RUN,
-AC-035,I05,HIGH,rule,Legacy heading-based ID vs canonical rule ID,Never claim equivalence without verified source map,automated,NOT_RUN,
-AC-036,I05,CRITICAL,trace,Rule only retrieved not executed,No APPLIED status without action + gate event,automated,NOT_RUN,
-AC-037,I05,HIGH,eval,20 new linked regressions not run,"NOT_RUN retained, not presented as evaluation pass",automated,NOT_RUN,
+AC-033,I05,CRITICAL,rule,Import 246 read-only index,No active unapproved rule,automated,PASS,Actual provided CSV66ac8e94 read246/candidate52/unrefined65/active0/source-map0; test_import_is_read_only_even_if_csv_declares_active_and_246_synthetic_rows_have_no_attestation; real activation pending
+AC-034,I05,CRITICAL,rule,52 candidate rules and 65 unrefined rules,Do not use in ACTIVE resolver,automated,PASS,test_52_and_65_cannot_enter_active_resolver_even_with_contract
+AC-035,I05,HIGH,rule,Legacy heading-based ID vs canonical rule ID,Never claim equivalence without verified source map,automated,PASS,test_source_hash_span_and_legacy_heading_alone_cannot_attest_equivalence; test_source_review_real_code_eval_and_human_activation_are_separate_and_bound
+AC-036,I05,CRITICAL,trace,Rule only retrieved not executed,No APPLIED status without action + gate event,automated,PASS,test_retrieved_only_never_applied_and_actual_action_gate_output_required; test_not_triggered_is_not_applied_and_failure_blocks_instead_of_fabricating; test_source_contract_index_and_implementation_changes_hold_existing_activation
+AC-037,I05,HIGH,eval,20 new linked regressions not run,"NOT_RUN retained, not presented as evaluation pass",automated,PASS,test_get_has_only_selects_no_provider_and_preserves_static_20_25_not_run; actual20/25 NOT_RUN retained; code evaluation not LLM evaluation
 AC-038,I06,CRITICAL,claim,Unsupported metric denominator in writer,"HOLD/no fabricated number, Claim Test preserved",automated,NOT_RUN,
 AC-039,I06,CRITICAL,review,P0/P1 review issue unaddressed,Freeze/ready blocked,automated,NOT_RUN,
 AC-040,I06,CRITICAL,privacy,User B requests A text-unit why,"Denied, no source or preference leak",automated,NOT_RUN,

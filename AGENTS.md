@@ -1,5 +1,7 @@
 # AGENTS.md — Career Harness
 
+2026-10-23 지속 목표/I05: 사용자 목표 '할거 계속 ㄱㄱ'는 active이며 한 단계 완료로 전체 완료 처리하지 않는다. codex/i05-rule-trace-foundation, 기반76d4097/I04 PR#8. 실제246 인덱스 read-only 수입(52/65/active0), 개인 pilot 출처/행 확인→실제 코드 평가→범위 승인→문서 RuleExecution, 기존 Review/final_lock/ready 연결. 기본 OFF·단일 owner, 실제9권 원문/실제 활성화0·전체목표 미완료. docs/I05_RULE_TRACE_FOUNDATION.md와 status 우선. baseline66/최종관련173·새22/frontend43·lint/types/build·Ruff/Pyright 통과, 전체CI는 고정 SHA 기록 예정. 다음I06+ 순서 유지·main 병합/운영 배포 금지.
+
 2026-10-23 I04 검증 완료: 코드·검사079a49f / CI39902127614 backend987·PG전용9 skipped와 별도실제PG9·MCP·migration·privacy·Ruff/Pyright·frontend38/lint/types/build/production audit0 모두 성공. PR#8 draft/unmerged·기본 OFF. 이 후속 커밋은 검증 문서만 갱신하며 tested SHA와 구분한다. 실제 브라우저/AI 품질·완전 의미 중복 판정·운영 가이드 권리 등록은 미완료다. I00~I04 AC32 PASS·I05+21 NOT_RUN. 다음 I05는 사용자 후속 요청에 따라 별도 PR에서 Rule 읽기/소수 실행 계약/실제 trace를 추가하며 52/65 자동 활성화·main 병합·운영 배포를 하지 않는다.
 
 2026-10-23 I04: 사용자 후속 요청으로 codex/i04-joint-portfolio, 기반460150b/I03 PR#7에서 현재 Guide+본인 Evidence 문항 배분·Persona/소재 HITL을 구현한다. CAREER_JOINT_PORTFOLIO_ENABLED=0. 기존 portfolio/전략 승인 재사용, 선택→전략+Persona 승인→모든 문항 배분 승인 별도, Claim/Review/Lock/Freeze 불변. 구체 파일·검사·한계는 docs/I04_JOINT_PORTFOLIO.md와 status 우선. 로컬 관련131/최종새30·추가선택분기1/frontend38·lint/types/build·Ruff/Pyright 통과. 전체 CI 고정 SHA는 완료 후 기록. 실제 AI/브라우저 시각 검수·완전 의미 중복 판정 미통과, I05+·main 병합·운영 배포 제외.

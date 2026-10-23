@@ -29,6 +29,7 @@ import { loadPublicService, type PublicService } from "./public-service";
 import { ExperienceOptions } from "./experience-options";
 import { WritingPlanPanel } from "./writing-plan-panel";
 import { JointPortfolioPanel } from "./joint-portfolio-panel";
+import { RulePilotPanel } from "./rule-pilot-panel";
 import { ClaimEvidencePanel } from "./claim-evidence-test";
 import { ReviewResponsePanel, responsesComplete } from "./review-responses";
 import { ResearchStatus } from "./research-status";
@@ -2707,6 +2708,16 @@ export default function Home() {
                             </select>
                           </label>
                         </Panel>
+                        <RulePilotPanel
+                          key={`rules:${ws.id}`}
+                          workspaceId={ws.id}
+                          revisionKey={ws.artifacts
+                            .map((a) => a.id + a.status)
+                            .join(":")}
+                          request={request}
+                          onSaved={() => refresh(ws.id)}
+                          disabled={busy}
+                        />
                         {questions.length > 0 && (
                           <JointPortfolioPanel
                             key={`joint:${ws.id}`}

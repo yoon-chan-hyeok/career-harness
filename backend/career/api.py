@@ -14,6 +14,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import TimeoutError as DatabasePoolTimeout
 from sqlalchemy.orm import Session
 
+from career.artifacts import fresh
 from career.authentication import authenticate, public_auth_configuration
 from career.conversation import ChatRequest, conversation_uses_ai, converse, history
 from career.db import Record, SessionLocal, engine
@@ -55,6 +56,8 @@ from career.provider_policy import BudgetExceeded
 from career.providers import ProviderUnavailable
 from career.public_guard import bind_request, limit_request
 from career.retrieval import configured_embedder, index_embeddings, search
+from career.rule_pilot import DocumentRequest as RuleDocumentRequest
+from career.rule_pilot import HumanRequest as RuleHumanRequest
 from career.scoped_context import ContextRequest
 from career.semantic_models import LocalEvidenceEmbedding
 from career.telemetry import export_events
@@ -176,6 +179,72 @@ def context_preview(body: ContextRequest, db: DB, ident: User):
     from career.scoped_context import compile_task_context
 
     return compile_task_context(db, ident, body)
+
+
+def require_rule_pilot(ident: User):
+    from career.rule_pilot import allowed
+
+    if not allowed(ident):
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+
+
+@app.get("/api/v4/applications/{workspace}/rules", dependencies=[Depends(require_rule_pilot)])
+def rule_catalog_preview(workspace: str, db: DB, ident: User):
+    from career.rule_pilot import snapshot
+
+    return snapshot(Workflow(db, ident), workspace)
+
+
+@app.post("/api/v4/applications/{workspace}/rules/{action}", dependencies=[Depends(require_rule_pilot)])
+def rule_pilot_decision(workspace: str, action: str, body: RuleHumanRequest, db: DB, ident: User,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]):
+    from career.activity import run_operation
+    from career.rule_pilot import activate, evaluate, retire, review_source
+
+    actions = {"source-review": review_source, "evaluate": evaluate, "activate": activate, "retire": retire}
+    if action not in actions:
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+    return view(run_operation(db, ident, workspace, "rule-" + action,
+        lambda: actions[action](Workflow(db, ident), workspace, body, idempotency_key), uses_ai=False))
+
+
+@app.get("/api/v4/applications/{workspace}/rule-documents/{document_id}", dependencies=[Depends(require_rule_pilot)])
+def rule_document_preview(workspace: str, document_id: str, db: DB, ident: User):
+    from career.rule_pilot import document_revision
+
+    service = Workflow(db, ident)
+    service.ws(workspace)
+    document = owned(db, Artifact, ident, document_id)
+    if document.workspace_id != workspace or document.kind not in {"Draft", "ResumeContent"}:
+        raise LookupError()
+    fresh(db, ident, document)
+    return {"document_id": document.id, "version": document.version,
+            "revision": document_revision(service, workspace, document)}
+
+
+@app.post("/api/v4/applications/{workspace}/rule-documents/check", dependencies=[Depends(require_rule_pilot)])
+def rule_document_check(workspace: str, body: RuleDocumentRequest, db: DB, ident: User,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]):
+    from career.activity import run_operation
+    from career.guide_choices import _replay
+    from career.rule_pilot import document_revision, execute
+
+    def check():
+        service = Workflow(db, ident)
+        service.editable(service.ws(workspace))
+        document = owned(db, Artifact, ident, body.document_id)
+        if document.workspace_id != workspace or document.kind not in {"Draft", "ResumeContent"}:
+            raise LookupError()
+        fresh(db, ident, document)
+        previous, request_hash = _replay(service, workspace, document.slot, "RuleExecution", idempotency_key, body)
+        if previous:
+            return previous
+        if document.version != body.document_version or document_revision(service, workspace, document) != body.expected_revision:
+            raise ValueError("현재 문서·규칙·근거 버전을 다시 확인해 주세요.")
+        limit = document.data.get("character_budget", 10000) if document.kind == "ResumeContent" else service.question(workspace, document.slot)["limit"]
+        return execute(service, workspace, document, service.selected(document.data["selected_evidence_ids"]), limit,
+                       request_id=idempotency_key, request_hash=request_hash)
+    return view(run_operation(db, ident, workspace, "rule-check", check, uses_ai=False))
 
 
 def require_joint_portfolio():
