@@ -123,6 +123,23 @@ def compile_task_context(db: Session, authenticated_user_id: str, request: Conte
             refs[f"QUESTION:{question['id']}"] = ContextReference(
                 kind="QUESTION", id=question["id"], revision=digest(question), status="CURRENT")
             payload["question"] = deepcopy(question)
+            contract_artifact = latest(db, authenticated_user_id, workspace.id, "QuestionContract", question["id"], required=False)
+            if contract_artifact:
+                from career.guide_choices import contract_state
+                from career.workflow import Workflow
+                from career.writing_plans import execution_ready_guide
+
+                current = contract_state(Workflow(db, authenticated_user_id), workspace.id, question["id"])
+                reference("QUESTION_CONTRACT", contract_artifact)
+                for source_id in contract_artifact.source_ids:
+                    reference("SOURCE", owned(db, Source, authenticated_user_id, source_id))
+                payload["question_contract"] = current["contract"].model_dump(mode="json")
+                if current["needs_reconfirmation"]:
+                    missing.append("CURRENT_QUESTION_CONTRACT_REQUIRES_CONFIRMATION")
+                try:
+                    execution_ready_guide({"question_contract": payload["question_contract"]})
+                except ValueError:
+                    missing.append("CURRENT_COUNTER_QA_UNSUPPORTED")
         elif request.task_type == "QUESTION_PORTFOLIO":
             payload["questions"] = deepcopy(workspace.data.get("questions", []))
             if not payload["questions"]:

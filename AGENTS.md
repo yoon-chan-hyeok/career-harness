@@ -1,5 +1,9 @@
 # AGENTS.md — Career Harness
 
+2026-10-23 I03 검증 완료: 코드·검사93f58c0 / CI39897932162 backend957·PG전용9 skipped와 별도실제PG9·MCP·migration·privacy·Ruff/Pyright·frontend34/lint/types/build/production audit0 모두 성공. PR#7 draft/unmerged, 기능 기본 OFF. 이 후속 커밋은 문서만 갱신하며 검증한 코드 SHA와 구분한다. 브라우저 시각 인수 NOT_RUN·계수기 지원 제한·실제 가이드 권리 등록과 모델 품질 인수는 docs/I03_GUIDE_WRITING_PLAN.md를 따른다. 다음 I04는 이 계약/선택 snapshot/WritingPlan·기존 QuestionPortfolio를 재사용하며 별도 요청/PR에서 진행한다.
+
+2026-10-23 I03: 사용자 후속 진행 요청에 따라 codex/i03-guide-writing-plan에서 현재 QuestionContract·가이드 선택·WritingPlan/API/UI를 연결했다. 기반9838362/I02 검증코드2e1df61은 보존한다. CAREER_GUIDE_SELECTION_ENABLED=0 기본 OFF, 현재 문항·권리·버전 우선, 화면/Brief/Writer 동일 snapshot, stale409·재요청·관련 하위 무효화·Frozen 불변·기존 Gate 유지. 로컬 관련Python86/frontend34·lint/types/build·Ruff/Pyright 통과. 실제 브라우저 시각 인수는 Work local browser 비활성화로 NOT_RUN. 전체 CI의 고정 SHA/결과는 docs/I03_GUIDE_WRITING_PLAN.md와 status를 확인한다. I00~I03 AC25 PASS·I04+28 NOT_RUN. I04 이상·main 병합·운영 배포는 이번에 하지 않는다.
+
 2026-10-23 I02 검증 완료: 코드·검사 SHA2e1df61 / CI39893880397 backend928·별도PG9/MCP/migration·frontend30/lint/types/build/audit0 모두 성공. PR#6 draft/unmerged, CAREER_CONTEXT_PREVIEW_ENABLED=0. 문서 후속 커밋과 tested SHA를 구분한다. docs/I02_SCOPED_CONTEXT.md 및 status를 우선한다. I00~I02 AC19 PASS·I03+34 NOT_RUN. 다음 I03은 명시 사용자 후속 요청에 따라 현재 QuestionContract·Guide 선택·WritingPlan/API/UI를 연결하며 main 병합·운영 자동 배포는 하지 않는다.
 
 2026-10-23 I02: 사용자 다음 단계 요청에 따라 codex/i02-scoped-context에서 docs/I02_SCOPED_CONTEXT.md의 read-only Context/Experience/Shadow를 구현한다. 기반7507319/CI39892050961은 backend873·별도PG9·MCP·migration 및 frontend30/lint/types/build/audit0 성공. 기존9941043의 v3 계약·조회·검사를 재사용하며 API는 기본 OFF인 /api/v4 preview3개. 현재 사용자/작업/scope/버전/필수자료/예산·선호 제한, HOLD·SKIPPED 차단, 외부전송/실행/승인 없음. 기존 core/models/migrations/frontend는 불변. I03 이상·main 병합·운영 배포 제외. 실제 검사 결과는 status·PR에서 고정 SHA로 확인한다.

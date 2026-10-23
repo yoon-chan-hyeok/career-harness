@@ -2138,5 +2138,31 @@
     "ci_run": 39893880397,
     "pr": "https://github.com/yoon-chan-hyeok/career-harness/pull/6",
     "documentation_followup": "This later commit records verification only; product code and tests remain identical to tested2e1df61."
+  },
+  "i03_guide_choice_2026_10_23": {
+    "status": "full_ci_passed_unmerged_feature_off",
+    "branch": "codex/i03-guide-writing-plan",
+    "base_branch": "codex/i02-scoped-context",
+    "base_commit": "9838362ed93c246ab12aad4364548a1eee74e29d",
+    "report": "docs/I03_GUIDE_WRITING_PLAN.md",
+    "scope": "Current QuestionContract and server-owned guide choice integrated with existing WritingPlan/Brief/Writer and final gates; no new truth store",
+    "feature_flag": "CAREER_GUIDE_SELECTION_ENABLED=0",
+    "verification": "Code/tests93f58c0: full CI39897932162 SUCCESS; Python957 passed/9 PG-only skipped; separate realPG9/MCP/migration roundtrip/check/privacy/Ruff/Pyright; frontend34/lint/types/build/production audit0. Local relevant Python86 passed.",
+    "compatibility": "Legacy exact/fallback and gate checks preserved; source revoke/current min/max add guards; frozen history immutable; no models/migrations",
+    "acceptance": "I00-I03 25 PASS in synthetic automation; I04+28 NOT_RUN",
+    "remaining": [
+      "Actual browser visual QA NOT_RUN: local browser disabled in Work settings",
+      "BYTES/excluded-counter execution held; UNKNOWN remains unconfirmed",
+      "Operator-reviewed real catalog rights/registration and actual model quality acceptance",
+      "I04 Persona/material/HITL question allocation and later phases in separate PRs"
+    ],
+    "production_deployment": false,
+    "main_modified": false,
+    "live_model_calls": false,
+    "migrations": false,
+    "tested_commit": "93f58c0ab80fd15a264df135ae4d129650244c40",
+    "ci_run": 39897932162,
+    "pr": "https://github.com/yoon-chan-hyeok/career-harness/pull/7",
+    "documentation_followup": "This later commit updates verification documentation only; product code/tests remain identical to tested93f58c0."
   }
 }

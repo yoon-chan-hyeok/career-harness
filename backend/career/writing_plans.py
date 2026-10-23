@@ -158,6 +158,14 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
     ws = service.ws(workspace)
     question = service.question(workspace, qid)
     guide = publishable_guide(guide_for(ws.company, ws.role, question))
+    from career.guide_choices import enabled, resolve
+
+    guide, choice, guide_deps = resolve(service, workspace, qid, guide)
+    hold_notice = choice.get("notice") if choice else None
+    try:
+        execution_ready_guide(guide)
+    except ValueError as error:
+        hold_notice = str(error)
     guide_hash = digest(guide)
     strategy = latest(service.db, service.user, workspace, "ApplicationBrief", required=False)
     pack = latest(service.db, service.user, workspace, "EvidencePack", required=False)
@@ -190,6 +198,8 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
                        "strategy": [strategy.id, strategy.version, strategy.status] if strategy else None,
                        "pack": [pack.id, pack.version, pack.status] if pack else None,
                        "selection": [selection.id, selection.status] if selection else None})
+    if choice:
+        revision = digest([revision, choice])
     stored = latest(service.db, service.user, workspace, "WritingPlan", qid, required=False)
     is_current = bool(stored and stored.status in {"ACTIVE", "LOCKED"}
                       and stored.data["input_revision"] == revision)
@@ -223,7 +233,10 @@ def preview(service: "Workflow", workspace: str, qid: str) -> dict:
         "missing_information": missing, "phase": phase,
         "review_current": bool(review and review.status in {"ACTIVE", "LOCKED"}),
         "counting_notice": "현재 서비스는 공백·줄바꿈을 포함한 글자 수로 검사합니다. 지원처가 바이트 등 다른 기준이면 별도 확인하세요.",
-        "can_design": bool(strategy and strategy.status == "LOCKED" and usable),
+        "can_design": bool(strategy and strategy.status == "LOCKED" and usable and not hold_notice),
+        "writing_hold_notice": hold_notice,
+        "guide_selection_enabled": enabled(), "guide_choice": choice,
+        "_guide_deps": guide_deps,
         "_source_ids": sorted(set(sources)), "_evidence_ids": ids,
     }
 
@@ -236,6 +249,8 @@ def public_preview(service: "Workflow", workspace: str, qid: str) -> dict:
 def persist(service: "Workflow", workspace: str, qid: str, request: PlanRequest | None = None):
     service.editable(service.ws(workspace))
     state = preview(service, workspace, qid)
+    if state["guide_choice"] and not state["guide_choice"]["current"]:
+        raise ValueError(state["guide_choice"]["notice"])
     if request and request.expected_revision != state["state_revision"]:
         raise ValueError("문항·가이드 또는 경험이 바뀌었습니다. 현재 작성 설계를 다시 확인해 주세요.")
     emphasis = state["emphasis"]
@@ -260,7 +275,7 @@ def persist(service: "Workflow", workspace: str, qid: str, request: PlanRequest 
     source, _ = register_source(service.db, service.user, f"writing-guide/{guide['guide_id']}",
                                 json.dumps(guide, ensure_ascii=False, sort_keys=True), "REFERENCE",
                                 {"title": guide["label"], "fact_authority": False})
-    deps = []
+    deps = list(state["_guide_deps"])
     for kind in ("ApplicationBrief", "EvidencePack"):
         item = latest(service.db, service.user, workspace, kind, required=False)
         if item and item.status in {"ACTIVE", "LOCKED"}:
@@ -273,6 +288,7 @@ def persist(service: "Workflow", workspace: str, qid: str, request: PlanRequest 
         "guide_snapshot_sha256": state["guide_snapshot_sha256"],
         "input_revision": state["state_revision"], "emphasis": emphasis,
         "working_notes": notes, "notes_are_verified_facts": False,
+        "guide_choice": state["guide_choice"],
         "evidence_ids": state["_evidence_ids"], "version": VERSION,
     }
     item, _ = save(service.db, service.user, workspace, "WritingPlan", data, deps=deps,
@@ -295,13 +311,36 @@ def context(plan) -> dict:
 
 def require_current(service: "Workflow", workspace: str, qid: str, brief):
     plan_id = brief.data.get("writing_plan_id")
-    if not plan_id:  # Already-created legacy briefs remain usable.
+    if not plan_id and not any(latest(service.db, service.user, workspace, kind, qid, required=False)
+                              for kind in ("QuestionContract", "GuideChoice")):
         return None
     state = preview(service, workspace, qid)
+    if state["guide_choice"]:
+        if not state["guide_choice"]["current"] or not plan_id:
+            raise ValueError("문항 기준이나 가이드 선택을 현재 메시지에 반영하고 다시 승인해 주세요.")
+        execution_ready_guide(state["guide"])
+    if not plan_id:  # Already-created legacy briefs remain usable.
+        return None
     if not state["plan_current"] or state["plan"]["id"] != plan_id:
         raise ValueError("작성 설계가 바뀌었습니다. 문항 메시지와 근거를 다시 확인해 주세요.")
     plan = service.artifact(workspace, "WritingPlan", qid)
     return plan
+
+
+def execution_ready_guide(guide):
+    """A clarified form counter must never silently fall back to the legacy character QA."""
+    contract = guide.get("question_contract")
+    if contract:
+        policy = contract["length"]
+        if policy["unit"] != "CHARACTERS" or any(policy[key] == "EXCLUDED" for key in ("spaces", "newlines", "title")):
+            raise ValueError("이 제출 폼의 계수 방식은 현재 자동 검증을 지원하지 않습니다. 가이드는 저장되지만 자동 작성·잠금은 보류됩니다.")
+
+
+def validate_plan_text(plan, text):
+    execution_ready_guide(plan.data["guide"])
+    policy = plan.data["guide"].get("question_contract", {}).get("length")
+    if policy and (len(text) > policy["maximum"] or len(text) < (policy["minimum"] or 0)):
+        raise ValueError("현재 제출 폼에서 확인한 최소·최대 분량을 맞춰 주세요.")
 
 
 def approve(service: "Workflow", workspace: str, qid: str, brief):

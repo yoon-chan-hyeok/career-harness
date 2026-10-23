@@ -19,6 +19,7 @@ from career.conversation import ChatRequest, conversation_uses_ai, converse, his
 from career.db import Record, SessionLocal, engine
 from career.entities import ENTITY_MODELS
 from career.extraction import ExtractionDecision, ExtractionRequest
+from career.guide_choices import GuideChoiceRequest, QuestionConfirmation
 from career.models import (
     AIUsageBucket,
     AIUsageReservation,
@@ -173,6 +174,40 @@ def context_preview(body: ContextRequest, db: DB, ident: User):
     from career.scoped_context import compile_task_context
 
     return compile_task_context(db, ident, body)
+
+
+def require_guide_selection():
+    from career.guide_choices import enabled
+
+    if not enabled():
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+
+
+@app.get("/api/v4/applications/{workspace}/questions/{qid}/guides", dependencies=[Depends(require_guide_selection)])
+def guide_search_preview(workspace: str, qid: str, db: DB, ident: User):
+    from career.guide_choices import search_preview
+
+    return search_preview(Workflow(db, ident), workspace, qid)
+
+
+@app.post("/api/v4/applications/{workspace}/questions/{qid}/contract", dependencies=[Depends(require_guide_selection)])
+def question_contract_confirm(workspace: str, qid: str, body: QuestionConfirmation, db: DB, ident: User,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]):
+    from career.activity import run_operation
+    from career.guide_choices import confirm_question
+
+    return view(run_operation(db, ident, workspace, "question-contract",
+        lambda: confirm_question(Workflow(db, ident), workspace, qid, body, idempotency_key), uses_ai=False))
+
+
+@app.post("/api/v4/applications/{workspace}/questions/{qid}/guide-choice", dependencies=[Depends(require_guide_selection)])
+def question_guide_choose(workspace: str, qid: str, body: GuideChoiceRequest, db: DB, ident: User,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]):
+    from career.activity import run_operation
+    from career.guide_choices import select_guide
+
+    return view(run_operation(db, ident, workspace, "guide-choice",
+        lambda: select_guide(Workflow(db, ident), workspace, qid, body, idempotency_key), uses_ai=False))
 
 
 @app.exception_handler(ValueError)
