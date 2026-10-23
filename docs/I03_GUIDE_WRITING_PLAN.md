@@ -55,6 +55,16 @@ UI는 조건을 편집하면 확인 저장 전 가이드 선택을 막고, 충�
 
 AC-020~025는 위 합성 자동화 범위에서 PASS다. I00~I03 25 PASS, I04 이후28 NOT_RUN. 전체 통합 서비스 인수가 끝난 것은 아니다.
 
+### 전체 CI 최종 결과
+
+검증한 코드·검사는 `93f58c0ab80fd15a264df135ae4d129650244c40`이며 [PR #7](https://github.com/yoon-chan-hyeok/career-harness/pull/7)의 [CI39897932162](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39897932162)는 backend/frontend 모두 SUCCESS다.
+
+- 전체 Python **957 passed, 9 skipped**. skipped는 PostgreSQL 전용 검사이며 별도 실제 PostgreSQL 실행에서 **9 passed**다. MCP protocol과 migration 검사도 포함한다.
+- Alembic upgrade/check/downgrade/upgrade 성공, 새 migration 없음. 전체 Ruff/Pyright/privacy 통과.
+- frontend **34 passed**(auth11/deploy4/upgrades19), lint/typecheck/production build 성공, production dependency audit0. npm 전체 설치 보고의 개발 전용 high5와 구분한다. 기존 CSS autoprefixer 경고는 남아 있으나 build는 성공했다.
+
+이 결과를 기록하는 후속 커밋은 AGENTS/status/이 문서만 갱신한다. 코드와 검사 파일은 위 검증 SHA와 동일하며 main·기존 PR 브랜치·운영 설정은 수정하지 않았다. 브라우저 시각 인수 NOT_RUN와 실제 운영/품질 미완료는 CI 성공 후에도 그대로 남는다.
+
 ## 미완료와 다음 의존성
 
 I04는 이 PR의 현재 QuestionContract·선택 snapshot·WritingPlan 인터페이스 위에서 Persona/소재 제안·문항 간 배분·사람의 선택을 구현해야 한다. 기존 QuestionPortfolio/Claim Test/Review를 재사용하고 별도 승인 체계를 만들지 않는다. 후속 사용자 진행 요청과 이 PR의 검증 결과를 기준으로 별도 PR에서 진행한다.
