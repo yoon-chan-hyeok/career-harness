@@ -2087,7 +2087,7 @@
     "base_commit": "d4e1689e7ed48ea13a5bbcf029c3d66e8c3cea24",
     "reused_commit": "26d89a92f92d7c464928afd058ab84aeea09ccda",
     "report": "docs/I01_UNIFIED_GUIDE.md",
-    "verification": "80 offline guide tests passed (final 2.24s); Ruff/Pyright/privacy/diff checks passed; baseline106 passed; core/API/UI/models/migrations byte-identical to main4202b86. Full local attempts interrupted; I01 remote CI pending.",
+    "verification": "83 offline guide tests passed (final 2.01s); Ruff/Pyright/privacy/diff checks passed; baseline106 passed; core/API/UI/models/migrations byte-identical to main4202b86. Full local attempts interrupted; I01 remote CI pending.",
     "default": "QUESTION_GUIDE_RAG_ENABLED=0; explicit local CLI opt-in; no product route integration",
     "compatibility": "Existing Fact/Evidence/Claim Test/WritingPlan/QuestionPortfolio/Review/Lock/Freeze/Submission modules unchanged",
     "remaining": [

@@ -11,7 +11,7 @@
 | `backend/career/question_guide_search.py` | exact 우선, BM25/사전 점수, 부정 요구·scope·필수 조건 필터, GuideCandidate·7종 fallback, 기본 OFF |
 | `backend/career/question_guide_cli.py` | 로컬 import/inventory/search 및 명시적 opt-in |
 | `tests/test_question_guide_retrieval.py` | 기존 38개 가이드 검사를 새 오프라인 계약에 맞춰 재사용 |
-| `tests/test_guide_i01_contracts.py` | 통합 경계 회귀 42개 추가 |
+| `tests/test_guide_i01_contracts.py` | 통합 경계 회귀 45개 추가 |
 | `.env.example` | `QUESTION_GUIDE_RAG_ENABLED=0`, 오프라인 CLI 용도 명시 |
 | `docs/V41_GUIDE_RETRIEVAL_2026_10_22.md` | 원래 PR 이력·새 단계 순서 연결 |
 | `docs/I01_UNIFIED_GUIDE.md` | 이 구현·검증·미완료 보고 |
@@ -52,7 +52,7 @@ python -m career.question_guide_cli search private_input/question.json --catalog
 ## 검증
 
 - 변경 전 SHA26d89a9의 WritingPlan/API·rulebook·portfolio·Claim Test·Review·Workflow: **106 passed**. 원래 브랜치에서 제품 수정 전에 실행.
-- 새 경계와 재사용 가이드 검사: `pytest tests/test_question_guide_retrieval.py tests/test_guide_i01_contracts.py -q -p no:cacheprovider`: **80 passed**. 합성 자료와 기존 가이드 fixture만 사용.
+- 새 경계와 재사용 가이드 검사: `pytest tests/test_question_guide_retrieval.py tests/test_guide_i01_contracts.py -q -p no:cacheprovider`: **83 passed**. 합성 자료와 기존 가이드 fixture만 사용.
 - 정적 검사: `ruff check .`, `pyright --pythonpath <venv-python>`. 둘 다 통과(0 errors/warnings). 개인정보·git diff 검사 통과. 기존 핵심/API/UI/models/migrations는 main4202b86과 diff 0.
 - 전체 로컬 실행: Windows MCP stdio 대기로 첫 시도를 중단했다. 해당 테스트 제외 후 재시도는 호스트 환경 전환 때 85%에서 종료돼 완료 결과가 없다. 둘 다 전체 통과로 계산하지 않는다. 저장소 테스트와 CI에 skip을 추가하지 않았다.
 - I00 exact head d4e1689의 [CI 39888623254](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39888623254): 백엔드 전체 pytest(MCP 포함), 실제 PostgreSQL, 마이그레이션 왕복/check, Ruff/Pyright/privacy 성공.

@@ -184,3 +184,20 @@ def test_cli_opt_in_is_explicit(tmp_path, monkeypatch, capsys, flag, env, enable
     result = json.loads(capsys.readouterr().out)
     assert result["feature_enabled"] is enabled
     assert result["outcome"] == ("EXACT" if enabled else "GUIDE_FALLBACK")
+
+
+
+@pytest.mark.parametrize("changes,budget", [
+    ({"company": "다른회사"}, 600),
+    ({"role": "다른직무"}, 600),
+    ({"length": {"maximum": 800}}, 800),
+])
+def test_legacy_exact_requires_company_role_and_current_limit_independently(changes, budget):
+    record = normalize(legacy_catalog()[0], legacy=True)
+    q = legacy_question(record, **changes)
+    result = retrieve(q, [record], releases=(release(record),), enabled=True)
+    candidate = result["candidates"][0]
+    assert candidate["match_type"] == "ADVISORY_ANALOGY"
+    assert sum(part["suggested_budget"] for part in candidate["suggested_allocation"]) == budget
+    assert [part["approximate_characters"] for part in candidate["source_allocation"]] == [70, 120, 280, 130]
+    assert guide_for(q.company, q.role, {"text": q.raw_text, "limit": budget})["origin"] != "ARCHIVED_REFERENCE"

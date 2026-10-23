@@ -4,8 +4,8 @@ AC-002,I00,HIGH,inventory,Count actual guide JSON corpus,Existing one guide not 
 AC-003,I00,HIGH,inventory,Identify source rights/permissions,Unknown redistribution rights not silently marked approved,automated,PASS,docs/INVENTORY_AND_BASELINE.md; source manifest and pinned SHA checked; AC-004: 106 tests passed before edits
 AC-004,I00,CRITICAL,regression,Run baseline rulebook/writing/portfolio tests,Actual command/results logged before modifications,automated,PASS,docs/INVENTORY_AND_BASELINE.md; source manifest and pinned SHA checked; AC-004: 106 tests passed before edits
 AC-005,I01,CRITICAL,exact,POSCO DX same company role question 600 chars,ARCHIVED_REFERENCE and 70/120/280/130 preserved,automated,PASS,test_legacy_exact_preserves_counts_and_original_hash_without_approving_unknown_policy
-AC-006,I01,CRITICAL,exact,Same words other company or role,Not EXACT; advisory or fallback,automated,PASS,test_other_company_and_changed_limit_are_only_advice_with_recomputed_budget
-AC-007,I01,HIGH,exact,Same company question but 800 chars,Not EXACT; recompute advisory length,automated,PASS,test_other_company_and_changed_limit_are_only_advice_with_recomputed_budget
+AC-006,I01,CRITICAL,exact,Same words other company or role,Not EXACT; advisory or fallback,automated,PASS,test_legacy_exact_requires_company_role_and_current_limit_independently
+AC-007,I01,HIGH,exact,Same company question but 800 chars,Not EXACT; recompute advisory length,automated,PASS,test_legacy_exact_requires_company_role_and_current_limit_independently
 AC-008,I01,HIGH,semantic,Challenge question vs competency question,"Contradictory family filtered, not accepted by keyword similarity",automated,PASS,test_shared_technical_keywords_do_not_override_current_question_intent; test_negative_requirements_are_not_positive_collaboration_advice
 AC-009,I01,HIGH,semantic,Missing mandatory requirement in retrieved guide,Missing_demands reported; no silent advice transfer,automated,PASS,test_explicit_demands_and_negative_topics_override_rank
 AC-010,I01,HIGH,fallback,No matching guide,7 known template families still work,automated,PASS,test_seven_fallback_families_without_guides
