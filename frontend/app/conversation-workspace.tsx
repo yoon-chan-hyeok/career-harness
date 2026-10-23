@@ -16,6 +16,7 @@ import { ExperienceOptions } from "./experience-options";
 import { ApplicationPacket } from "./application-packet";
 import { ResearchStatus } from "./research-status";
 import { WritingPlanPanel } from "./writing-plan-panel";
+import { JointPortfolioPanel } from "./joint-portfolio-panel";
 
 type Turn = {
   id: string;
@@ -102,6 +103,7 @@ export function ConversationWorkspace({
     [view, setView] = useState<"conversation" | "agents">("conversation");
   const pending = useRef<{ signature: string; id: string } | null>(null);
   const writingPlanDirty = useRef(false);
+  const jointPortfolioDirty = useRef(false);
   const end = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const load = useCallback(
@@ -162,7 +164,7 @@ export function ConversationWorkspace({
   };
   const send = async (message = text) => {
     if (!message.trim() || sending) return;
-    if (writingPlanDirty.current) {
+    if (writingPlanDirty.current || jointPortfolioDirty.current) {
       setError("변경한 작성 구성을 먼저 저장해 주세요.");
       return;
     }
@@ -393,6 +395,18 @@ export function ConversationWorkspace({
                 </div>
               </div>
             ))}
+            {w.data.questions.length > 0 && (
+              <JointPortfolioPanel
+                key={`joint:${w.id}`}
+                workspaceId={w.id}
+                revisionKey={w.artifacts.map((a) => a.id + a.status).join(":")}
+                request={request}
+                onSaved={() => refresh(w.id)}
+                ai={ai}
+                disabled={sending}
+                dirtyState={jointPortfolioDirty}
+              />
+            )}
             {questionId && (
               <WritingPlanPanel
                 dirtyState={writingPlanDirty}

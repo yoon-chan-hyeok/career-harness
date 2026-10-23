@@ -118,6 +118,16 @@ _PROMPTS = {
         "Do not start a final document or approve the strategy. Do not fix a persona before evidence "
         "analysis, hide fatal gaps or override the user's current explicit decision.",
     ),
+    "joint_portfolio": _spec(
+        "Applicant-grounded persona and material proposal planner",
+        ("context_pack", "context_manifest", "guides", "candidates", "existing_selections"),
+        "Return personas and material items for every current question in the supplied schema. "
+        "Use distinct identity_role, primary_message, evidence_role and climax; only ELIGIBLE applicant "
+        "evidence IDs and their actual metric IDs. Preserve explicit existing experience choices.",
+        "Guides provide intent/demands/transfer limits, never applicant facts. Do not copy guide examples, "
+        "upgrade ADJACENT/NO_EVIDENCE, invent ownership or metrics, approve personas or lock anything. "
+        "Explain persona limitations. Missing evidence stays empty and HOLD, never invented.",
+    ),
     "question_portfolio": _spec(
         "Question portfolio planner",
         ("questions", "strategy", "evidence_pack"),

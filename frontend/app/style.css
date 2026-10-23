@@ -3696,6 +3696,13 @@ main.public-page { display: block; min-height: 100vh; background: linear-gradien
 .guide-choice-option { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 12px 0; }
 .guide-choice-option p { line-height: 1.7; margin: 7px 0; }
 .guide-choice-panel blockquote { overflow-wrap: anywhere; margin: 14px 0; padding: 12px; background: var(--surface); border-radius: 8px; }
+.joint-portfolio-panel { min-width: 0; overflow-wrap: anywhere; }
+.joint-portfolio-panel fieldset { min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin: 12px 0; }
+.joint-portfolio-panel legend { padding: 0 6px; font-weight: 650; }
+.joint-portfolio-panel label { display: block; line-height: 1.7; margin: 12px 0; }
+.joint-portfolio-panel textarea, .joint-portfolio-panel select { width: 100%; display: block; }
+.joint-portfolio-panel input[type="checkbox"] { width: auto; margin-right: 8px; }
+.joint-material-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
 .writing-plan-details li,
 .writing-plan-evidence li {
   line-height: 1.9;
