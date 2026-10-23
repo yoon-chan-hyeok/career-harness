@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Request } from "./api-client";
+import { QuestionGuideChoice } from "./question-guide-choice";
 
 type Guide = {
+  actual_limit?: { unit: string };
   label: string;
   origin: string;
   question_intent: string;
@@ -40,6 +42,8 @@ type Plan = {
   phase: string;
   counting_notice: string;
   can_design: boolean;
+  guide_selection_enabled?: boolean;
+  writing_hold_notice?: string | null;
 };
 const phases: Record<string, string> = {
   PLANNING: "작성 설계 중",
@@ -52,8 +56,8 @@ const exampleLabel = (guide: Guide) =>
   guide.reference_example.origin === "WITHHELD_RIGHTS_PENDING"
     ? "예시 공개 범위 안내"
     : guide.origin === "ARCHIVED_REFERENCE"
-    ? "출처에 수록된 참고 예시"
-    : "내용을 채우는 구조 예시";
+      ? "출처에 수록된 참고 예시"
+      : "내용을 채우는 구조 예시";
 
 export function WritingPlanPanel({
   workspaceId,
@@ -86,6 +90,14 @@ export function WritingPlanPanel({
   const [notice, setNotice] = useState("");
   const [reload, setReload] = useState(0);
   const dirty = useRef(false);
+  const guideDirty = useRef(false);
+  const markGuideDirty = useCallback(
+    (value: boolean) => {
+      guideDirty.current = value;
+      if (dirtyState) dirtyState.current = dirty.current || value;
+    },
+    [dirtyState],
+  );
   useEffect(
     () => () => {
       if (dirtyState) dirtyState.current = false;
@@ -151,7 +163,7 @@ export function WritingPlanPanel({
         working_notes: notes,
       });
       dirty.current = false;
-      if (dirtyState) dirtyState.current = false;
+      if (dirtyState) dirtyState.current = guideDirty.current;
       await onSaved();
       const next = await load();
       setData(next);
@@ -218,7 +230,10 @@ export function WritingPlanPanel({
               {phases[data.phase] || "작성 설계"}
             </span>
             <span>
-              {data.question.limit.toLocaleString()}자 · {data.guide.label}
+              {data.question.limit.toLocaleString()}
+              {data.guide.actual_limit?.unit === "BYTES"
+                ? "바이트"
+                : "자"} · {data.guide.label}
             </span>
             {data.plan && (
               <span>
@@ -229,6 +244,24 @@ export function WritingPlanPanel({
           </div>
           <p className="writing-plan-question">{data.question.text}</p>
           <p className="writing-plan-intent">{data.guide.question_intent}</p>
+          {data.writing_hold_notice && (
+            <p role="status">{data.writing_hold_notice}</p>
+          )}
+          {data.guide_selection_enabled && (
+            <QuestionGuideChoice
+              key={workspaceId + questionId}
+              workspaceId={workspaceId}
+              questionId={questionId}
+              revision={data.state_revision}
+              onDirtyChange={markGuideDirty}
+              request={request}
+              disabled={disabled || dirty.current}
+              onSaved={async () => {
+                await onSaved();
+                setReload((n) => n + 1);
+              }}
+            />
+          )}
           <ol className="writing-plan-steps" aria-label="문항 완성 순서">
             {[
               "구성 이해",
@@ -304,7 +337,9 @@ export function WritingPlanPanel({
                     가이드 원문 출처 ↗
                   </a>
                 )}
-                {source.source_quote && <blockquote>{source.source_quote}</blockquote>}
+                {source.source_quote && (
+                  <blockquote>{source.source_quote}</blockquote>
+                )}
                 <small>
                   보관된 참고 자료이며 현재 채용 조건을 증명하지 않습니다.
                 </small>

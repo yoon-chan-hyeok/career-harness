@@ -3687,6 +3687,15 @@ main.public-page { display: block; min-height: 100vh; background: linear-gradien
   font-weight: 600;
   line-height: 1.7;
 }
+.guide-choice-panel fieldset { min-width: 0; border: 1px solid var(--line); border-radius: 10px; margin: 18px 0; padding: 16px; }
+.guide-choice-panel legend { font-weight: 650; padding: 0 6px; }
+.guide-choice-panel label { display: block; margin: 12px 0; line-height: 1.7; }
+.guide-choice-panel textarea, .guide-choice-panel select, .guide-choice-panel input[type="number"] { display: block; width: 100%; margin-top: 5px; }
+.guide-choice-panel input[type="checkbox"], .guide-choice-panel input[type="radio"] { width: auto; margin-right: 8px; }
+.guide-policy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 12px; }
+.guide-choice-option { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 12px 0; }
+.guide-choice-option p { line-height: 1.7; margin: 7px 0; }
+.guide-choice-panel blockquote { overflow-wrap: anywhere; margin: 14px 0; padding: 12px; background: var(--surface); border-radius: 8px; }
 .writing-plan-details li,
 .writing-plan-evidence li {
   line-height: 1.9;

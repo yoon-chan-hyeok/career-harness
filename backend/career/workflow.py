@@ -494,6 +494,9 @@ class Workflow:
         from career.writing_plans import persist as prepare_plan
 
         writing_plan = prepare_plan(self, ident, qid)
+        from career.writing_plans import execution_ready_guide
+
+        execution_ready_guide(writing_plan.data["guide"])
         question = self.question(ident, qid)
         pack = self.artifact(ident, "EvidencePack")
         from career.experience_options import active_selection, selection_context
@@ -756,6 +759,10 @@ class Workflow:
         data = (
             Document.model_validate(manual).model_dump() if manual else self.ai("writer", context, Document)
         )
+        if writing_plan:
+            from career.writing_plans import validate_plan_text
+
+            validate_plan_text(writing_plan, data["text"])
         old = latest(self.db, self.user, ident, "Draft", qid, required=False)
         if old and any(
             data["text"].count(span) < old.data["text"].count(span)
@@ -1133,7 +1140,21 @@ class Workflow:
 
     def final_lock(self, ident: str, qid="", resume=False):
         self.editable(self.ws(ident))
+        writing_plan = None
+        if not resume:
+            brief = latest(self.db, self.user, ident, "QuestionBrief", qid, required=False)
+            if brief:
+                from career.writing_plans import require_current as current_plan
+
+                writing_plan = current_plan(self, ident, qid, brief)
+            elif any(latest(self.db, self.user, ident, kind, qid, required=False)
+                     for kind in ("QuestionContract", "GuideChoice")):
+                raise ValueError("현재 문항·가이드 기준으로 메시지를 설계하고 승인해 주세요.")
         document = self.artifact(ident, "ResumeContent" if resume else "Draft", qid)
+        if writing_plan:
+            from career.writing_plans import validate_plan_text
+
+            validate_plan_text(writing_plan, document.data["text"])
         review = self.artifact(ident, "ResumeReview" if resume else "Review", qid)
         from career.project_boundaries import document_issues
 
@@ -1322,8 +1343,15 @@ class Workflow:
 
             require_current(self, ident, brief)
             require_pass(self, ident, q["id"], brief)
+            from career.writing_plans import require_current as current_plan
+
+            writing_plan = current_plan(self, ident, q["id"], brief)
             messages.append(brief.data["primary_message"].strip())
             document = self.artifact(ident, "Draft", q["id"])
+            if writing_plan:
+                from career.writing_plans import validate_plan_text
+
+                validate_plan_text(writing_plan, document.data["text"])
             review = self.artifact(ident, "Review", q["id"])
             if document.status != "LOCKED" or review.status != "LOCKED":
                 raise ValueError("모든 문항의 현재 본문과 검수 결과를 최종 잠금해 주세요.")

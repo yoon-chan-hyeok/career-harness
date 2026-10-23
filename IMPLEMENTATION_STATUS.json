@@ -2138,5 +2138,28 @@
     "ci_run": 39893880397,
     "pr": "https://github.com/yoon-chan-hyeok/career-harness/pull/6",
     "documentation_followup": "This later commit records verification only; product code and tests remain identical to tested2e1df61."
+  },
+  "i03_guide_choice_2026_10_23": {
+    "status": "local_verified_full_ci_pending_unmerged_feature_off",
+    "branch": "codex/i03-guide-writing-plan",
+    "base_branch": "codex/i02-scoped-context",
+    "base_commit": "9838362ed93c246ab12aad4364548a1eee74e29d",
+    "report": "docs/I03_GUIDE_WRITING_PLAN.md",
+    "scope": "Current QuestionContract and server-owned guide choice integrated with existing WritingPlan/Brief/Writer and final gates; no new truth store",
+    "feature_flag": "CAREER_GUIDE_SELECTION_ENABLED=0",
+    "verification": "Local targeted Python86; frontend34 including actual React DOM4; Ruff/Pyright/lint/types/production build passed; production audit0; full Linux CI pending",
+    "compatibility": "Legacy exact/fallback and gate checks preserved; source revoke/current min/max add guards; frozen history immutable; no models/migrations",
+    "acceptance": "I00-I03 25 PASS in synthetic automation; I04+28 NOT_RUN",
+    "remaining": [
+      "Full CI at pinned code SHA before completion",
+      "Actual browser visual QA NOT_RUN: local browser disabled in Work settings",
+      "BYTES/excluded-counter execution held; UNKNOWN remains unconfirmed",
+      "Operator-reviewed real catalog rights/registration and actual model quality acceptance",
+      "I04 Persona/material/HITL question allocation and later phases in separate PRs"
+    ],
+    "production_deployment": false,
+    "main_modified": false,
+    "live_model_calls": false,
+    "migrations": false
   }
 }
