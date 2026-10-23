@@ -3702,6 +3702,11 @@ main.public-page { display: block; min-height: 100vh; background: linear-gradien
 .joint-portfolio-panel label { display: block; line-height: 1.7; margin: 12px 0; }
 .joint-portfolio-panel textarea, .joint-portfolio-panel select { width: 100%; display: block; }
 .joint-portfolio-panel input[type="checkbox"] { width: auto; margin-right: 8px; }
+.rule-pilot-panel { overflow-wrap: anywhere; min-width: 0; }
+.rule-pilot-panel label { display: block; margin: 12px 0; line-height: 1.7; }
+.rule-pilot-panel select { width: 100%; }
+.rule-pilot-panel input[type="checkbox"] { width: auto; margin-right: 8px; }
+.rule-pilot-panel blockquote { white-space: pre-wrap; margin: 14px 0; padding: 12px; border-left: 3px solid var(--line); }
 .joint-material-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
 .writing-plan-details li,
 .writing-plan-evidence li {

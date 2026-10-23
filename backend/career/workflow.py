@@ -858,6 +858,13 @@ class Workflow:
         kind = "ResumeContent" if resume else "Draft"
         document = self.artifact(ident, kind, qid)
         evidence = self.selected(document.data["selected_evidence_ids"])
+        from career.rule_pilot import allowed as rule_pilot_allowed
+        from career.rule_pilot import execute as execute_rule_checks
+
+        rule_execution = None
+        if rule_pilot_allowed(self.user):
+            rule_execution = execute_rule_checks(self, ident, document, evidence,
+                document.data.get("character_budget", 10000) if resume else self.question(ident, qid)["limit"])
         issues: list[dict[str, Any]] = hard_qa(
             document.data["text"],
             evidence,
@@ -868,6 +875,8 @@ class Workflow:
         )
         if resume:
             issues.extend(skimmability_qa(document.data["text"]))
+        if rule_execution:
+            issues.extend(issue for issue in rule_execution.data["issues"] if issue not in issues)
         issues.extend(ledger_coverage(document.data))
         from career.project_boundaries import document_issues
 
@@ -1014,8 +1023,9 @@ class Workflow:
                 "mode": review_mode,
                 "document_version": document.version,
                 "response_tasks": response_tasks,
+                "rule_execution_id": rule_execution.id if rule_execution else None,
             },
-            deps=[document.id],
+            deps=[document.id] + ([rule_execution.id] if rule_execution else []),
             sources=sorted(set(self.reference_sources("fact_reviewer")
                                + self.reference_sources("recruiter", "RESUME" if resume else "COVER")
                                + self.reference_sources("reverse_interview", "RESUME" if resume else "COVER"))),
@@ -1187,6 +1197,9 @@ class Workflow:
             from career.resume_master import require_file_qa
 
             require_file_qa(self, document)
+        from career.rule_pilot import require_checks
+
+        require_checks(self, ident, document)
         lock(self.db, self.user, document)
         lock(self.db, self.user, review)
         feedback(self.db, self.user, document, "ACCEPT")
@@ -1390,6 +1403,9 @@ class Workflow:
             raise ValueError("최종 잠금된 문서가 필요합니다.")
         for document in documents:
             self.validate_ledger(document.data, self.selected(document.data["selected_evidence_ids"]))
+            from career.rule_pilot import require_checks
+
+            require_checks(self, ident, document)
         from career.final_decision import require_pass as require_final_review
 
         require_final_review(self, ident)
