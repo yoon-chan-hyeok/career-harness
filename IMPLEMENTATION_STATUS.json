@@ -2062,5 +2062,21 @@
       "horizontal_overflow": false,
       "console_errors_on_final_views": 0
     }
+  },
+  "unified_i00_2026_10_23": {
+    "status": "inventory_and_baseline_verified_ci_pending",
+    "branch": "codex/i00-unified-inventory",
+    "base_commit": "4202b86c079df28642e24e01d420664600bad316",
+    "baseline_tested_commit": "26d89a92f92d7c464928afd058ab84aeea09ccda",
+    "reports": [
+      "docs/INVENTORY_AND_BASELINE.md",
+      "docs/UNIFIED_IMPLEMENTATION_PLAN.md",
+      "docs/UNIFIED_ACCEPTANCE_TEST_MATRIX.csv"
+    ],
+    "verification": "106 baseline contract tests passed before edits; Ruff/Pyright/privacy passed. Local full suite interrupted at Windows MCP stdio hang, not PASS.",
+    "remaining": "I01 offline guide contracts; I02+ NOT_RUN; legacy public example rights unresolved before I03 integration",
+    "runtime_changes": false,
+    "production_deployment": false,
+    "main_modified": false
   }
 }
