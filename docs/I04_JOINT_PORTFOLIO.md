@@ -58,6 +58,16 @@ I02 compiler 자체의 `external_transfer_allowed=false`/read-only 표기는 권
 
 AC-026~032는 위 합성 자동화 범위에서 PASS다. I00~I04 32 PASS, I05 이후21 NOT_RUN. 전체 제품·운영 완료 표기가 아니다.
 
+### 고정 SHA의 전체 CI 결과
+
+검증한 코드·검사는 `079a49f929fb77a646e31e1d0786de2b9224f1fc`다. [초안 PR #8](https://github.com/yoon-chan-hyeok/career-harness/pull/8)의 [CI39902127614](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39902127614)는 backend/frontend 모두 SUCCESS다.
+
+- 전체 Python **987 passed, 9 skipped /119.56초**. PostgreSQL 전용9개는 별도 실제 PostgreSQL 실행에서 **9 passed**다. MCP protocol·migration 검사도 포함한다.
+- 실제 DB upgrade/check/downgrade/upgrade 성공·새 migration 없음, Ruff/Pyright/privacy 통과.
+- frontend **38 passed**(auth11/deploy4/upgrades23), lint/typecheck/production build 성공, production dependency audit **0 vulnerabilities**. 기존 개발 전용 high5 advisory와 기존 CSS autoprefixer 경고는 잔여 사항이며 production 감사와 구분한다.
+
+이 결과를 기록하는 후속 커밋은 AGENTS/status/이 문서3개만 수정한다. 제품 코드와 검사 파일은 위 검증 SHA와 동일하다. 기능 기본 OFF·main/기존 브랜치 보존·운영 배포0·실제 외부 AI 호출0이며 브라우저/실제 모델 품질/완전한 의미 중복 판정/운영 인수 미완료는 그대로 남는다.
+
 ## 다음 의존성
 
 I05는 현재 결정 ID/version·Context manifest와 기존6종 지침을 보존하면서 Rule 후보의 읽기 전용 인덱스·검증된 소수 실행 계약·실제 trace 기반을 별도 PR로 추가해야 한다. 52/65개를 자동 활성화하지 않는다. I06 Writer 설명/문단 단위 trace는 이 I04의 사용자 선택과 I05의 실제 실행 증거에 의존한다. 이번에는 I05 이후·main 병합·운영 배포를 수행하지 않았다.
