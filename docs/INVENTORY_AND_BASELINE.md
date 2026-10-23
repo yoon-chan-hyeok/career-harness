@@ -129,3 +129,7 @@ canonical 범위는 guide 객체를 `ensure_ascii=False, sort_keys=True, separat
 - I03: I02 계약 확정과 기존 원문 권리 blocker 해결 후, Guide 선택·WritingPlan·동일 snapshot 연결. I04 이후는 통합 계획의 선행조건을 따른다.
 
 기존 브랜치는 보존하고 공유 커밋을 강제로 덮어쓰지 않는다. 새 기능을 OFF로 돌리거나 해당 증분 커밋을 revert하는 경로를 사용한다. main merge와 운영 배포는 수행하지 않는다.
+
+## 8. I00 원격 기준선 후속 결과 (2026-10-23)
+
+[I00 PR #3](https://github.com/yoon-chan-hyeok/career-harness/pull/3), head d4e1689, [CI39888623254](https://github.com/yoon-chan-hyeok/career-harness/actions/runs/39888623254): backend 전체 검사·실제 PG·migration·privacy 성공. frontend는 기존 Next.js15.5.27의 production 의존성 보안 검사 실패로 이후 lint/types/tests/build SKIPPED다. 전체 CI PASS가 아니며 I01 보고서의 기존 의존성 blocker를 먼저 해결해야 한다.
