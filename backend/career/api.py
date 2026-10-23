@@ -52,6 +52,7 @@ from career.provider_policy import BudgetExceeded
 from career.providers import ProviderUnavailable
 from career.public_guard import bind_request, limit_request
 from career.retrieval import configured_embedder, index_embeddings, search
+from career.scoped_context import ContextRequest
 from career.semantic_models import LocalEvidenceEmbedding
 from career.telemetry import export_events
 from career.truth import (
@@ -86,7 +87,7 @@ async def validation_error(request: Request, error: RequestValidationError):
     if request.url.path.startswith("/api/providers"):
         # FastAPI's normal error includes the invalid input; this route may carry a key.
         return JSONResponse(status_code=422, content={"detail": "AI 제공자 입력 형식과 무료 사용 확인을 확인해 주세요."})
-    if request.url.path.startswith(("/api/sources/upload", "/api/editor-drafts", "/api/semantic/")):
+    if request.url.path.startswith(("/api/sources/upload", "/api/editor-drafts", "/api/semantic/", "/api/v4/")):
         return JSONResponse(status_code=422, content={"detail": "입력 형식·크기·필수 항목을 확인해 주세요."})
     return await request_validation_exception_handler(request, error)
 
@@ -145,6 +146,33 @@ def user(authorization: Annotated[str | None, Header()] = None,
 DB = Annotated[Session, Depends(database, scope="function")]
 User = Annotated[str, Depends(user)]
 MemberUser = Annotated[str, Depends(identity_member)]
+
+
+def require_i02_preview():
+    if os.getenv("CAREER_CONTEXT_PREVIEW_ENABLED", "0") != "1":
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+
+
+@app.get("/api/v4/experience-cards/{evidence_id}", dependencies=[Depends(require_i02_preview)])
+def context_experience_card(evidence_id: str, db: DB, ident: User):
+    from career.v3_preview import experience_card
+
+    return experience_card(db, ident, evidence_id)
+
+
+@app.get("/api/v4/applications/{workspace_id}/plan-preview", dependencies=[Depends(require_i02_preview)])
+def context_plan_preview(workspace_id: str, db: DB, ident: User,
+                         intent: Literal["APPLICATION", "RESUME_ONLY", "INTERVIEW_ONLY"] = "APPLICATION"):
+    from career.v3_preview import application_plan
+
+    return application_plan(db, ident, workspace_id, intent)
+
+
+@app.post("/api/v4/context/preview", dependencies=[Depends(require_i02_preview)])
+def context_preview(body: ContextRequest, db: DB, ident: User):
+    from career.scoped_context import compile_task_context
+
+    return compile_task_context(db, ident, body)
 
 
 @app.exception_handler(ValueError)

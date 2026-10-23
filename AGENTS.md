@@ -1,6 +1,8 @@
 # AGENTS.md — Career Harness
 
-2026-10-23 次 단계 요청: I01 차단 보완은 docs/I01_READINESS_FIXES.md. Next15.5.28·production audit0, 가이드 전문/인용을 preview/Writer/과거 view·export에서 투영하고 저장본 불변. Python24/frontend30·lint/types/build 통과. 전체 CI 확인 후 I02 Context/Experience/Shadow를 별도 PR로 진행하며 I03 이상·main 병합·운영 배포는 제외한다.
+2026-10-23 I02: 사용자 다음 단계 요청에 따라 codex/i02-scoped-context에서 docs/I02_SCOPED_CONTEXT.md의 read-only Context/Experience/Shadow를 구현한다. 기반7507319/CI39892050961은 backend873·별도PG9·MCP·migration 및 frontend30/lint/types/build/audit0 성공. 기존9941043의 v3 계약·조회·검사를 재사용하며 API는 기본 OFF인 /api/v4 preview3개. 현재 사용자/작업/scope/버전/필수자료/예산·선호 제한, HOLD·SKIPPED 차단, 외부전송/실행/승인 없음. 기존 core/models/migrations/frontend는 불변. I03 이상·main 병합·운영 배포 제외. 실제 검사 결과는 status·PR에서 고정 SHA로 확인한다.
+
+2026-10-23 다음 단계 요청: I01 차단 보완은 docs/I01_READINESS_FIXES.md. Next15.5.28·production audit0, 가이드 전문/인용을 preview/Writer/과거 view·export에서 투영하고 저장본 불변. Python24/frontend30·lint/types/build 통과. 전체 CI 확인 후 I02 Context/Experience/Shadow를 별도 PR로 진행하며 I03 이상·main 병합·운영 배포는 제외한다.
 
 2026-10-23 I01: docs/I01_UNIFIED_GUIDE.md가 새 가이드 계약의 현재 기록이다. codex/i01-unified-guide는 I00 PR #3 위에서26d89a9의 가이드 코드만 재사용한다. 새 기능 기본 OFF·순수 오프라인, 기존 서비스 경로 불변. 가이드83검사 통과. 코드·검사 SHA f8ef7ff의 CI39890434876 backend868/별도PG9·MCP·migration·정적·privacy 성공, frontend는 기존 Next.js 보안 감사 실패로 후속검사 SKIPPED. 전체 CI 통과 아님. 후속 문서 커밋과 tested SHA를 구분한다. AC-012는 기존 public_preview 원문 권리 때문에 PARTIAL, I02 이후 NOT_RUN. 이 상태를 전체 구현/운영 완료로 표시하지 않는다.
 

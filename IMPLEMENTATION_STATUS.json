@@ -2104,13 +2104,35 @@
     "report_followup": "This later commit updates verification documentation only; tested code and tests remain at f8ef7ff."
   },
   "i01_readiness_2026_10_23": {
-    "status": "local_verified_ci_pending",
+    "status": "full_ci_passed_unmerged",
     "branch": "codex/i01-readiness-fixes",
     "base_commit": "737b335f01a4dec371ef54b49932dd2b1c41af9e",
     "report": "docs/I01_READINESS_FIXES.md",
     "checks": "Python24 passed; frontend30/lint/types/build passed; Ruff/Pyright passed; production npm audit0; dev-only high5 remain",
     "rights": "AC-012 runtime projection PASS; no redistribution grant; historical snapshots immutable",
     "next": "I02 only after baseline CI; no I03+ execution",
-    "production_deployment": false
+    "production_deployment": false,
+    "tested_commit": "75073193f9ac47f1c5b451b389baf6d971d406bd",
+    "ci": "39892050961: backend873, PG-only9 skipped; separate realPG9/MCP/migration/privacy/static and frontend30/lint/types/build/audit0 SUCCESS"
+  },
+  "i02_context_2026_10_23": {
+    "status": "implemented_local_acceptance_ci_pending",
+    "branch": "codex/i02-scoped-context",
+    "base_branch": "codex/i01-readiness-fixes",
+    "base_commit": "75073193f9ac47f1c5b451b389baf6d971d406bd",
+    "reused_commit": "9941043316e80db74c69026193b576fa9a916957",
+    "report": "docs/I02_SCOPED_CONTEXT.md",
+    "scope": "Read-only ExperienceCardProjection, task ScopedContextManifest/ContextPack and DynamicPlanPreview; no second Truth store or executor",
+    "feature_flag": "CAREER_CONTEXT_PREVIEW_ENABLED=0",
+    "verification": "87 targeted context/prototype/legacy writing/Claim/portfolio passed (26.67s); Ruff/Pyright/privacy/diff passed; remote full CI pending",
+    "compatibility": "Existing Fact/Evidence/Claim/Plan/Portfolio/Review/Lock/Freeze/Submission core, models, migrations and frontend unchanged from7507319",
+    "remaining": [
+      "I03 Guide selection/QuestionContract/WritingPlan API+UI",
+      "Real consent/provider/model/task executor integration after later phases",
+      "VoiceProfile editing and semantic context selection not implemented"
+    ],
+    "production_deployment": false,
+    "live_model_calls": false,
+    "migrations": false
   }
 }

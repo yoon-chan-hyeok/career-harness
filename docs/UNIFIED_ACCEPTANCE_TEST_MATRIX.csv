@@ -13,11 +13,11 @@ AC-011,I01,HIGH,fallback,Vector/index unavailable,"LEXICAL_ONLY or fallback repo
 AC-012,I01,CRITICAL,rights,Unknown rights for archived full example,"Only allowed summary and provenance, no unapproved full public text",automated,PASS,tests/test_guide_publication.py: runtime preview/store/Writer/history/trace/export fulltext withheld; original immutable; publication rights still pending
 AC-013,I01,HIGH,dedupe,Duplicate imported guide ID/hash,Idempotent import; conflict visible,automated,PASS,test_import_idempotent_version_immutable_and_new_version_requires_new_release
 AC-014,I01,CRITICAL,data,Attempt put user Evidence into global Guide index,Reject mixed namespaces,automated,PASS,test_personal_truth_rejected_in_legacy_at_every_depth; test_actual_personal_models_cannot_enter_global_catalog
-AC-015,I02,CRITICAL,privacy,A actor requests B source/vector/context,Cross-user outputs zero; denied,automated,NOT_RUN,
-AC-016,I02,HIGH,experience,Start experience registration without JD,"Allowed, extract not auto VERIFIED",automated,NOT_RUN,
-AC-017,I02,HIGH,context,Task-specific ContextPack,"Only appropriate user, task scope and approved prefs",automated,NOT_RUN,
-AC-018,I02,CRITICAL,planner,Shadow plan preview,DB/legacy workflow/output unchanged,automated,NOT_RUN,
-AC-019,I02,CRITICAL,planner,Mark required evidence SKIPPED,Must remain blocked absent verified equivalent,automated,NOT_RUN,
+AC-015,I02,CRITICAL,privacy,A actor requests B source/vector/context,Cross-user outputs zero; denied,automated,PASS,test_cross_user_evidence_context_and_linked_sources_are_denied; test_context_never_follows_foreign_profile_fact_or_fact_source; test_http_context_scope_revision_and_authority_injection_fail_without_content_echo
+AC-016,I02,HIGH,experience,Start experience registration without JD,"Allowed, extract not auto VERIFIED",automated,PASS,test_http_experience_registration_and_review_without_job_keep_unverified_status; test_experience_review_without_job_does_not_promote_unverified_truth
+AC-017,I02,HIGH,context,Task-specific ContextPack,"Only appropriate user, task scope and approved prefs",automated,PASS,test_task_allowlist_and_current_scoped_preferences_are_distinct; test_context_revisions_cover_truth_preferences_scope_and_current_question; test_budget_holds_entire_required_context_and_never_claims_provider_usage
+AC-018,I02,CRITICAL,planner,Shadow plan preview,DB/legacy workflow/output unchanged,automated,PASS,test_no_writes_no_provider_no_embeddings_or_workflow_execution; test_i02_is_off_by_default_and_enabled_routes_remain_authenticated_read_only; test_reads_do_not_flush_write_or_call_workflow_or_models
+AC-019,I02,CRITICAL,planner,Mark required evidence SKIPPED,Must remain blocked absent verified equivalent,automated,PASS,test_skipped_required_step_is_blocked_and_cannot_satisfy_its_dependents; test_http_required_skipped_and_frozen_material_are_never_auto_approved
 AC-020,I03,CRITICAL,contract,Current question conflicts with archived guide,Current demand and count policy win,automated,NOT_RUN,
 AC-021,I03,CRITICAL,writer-input,UI and QuestionBrief/Writer guide snapshot,Same guide_id/version/hash exactly,automated,NOT_RUN,
 AC-022,I03,HIGH,workflow,GET preview called repeatedly,No DB side-effects and no provider calls,automated,NOT_RUN,
